@@ -27,6 +27,8 @@ urlpatterns = [
 
     path('api/', include('owners.urls')),
 
+    path('api/', include('animals.urls')),
+
     # schema JSON
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
 
