@@ -22,6 +22,11 @@ from drf_spectacular.views import (
     SpectacularSwaggerView
 )
 
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -29,9 +34,14 @@ urlpatterns = [
 
     path('api/', include('animals.urls')),
 
+    path("api/auth/login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    
+    path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+
     # schema JSON
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
 
     # Swagger UI
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema')),
 ]
+
