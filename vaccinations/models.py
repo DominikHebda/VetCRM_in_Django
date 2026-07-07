@@ -41,8 +41,15 @@ class Vaccination(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         ordering = ["-vaccination_date"]
+
+        indexes = [
+            models.Index(fields=["vaccination_date"]),
+            models.Index(fields=["next_due_date"]),
+        ]
 
     def __str__(self):
         return f"{self.animal.name} - {self.vaccine_name}"
