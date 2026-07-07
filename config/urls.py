@@ -38,6 +38,8 @@ urlpatterns = [
     
     path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
+    path("api/", include("medical.urls")),
+
     # schema JSON
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
 

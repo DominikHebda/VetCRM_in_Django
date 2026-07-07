@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'animals',
     'accounts',
     'visits',
-    'django-filter',
+    'django_filters',
+    'medical',
 ]
 
 MIDDLEWARE = [
