@@ -135,9 +135,31 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'VetCRM API',
-    'DESCRIPTION': 'API systemu przychodni weterynaryjnej',
-    'VERSION': '1.0.0',
+    "TITLE": "VetCRM API",
+    "DESCRIPTION": "REST API for the Veterinary Clinic Management System",
+    "VERSION": "1.0.0",
+
+    "SERVE_INCLUDE_SCHEMA": False,
+
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+    },
+
+    "SECURITY": [
+        {
+            "BearerAuth": [],
+        }
+    ],
+
+    "COMPONENTS": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    }
 }
 
 SIMPLE_JWT = {
