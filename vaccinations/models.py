@@ -2,9 +2,10 @@ from django.conf import settings
 from django.db import models
 
 from animals.models import Animal
+from common.models import TimeStampedModel
 
 
-class Vaccination(models.Model):
+class Vaccination(TimeStampedModel):
 
     animal = models.ForeignKey(
         Animal,
@@ -38,10 +39,6 @@ class Vaccination(models.Model):
     )
 
     notes = models.TextField(blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-vaccination_date"]

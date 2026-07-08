@@ -1,13 +1,11 @@
-from django.db import models
-
-# Create your models here.
 from django.conf import settings
 from django.db import models
 
 from animals.models import Animal
+from common.models import TimeStampedModel
 
 
-class Visit(models.Model):
+class Visit(TimeStampedModel):
 
     class Status(models.TextChoices):
         SCHEDULED = "SCHEDULED", "Scheduled"

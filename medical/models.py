@@ -1,9 +1,10 @@
 from django.db import models
 
 from visits.models import Visit
+from common.models import TimeStampedModel
 
 
-class MedicalRecord(models.Model):
+class MedicalRecord(TimeStampedModel):
 
     visit = models.OneToOneField(
         Visit,
@@ -31,9 +32,6 @@ class MedicalRecord(models.Model):
         blank=True,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Medical Record #{self.pk}"
