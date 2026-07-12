@@ -1,5 +1,7 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
 
 from .models import MedicalRecord
 from .serializers import MedicalRecordSerializer
@@ -17,3 +19,23 @@ class MedicalRecordViewSet(ModelViewSet):
     )
 
     serializer_class = MedicalRecordSerializer
+
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+
+    filterset_fields = [
+        "animal",
+        "visit",
+    ]
+
+    search_fields = [
+        "diagnosis",
+        "treatment",
+    ]
+
+    ordering_fields = [
+        "created_at",
+    ]

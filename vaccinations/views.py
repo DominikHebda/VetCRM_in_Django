@@ -1,8 +1,7 @@
 from django.shortcuts import render
-
-# Create your views here.
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from rest_framework.filters import OrderingFilter, SearchFilter
+
 from rest_framework.viewsets import ModelViewSet
 
 from drf_spectacular.utils import extend_schema
@@ -26,8 +25,8 @@ class VaccinationViewSet(ModelViewSet):
 
     filter_backends = (
         DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
+        SearchFilter,
+        OrderingFilter,
     )
 
     filterset_fields = (
