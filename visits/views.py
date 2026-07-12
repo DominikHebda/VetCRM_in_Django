@@ -11,6 +11,7 @@ from .serializers import VisitSerializer
 @extend_schema(
     tags=["Visits"],
     summary="Manage veterinary visits",
+    description="Manage veterinary visits.",
 )
 class VisitViewSet(ModelViewSet):
 
