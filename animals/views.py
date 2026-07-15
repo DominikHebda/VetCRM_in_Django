@@ -20,16 +20,17 @@ class AnimalViewSet(ModelViewSet):
         OrderingFilter,
     ]
     filterset_fields = [
-        "name",
-        "species",
-        "sex",
+    "owner",
+    "species",
     ]
+
     search_fields = [
         "name",
         "breed",
-        "microchip_number",
+        "chip_number",
     ]
+
     ordering_fields = [
         "name",
-        "date_of_birth",
+        "birth_date",
     ]

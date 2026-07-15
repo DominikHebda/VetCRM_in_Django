@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'medical',
     'vaccinations',
     'prescriptions',
+    'common',
 ]
 
 MIDDLEWARE = [

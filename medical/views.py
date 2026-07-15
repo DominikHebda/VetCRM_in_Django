@@ -9,7 +9,7 @@ from .serializers import MedicalRecordSerializer
 
 @extend_schema(
     tags=["Medical Records"],
-    summary="Manage medical records",
+    description="Manage medical records.",
 )
 class MedicalRecordViewSet(ModelViewSet):
 
@@ -27,8 +27,8 @@ class MedicalRecordViewSet(ModelViewSet):
     ]
 
     filterset_fields = [
-        "animal",
         "visit",
+        "visit__animal",
     ]
 
     search_fields = [
