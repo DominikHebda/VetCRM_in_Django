@@ -1,6 +1,8 @@
 from django.db import models
 
-class Owner(models.Model):
+from common.models import TimeStampedModel
+
+class Owner(TimeStampedModel):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)

@@ -36,7 +36,6 @@ class Visit(TimeStampedModel):
         default=Status.SCHEDULED,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["visit_date"]

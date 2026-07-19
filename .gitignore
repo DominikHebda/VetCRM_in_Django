@@ -1,23 +1,33 @@
-# Virtual environment
+# Environment
+.env
+.env.*
+!.env.example
 .venv/
+venv/
 
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# SQLite
+# Django
 db.sqlite3
-
-# Django media
 media/
-
-# Environment variables
-.env
+staticfiles/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
+
+# Frontend
+node_modules/
+dist/

@@ -1,0 +1,1890 @@
+openapi: 3.0.3
+info:
+  title: VetCRM API
+  version: 1.0.0
+  description: REST API for the Veterinary Clinic Management System
+paths:
+  /api/animals/:
+    get:
+      operationId: animals_list
+      description: CRUD operations for veterinary patients.
+      summary: Manage animals
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: owner
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: species
+        schema:
+          type: string
+          enum:
+          - cat
+          - dog
+          - other
+        description: |-
+          * `dog` - Dog
+          * `cat` - Cat
+          * `other` - Other
+      tags:
+      - Animals
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnimalList'
+          description: ''
+    post:
+      operationId: animals_create
+      description: CRUD operations for veterinary patients.
+      summary: Manage animals
+      tags:
+      - Animals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Animal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Animal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Animal'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+          description: ''
+  /api/animals/{id}/:
+    get:
+      operationId: animals_retrieve
+      description: CRUD operations for veterinary patients.
+      summary: Manage animals
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this animal.
+        required: true
+      tags:
+      - Animals
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+          description: ''
+    put:
+      operationId: animals_update
+      description: CRUD operations for veterinary patients.
+      summary: Manage animals
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this animal.
+        required: true
+      tags:
+      - Animals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Animal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Animal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Animal'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+          description: ''
+    patch:
+      operationId: animals_partial_update
+      description: CRUD operations for veterinary patients.
+      summary: Manage animals
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this animal.
+        required: true
+      tags:
+      - Animals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAnimal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAnimal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAnimal'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+          description: ''
+    delete:
+      operationId: animals_destroy
+      description: CRUD operations for veterinary patients.
+      summary: Manage animals
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this animal.
+        required: true
+      tags:
+      - Animals
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/medical-records/:
+    get:
+      operationId: medical_records_list
+      description: Manage medical records.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: visit
+        schema:
+          type: integer
+      - in: query
+        name: visit__animal
+        schema:
+          type: integer
+      tags:
+      - Medical Records
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMedicalRecordList'
+          description: ''
+    post:
+      operationId: medical_records_create
+      description: Manage medical records.
+      tags:
+      - Medical Records
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+          description: ''
+  /api/medical-records/{id}/:
+    get:
+      operationId: medical_records_retrieve
+      description: Manage medical records.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medical record.
+        required: true
+      tags:
+      - Medical Records
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+          description: ''
+    put:
+      operationId: medical_records_update
+      description: Manage medical records.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medical record.
+        required: true
+      tags:
+      - Medical Records
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicalRecord'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+          description: ''
+    patch:
+      operationId: medical_records_partial_update
+      description: Manage medical records.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medical record.
+        required: true
+      tags:
+      - Medical Records
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicalRecord'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicalRecord'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicalRecord'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecord'
+          description: ''
+    delete:
+      operationId: medical_records_destroy
+      description: Manage medical records.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medical record.
+        required: true
+      tags:
+      - Medical Records
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/owners/:
+    get:
+      operationId: owners_list
+      description: Manage pet owners.
+      parameters:
+      - in: query
+        name: email
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Owners
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOwnerList'
+          description: ''
+    post:
+      operationId: owners_create
+      description: Manage pet owners.
+      tags:
+      - Owners
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Owner'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Owner'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Owner'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+          description: ''
+  /api/owners/{id}/:
+    get:
+      operationId: owners_retrieve
+      description: Manage pet owners.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this owner.
+        required: true
+      tags:
+      - Owners
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+          description: ''
+    put:
+      operationId: owners_update
+      description: Manage pet owners.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this owner.
+        required: true
+      tags:
+      - Owners
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Owner'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Owner'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Owner'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+          description: ''
+    patch:
+      operationId: owners_partial_update
+      description: Manage pet owners.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this owner.
+        required: true
+      tags:
+      - Owners
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOwner'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOwner'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOwner'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owner'
+          description: ''
+    delete:
+      operationId: owners_destroy
+      description: Manage pet owners.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this owner.
+        required: true
+      tags:
+      - Owners
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/prescriptions/:
+    get:
+      operationId: prescriptions_list
+      parameters:
+      - in: query
+        name: animal
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: veterinarian
+        schema:
+          type: integer
+      - in: query
+        name: visit
+        schema:
+          type: integer
+      tags:
+      - Prescriptions
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPrescriptionList'
+          description: ''
+    post:
+      operationId: prescriptions_create
+      tags:
+      - Prescriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+  /api/prescriptions/{id}/:
+    get:
+      operationId: prescriptions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this prescription.
+        required: true
+      tags:
+      - Prescriptions
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+    put:
+      operationId: prescriptions_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this prescription.
+        required: true
+      tags:
+      - Prescriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Prescription'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+    patch:
+      operationId: prescriptions_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this prescription.
+        required: true
+      tags:
+      - Prescriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPrescription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPrescription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPrescription'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+          description: ''
+    delete:
+      operationId: prescriptions_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this prescription.
+        required: true
+      tags:
+      - Prescriptions
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/vaccinations/:
+    get:
+      operationId: vaccinations_list
+      summary: Manage animal vaccinations
+      parameters:
+      - in: query
+        name: animal
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: veterinarian
+        schema:
+          type: integer
+      tags:
+      - Vaccinations
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVaccinationList'
+          description: ''
+    post:
+      operationId: vaccinations_create
+      summary: Manage animal vaccinations
+      tags:
+      - Vaccinations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vaccination'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vaccination'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vaccination'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vaccination'
+          description: ''
+  /api/vaccinations/{id}/:
+    get:
+      operationId: vaccinations_retrieve
+      summary: Manage animal vaccinations
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this vaccination.
+        required: true
+      tags:
+      - Vaccinations
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vaccination'
+          description: ''
+    put:
+      operationId: vaccinations_update
+      summary: Manage animal vaccinations
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this vaccination.
+        required: true
+      tags:
+      - Vaccinations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vaccination'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vaccination'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vaccination'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vaccination'
+          description: ''
+    patch:
+      operationId: vaccinations_partial_update
+      summary: Manage animal vaccinations
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this vaccination.
+        required: true
+      tags:
+      - Vaccinations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVaccination'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVaccination'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVaccination'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vaccination'
+          description: ''
+    delete:
+      operationId: vaccinations_destroy
+      summary: Manage animal vaccinations
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this vaccination.
+        required: true
+      tags:
+      - Vaccinations
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/visits/:
+    get:
+      operationId: visits_list
+      description: Manage veterinary visits.
+      summary: Manage veterinary visits
+      parameters:
+      - in: query
+        name: animal
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - COMPLETED
+          - SCHEDULED
+        description: |-
+          * `SCHEDULED` - Scheduled
+          * `COMPLETED` - Completed
+          * `CANCELLED` - Cancelled
+      - in: query
+        name: veterinarian
+        schema:
+          type: integer
+      tags:
+      - Visits
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVisitList'
+          description: ''
+    post:
+      operationId: visits_create
+      description: Manage veterinary visits.
+      summary: Manage veterinary visits
+      tags:
+      - Visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Visit'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+  /api/visits/{id}/:
+    get:
+      operationId: visits_retrieve
+      description: Manage veterinary visits.
+      summary: Manage veterinary visits
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - Visits
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    put:
+      operationId: visits_update
+      description: Manage veterinary visits.
+      summary: Manage veterinary visits
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - Visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Visit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Visit'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    patch:
+      operationId: visits_partial_update
+      description: Manage veterinary visits.
+      summary: Manage veterinary visits
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - Visits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVisit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVisit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVisit'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visit'
+          description: ''
+    delete:
+      operationId: visits_destroy
+      description: Manage veterinary visits.
+      summary: Manage veterinary visits
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this visit.
+        required: true
+      tags:
+      - Visits
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Animal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        species:
+          $ref: '#/components/schemas/SpeciesEnum'
+        breed:
+          type: string
+          nullable: true
+          maxLength: 100
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        chip_number:
+          type: string
+          nullable: true
+          maxLength: 50
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner:
+          type: integer
+      required:
+      - created_at
+      - id
+      - name
+      - owner
+      - species
+      - updated_at
+    MedicalRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+        recommendations:
+          type: string
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        temperature:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,1})?$
+          nullable: true
+        visit:
+          type: integer
+      required:
+      - created_at
+      - diagnosis
+      - id
+      - updated_at
+      - visit
+    Owner:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        address:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - updated_at
+    PaginatedAnimalList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Animal'
+    PaginatedMedicalRecordList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalRecord'
+    PaginatedOwnerList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Owner'
+    PaginatedPrescriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prescription'
+    PaginatedVaccinationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vaccination'
+    PaginatedVisitList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Visit'
+    PatchedAnimal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        species:
+          $ref: '#/components/schemas/SpeciesEnum'
+        breed:
+          type: string
+          nullable: true
+          maxLength: 100
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+        chip_number:
+          type: string
+          nullable: true
+          maxLength: 50
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner:
+          type: integer
+    PatchedMedicalRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        diagnosis:
+          type: string
+        treatment:
+          type: string
+        recommendations:
+          type: string
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        temperature:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,1})?$
+          nullable: true
+        visit:
+          type: integer
+    PatchedOwner:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        address:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPrescription:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        prescription_number:
+          type: string
+          readOnly: true
+        medication_name:
+          type: string
+          maxLength: 200
+        active_substance:
+          type: string
+          maxLength: 200
+        dosage:
+          type: string
+          maxLength: 100
+        frequency:
+          type: string
+          maxLength: 100
+        duration:
+          type: string
+          maxLength: 100
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        issue_date:
+          type: string
+          format: date
+        valid_until:
+          type: string
+          format: date
+        instructions:
+          type: string
+        animal:
+          type: integer
+        visit:
+          type: integer
+        veterinarian:
+          type: integer
+          readOnly: true
+    PatchedVaccination:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        animal:
+          type: integer
+        animal_name:
+          type: string
+          readOnly: true
+        veterinarian:
+          type: integer
+        veterinarian_name:
+          type: string
+          readOnly: true
+        vaccine_name:
+          type: string
+          maxLength: 150
+        manufacturer:
+          type: string
+          maxLength: 150
+        batch_number:
+          type: string
+          maxLength: 100
+        vaccination_date:
+          type: string
+          format: date
+        next_due_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedVisit:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        animal:
+          type: integer
+        animal_name:
+          type: string
+          readOnly: true
+        veterinarian:
+          type: integer
+        veterinarian_name:
+          type: string
+          readOnly: true
+        visit_date:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          maxLength: 255
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Prescription:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        prescription_number:
+          type: string
+          readOnly: true
+        medication_name:
+          type: string
+          maxLength: 200
+        active_substance:
+          type: string
+          maxLength: 200
+        dosage:
+          type: string
+          maxLength: 100
+        frequency:
+          type: string
+          maxLength: 100
+        duration:
+          type: string
+          maxLength: 100
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        issue_date:
+          type: string
+          format: date
+        valid_until:
+          type: string
+          format: date
+        instructions:
+          type: string
+        animal:
+          type: integer
+        visit:
+          type: integer
+        veterinarian:
+          type: integer
+          readOnly: true
+      required:
+      - animal
+      - created_at
+      - dosage
+      - duration
+      - frequency
+      - id
+      - issue_date
+      - medication_name
+      - prescription_number
+      - quantity
+      - updated_at
+      - valid_until
+      - veterinarian
+      - visit
+    SpeciesEnum:
+      enum:
+      - dog
+      - cat
+      - other
+      type: string
+      description: |-
+        * `dog` - Dog
+        * `cat` - Cat
+        * `other` - Other
+    StatusEnum:
+      enum:
+      - SCHEDULED
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `SCHEDULED` - Scheduled
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    Vaccination:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        animal:
+          type: integer
+        animal_name:
+          type: string
+          readOnly: true
+        veterinarian:
+          type: integer
+        veterinarian_name:
+          type: string
+          readOnly: true
+        vaccine_name:
+          type: string
+          maxLength: 150
+        manufacturer:
+          type: string
+          maxLength: 150
+        batch_number:
+          type: string
+          maxLength: 100
+        vaccination_date:
+          type: string
+          format: date
+        next_due_date:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - animal
+      - animal_name
+      - created_at
+      - id
+      - updated_at
+      - vaccination_date
+      - vaccine_name
+      - veterinarian
+      - veterinarian_name
+    Visit:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        animal:
+          type: integer
+        animal_name:
+          type: string
+          readOnly: true
+        veterinarian:
+          type: integer
+        veterinarian_name:
+          type: string
+          readOnly: true
+        visit_date:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          maxLength: 255
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - animal
+      - animal_name
+      - created_at
+      - id
+      - reason
+      - veterinarian
+      - veterinarian_name
+      - visit_date
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

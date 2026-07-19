@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.db import models
 
+from common.models import TimeStampedModel
 
-class UserProfile(models.Model):
+
+class UserProfile(TimeStampedModel):
 
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Administrator"

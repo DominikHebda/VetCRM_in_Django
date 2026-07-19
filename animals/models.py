@@ -1,7 +1,8 @@
 from django.db import models
 from owners.models import Owner
+from common.models import TimeStampedModel
 
-class Animal(models.Model):
+class Animal(TimeStampedModel):
     SPECIES_CHOICES = [
         ('dog', 'Dog'),
         ('cat', 'Cat'),
