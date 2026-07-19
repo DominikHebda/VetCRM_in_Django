@@ -1,0 +1,36 @@
+[run]
+branch = True
+source =
+    accounts
+    animals
+    common
+    config
+    medical
+    owners
+    prescriptions
+    vaccinations
+    visits
+
+omit =
+    */migrations/*
+    */tests/*
+    */__init__.py
+    manage.py
+    */admin.py
+    */apps.py
+    */asgi.py
+    */wsgi.py
+
+[report]
+show_missing = True
+skip_covered = False
+precision = 2
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    if TYPE_CHECKING:
+    if __name__ == .__main__.:
+
+[html]
+directory = htmlcov
