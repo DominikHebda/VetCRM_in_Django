@@ -5,26 +5,50 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('visits', '0001_initial'),
+        ("visits", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MedicalRecord',
+            name="MedicalRecord",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('diagnosis', models.TextField()),
-                ('treatment', models.TextField(blank=True)),
-                ('recommendations', models.TextField(blank=True)),
-                ('weight', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('temperature', models.DecimalField(blank=True, decimal_places=1, max_digits=4, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('visit', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='medical_record', to='visits.visit')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("diagnosis", models.TextField()),
+                ("treatment", models.TextField(blank=True)),
+                ("recommendations", models.TextField(blank=True)),
+                (
+                    "weight",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "temperature",
+                    models.DecimalField(
+                        blank=True, decimal_places=1, max_digits=4, null=True
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "visit",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="medical_record",
+                        to="visits.visit",
+                    ),
+                ),
             ],
         ),
     ]

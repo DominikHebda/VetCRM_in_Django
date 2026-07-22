@@ -4,15 +4,10 @@ from .models import Visit
 
 
 class VisitSerializer(serializers.ModelSerializer):
-
-    animal_name = serializers.CharField(
-        source="animal.name",
-        read_only=True
-    )
+    animal_name = serializers.CharField(source="animal.name", read_only=True)
 
     veterinarian_name = serializers.CharField(
-        source="veterinarian.get_full_name",
-        read_only=True
+        source="veterinarian.get_full_name", read_only=True
     )
 
     class Meta:

@@ -1,21 +1,18 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Prescription
 from .serializers import PrescriptionSerializer
 from .services import generate_prescription_number
-from drf_spectacular.utils import extend_schema
 
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter, SearchFilter
 
 @extend_schema(
     tags=["Prescriptions"],
 )
-
-
 class PrescriptionViewSet(viewsets.ModelViewSet):
-
     queryset = Prescription.objects.select_related(
         "animal",
         "visit",
@@ -25,10 +22,10 @@ class PrescriptionViewSet(viewsets.ModelViewSet):
     serializer_class = PrescriptionSerializer
 
     filter_backends = [
-    DjangoFilterBackend,
-    SearchFilter,
-    OrderingFilter,
-]
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
 
     filterset_fields = [
         "animal",

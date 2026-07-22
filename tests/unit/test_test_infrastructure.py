@@ -27,10 +27,7 @@ class TestFactories:
         self,
         receptionist_profile,
     ):
-        assert (
-            receptionist_profile.role
-            == UserProfile.Role.RECEPTIONIST
-        )
+        assert receptionist_profile.role == UserProfile.Role.RECEPTIONIST
 
     def test_owner_factory_creates_valid_owner(self, owner):
         assert isinstance(owner, Owner)

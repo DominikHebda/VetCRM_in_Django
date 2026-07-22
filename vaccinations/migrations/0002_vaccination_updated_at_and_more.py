@@ -5,25 +5,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('animals', '0001_initial'),
-        ('vaccinations', '0001_initial'),
+        ("animals", "0001_initial"),
+        ("vaccinations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='vaccination',
-            name='updated_at',
+            model_name="vaccination",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddIndex(
-            model_name='vaccination',
-            index=models.Index(fields=['vaccination_date'], name='vaccination_vaccina_745d53_idx'),
+            model_name="vaccination",
+            index=models.Index(
+                fields=["vaccination_date"], name="vaccination_vaccina_745d53_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='vaccination',
-            index=models.Index(fields=['next_due_date'], name='vaccination_next_du_2be640_idx'),
+            model_name="vaccination",
+            index=models.Index(
+                fields=["next_due_date"], name="vaccination_next_du_2be640_idx"
+            ),
         ),
     ]

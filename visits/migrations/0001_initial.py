@@ -6,29 +6,61 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('animals', '0001_initial'),
+        ("animals", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Visit',
+            name="Visit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('visit_date', models.DateTimeField()),
-                ('reason', models.CharField(max_length=255)),
-                ('notes', models.TextField(blank=True)),
-                ('status', models.CharField(choices=[('SCHEDULED', 'Scheduled'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled')], default='SCHEDULED', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('animal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='visits', to='animals.animal')),
-                ('veterinarian', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='visits', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("visit_date", models.DateTimeField()),
+                ("reason", models.CharField(max_length=255)),
+                ("notes", models.TextField(blank=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("SCHEDULED", "Scheduled"),
+                            ("COMPLETED", "Completed"),
+                            ("CANCELLED", "Cancelled"),
+                        ],
+                        default="SCHEDULED",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "animal",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="visits",
+                        to="animals.animal",
+                    ),
+                ),
+                (
+                    "veterinarian",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="visits",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['visit_date'],
+                "ordering": ["visit_date"],
             },
         ),
     ]

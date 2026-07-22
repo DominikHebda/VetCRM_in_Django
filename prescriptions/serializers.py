@@ -4,7 +4,6 @@ from .models import Prescription
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Prescription
 
@@ -16,6 +15,7 @@ class PrescriptionSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
 
 def validate(self, attrs):
 
@@ -29,11 +29,10 @@ def validate(self, attrs):
 
     return attrs
 
+
 def validate_quantity(self, value):
 
     if value <= 0:
-        raise serializers.ValidationError(
-            "Quantity must be greater than zero."
-        )
+        raise serializers.ValidationError("Quantity must be greater than zero.")
 
     return value

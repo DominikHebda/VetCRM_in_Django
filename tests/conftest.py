@@ -22,7 +22,17 @@ def user(db):
 
 @pytest.fixture
 def admin_profile(db):
-    return AdminProfileFactory()
+    return AdminProfileFactory.create()
+
+
+@pytest.fixture
+def veterinarian_profile(db):
+    return VeterinarianProfileFactory.create()
+
+
+@pytest.fixture
+def receptionist_profile(db):
+    return ReceptionistProfileFactory.create()
 
 
 @pytest.fixture
@@ -31,18 +41,8 @@ def admin_user(admin_profile):
 
 
 @pytest.fixture
-def veterinarian_profile(db):
-    return VeterinarianProfileFactory()
-
-
-@pytest.fixture
 def veterinarian_user(veterinarian_profile):
     return veterinarian_profile.user
-
-
-@pytest.fixture
-def receptionist_profile(db):
-    return ReceptionistProfileFactory()
 
 
 @pytest.fixture
@@ -59,18 +59,3 @@ def owner(db):
 def authenticated_client(api_client, user):
     api_client.force_authenticate(user=user)
     return api_client
-
-
-@pytest.fixture
-def admin_profile(db):
-    return AdminProfileFactory.create()
-
-
-@pytest.fixture
-def veterinarian_profile(db):
-    return VeterinarianProfileFactory.create()
-
-
-@pytest.fixture
-def receptionist_profile(db):
-    return ReceptionistProfileFactory.create()

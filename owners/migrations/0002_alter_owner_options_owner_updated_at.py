@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owners', '0001_initial'),
+        ("owners", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='owner',
-            options={'ordering': ['last_name', 'first_name']},
+            name="owner",
+            options={"ordering": ["last_name", "first_name"]},
         ),
         migrations.AddField(
-            model_name='owner',
-            name='updated_at',
+            model_name="owner",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
     ]
