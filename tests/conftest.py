@@ -7,6 +7,7 @@ from tests.factories.accounts import (
     UserFactory,
     VeterinarianProfileFactory,
 )
+from tests.factories.animals import AnimalFactory
 from tests.factories.owners import OwnerFactory
 
 
@@ -59,3 +60,7 @@ def owner(db):
 def authenticated_client(api_client, user):
     api_client.force_authenticate(user=user)
     return api_client
+
+@pytest.fixture
+def animal(db):
+    return AnimalFactory()
