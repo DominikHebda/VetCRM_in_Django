@@ -9,6 +9,7 @@ from tests.factories.accounts import (
 )
 from tests.factories.animals import AnimalFactory
 from tests.factories.owners import OwnerFactory
+from tests.factories.visits import VisitFactory
 
 
 @pytest.fixture
@@ -64,3 +65,7 @@ def authenticated_client(api_client, user):
 @pytest.fixture
 def animal(db):
     return AnimalFactory()
+
+@pytest.fixture
+def visit():
+    return VisitFactory()
