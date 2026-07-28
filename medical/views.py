@@ -1,7 +1,7 @@
-from drf_spectacular.utils import extend_schema
-from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.viewsets import ModelViewSet
 
 from .models import MedicalRecord
 from .serializers import MedicalRecordSerializer
@@ -12,7 +12,6 @@ from .serializers import MedicalRecordSerializer
     description="Manage medical records.",
 )
 class MedicalRecordViewSet(ModelViewSet):
-
     queryset = MedicalRecord.objects.select_related(
         "visit",
         "visit__animal",

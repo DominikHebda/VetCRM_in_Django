@@ -6,22 +6,15 @@ from common.models import TimeStampedModel
 
 
 class Visit(TimeStampedModel):
-
     class Status(models.TextChoices):
         SCHEDULED = "SCHEDULED", "Scheduled"
         COMPLETED = "COMPLETED", "Completed"
         CANCELLED = "CANCELLED", "Cancelled"
 
-    animal = models.ForeignKey(
-        Animal,
-        on_delete=models.CASCADE,
-        related_name="visits"
-    )
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name="visits")
 
     veterinarian = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        related_name="visits"
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="visits"
     )
 
     visit_date = models.DateTimeField()
@@ -35,7 +28,6 @@ class Visit(TimeStampedModel):
         choices=Status.choices,
         default=Status.SCHEDULED,
     )
-
 
     class Meta:
         ordering = ["visit_date"]

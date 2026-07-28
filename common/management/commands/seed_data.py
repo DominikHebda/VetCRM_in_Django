@@ -31,8 +31,4 @@ class Command(BaseCommand):
 
         owners = seed_owners(count=options["owners"])
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Created {len(owners)} owners."
-            )
-        )
+        self.stdout.write(self.style.SUCCESS(f"Created {len(owners)} owners."))

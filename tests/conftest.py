@@ -7,7 +7,12 @@ from tests.factories.accounts import (
     UserFactory,
     VeterinarianProfileFactory,
 )
+from tests.factories.animals import AnimalFactory
+from tests.factories.medical import MedicalRecordFactory
 from tests.factories.owners import OwnerFactory
+from tests.factories.prescriptions import PrescriptionFactory
+from tests.factories.vaccinations import VaccinationFactory
+from tests.factories.visits import VisitFactory
 
 
 @pytest.fixture
@@ -22,7 +27,17 @@ def user(db):
 
 @pytest.fixture
 def admin_profile(db):
-    return AdminProfileFactory()
+    return AdminProfileFactory.create()
+
+
+@pytest.fixture
+def veterinarian_profile(db):
+    return VeterinarianProfileFactory.create()
+
+
+@pytest.fixture
+def receptionist_profile(db):
+    return ReceptionistProfileFactory.create()
 
 
 @pytest.fixture
@@ -31,18 +46,8 @@ def admin_user(admin_profile):
 
 
 @pytest.fixture
-def veterinarian_profile(db):
-    return VeterinarianProfileFactory()
-
-
-@pytest.fixture
 def veterinarian_user(veterinarian_profile):
     return veterinarian_profile.user
-
-
-@pytest.fixture
-def receptionist_profile(db):
-    return ReceptionistProfileFactory()
 
 
 @pytest.fixture
@@ -62,15 +67,23 @@ def authenticated_client(api_client, user):
 
 
 @pytest.fixture
-def admin_profile(db):
-    return AdminProfileFactory.create()
+def animal(db):
+    return AnimalFactory()
 
 
 @pytest.fixture
-def veterinarian_profile(db):
-    return VeterinarianProfileFactory.create()
+def visit():
+    return VisitFactory()
 
 
 @pytest.fixture
-def receptionist_profile(db):
-    return ReceptionistProfileFactory.create()
+def vaccination(db):
+    return VaccinationFactory()
+
+@pytest.fixture
+def medical_record(db):
+    return MedicalRecordFactory()
+
+@pytest.fixture
+def prescription(db):
+    return PrescriptionFactory()

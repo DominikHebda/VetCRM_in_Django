@@ -1,19 +1,17 @@
 from django.db import models
-from owners.models import Owner
+
 from common.models import TimeStampedModel
+from owners.models import Owner
+
 
 class Animal(TimeStampedModel):
     SPECIES_CHOICES = [
-        ('dog', 'Dog'),
-        ('cat', 'Cat'),
-        ('other', 'Other'),
+        ("dog", "Dog"),
+        ("cat", "Cat"),
+        ("other", "Other"),
     ]
 
-    owner = models.ForeignKey(
-        Owner,
-        on_delete=models.CASCADE,
-        related_name='animals'
-    )
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="animals")
 
     name = models.CharField(max_length=100)
     species = models.CharField(max_length=20, choices=SPECIES_CHOICES)

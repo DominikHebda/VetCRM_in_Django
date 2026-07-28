@@ -16,9 +16,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         skip_postgeneration_save = True
 
     username = factory.Sequence(lambda number: f"user{number}")
-    email = factory.LazyAttribute(
-        lambda user: f"{user.username}@example.com"
-    )
+    email = factory.LazyAttribute(lambda user: f"{user.username}@example.com")
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     is_active = True
@@ -35,7 +33,8 @@ def update_profile(
     role: str,
     license_number: str = "",
 ) -> UserProfile:
-    profile = user.profile
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+
     profile.role = role
     profile.license_number = license_number
     profile.save(
