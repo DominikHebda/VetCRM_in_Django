@@ -10,6 +10,7 @@ from tests.factories.accounts import (
 from tests.factories.animals import AnimalFactory
 from tests.factories.medical import MedicalRecordFactory
 from tests.factories.owners import OwnerFactory
+from tests.factories.prescriptions import PrescriptionFactory
 from tests.factories.vaccinations import VaccinationFactory
 from tests.factories.visits import VisitFactory
 
@@ -82,3 +83,7 @@ def vaccination(db):
 @pytest.fixture
 def medical_record(db):
     return MedicalRecordFactory()
+
+@pytest.fixture
+def prescription(db):
+    return PrescriptionFactory()
