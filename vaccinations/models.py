@@ -6,7 +6,6 @@ from common.models import TimeStampedModel
 
 
 class Vaccination(TimeStampedModel):
-
     animal = models.ForeignKey(
         Animal,
         on_delete=models.CASCADE,

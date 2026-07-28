@@ -4,7 +4,6 @@ from .models import Vaccination
 
 
 class VaccinationSerializer(serializers.ModelSerializer):
-
     animal_name = serializers.CharField(
         source="animal.name",
         read_only=True,

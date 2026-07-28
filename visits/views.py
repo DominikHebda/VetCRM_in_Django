@@ -1,12 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
-from drf_spectacular.utils import extend_schema
-
 from .models import Visit
 from .serializers import VisitSerializer
-
 
 
 @extend_schema(
@@ -15,7 +13,6 @@ from .serializers import VisitSerializer
     description="Manage veterinary visits.",
 )
 class VisitViewSet(ModelViewSet):
-
     queryset = Visit.objects.select_related(
         "animal",
         "veterinarian",

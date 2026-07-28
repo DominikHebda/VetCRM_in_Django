@@ -1,11 +1,10 @@
 from django.db import models
 
-from visits.models import Visit
 from common.models import TimeStampedModel
+from visits.models import Visit
 
 
 class MedicalRecord(TimeStampedModel):
-
     visit = models.OneToOneField(
         Visit,
         on_delete=models.CASCADE,
@@ -31,7 +30,6 @@ class MedicalRecord(TimeStampedModel):
         null=True,
         blank=True,
     )
-
 
     def __str__(self):
         return f"Medical Record #{self.pk}"

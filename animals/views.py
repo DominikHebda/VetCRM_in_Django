@@ -1,16 +1,17 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
+
 from .models import Animal
 from .serializers import AnimalSerializer
-from drf_spectacular.utils import extend_schema
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter, SearchFilter
+
 
 @extend_schema(
     tags=["Animals"],
     summary="Manage animals",
-    description="CRUD operations for veterinary patients."
+    description="CRUD operations for veterinary patients.",
 )
-
 class AnimalViewSet(ModelViewSet):
     queryset = Animal.objects.all()
     serializer_class = AnimalSerializer
@@ -20,8 +21,8 @@ class AnimalViewSet(ModelViewSet):
         OrderingFilter,
     ]
     filterset_fields = [
-    "owner",
-    "species",
+        "owner",
+        "species",
     ]
 
     search_fields = [

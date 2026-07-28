@@ -2,12 +2,11 @@ from django.conf import settings
 from django.db import models
 
 from animals.models import Animal
-from visits.models import Visit
 from common.models import TimeStampedModel
+from visits.models import Visit
 
 
 class Prescription(TimeStampedModel):
-
     animal = models.ForeignKey(
         Animal,
         on_delete=models.CASCADE,
