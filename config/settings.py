@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "common",
     "corsheaders",
     "dashboard",
+    "analytics",
 ]
 
 MIDDLEWARE = [
