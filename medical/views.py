@@ -3,6 +3,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
+from accounts.permissions import ClinicalPermission
+
 from .models import MedicalRecord
 from .serializers import MedicalRecordSerializer
 
@@ -38,3 +40,5 @@ class MedicalRecordViewSet(ModelViewSet):
     ordering_fields = [
         "created_at",
     ]
+
+permission_classes = [ClinicalPermission]

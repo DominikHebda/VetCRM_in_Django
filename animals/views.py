@@ -3,6 +3,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
+from accounts.permissions import OwnerAnimalPermission
+
 from .models import Animal
 from .serializers import AnimalSerializer
 
@@ -35,3 +37,5 @@ class AnimalViewSet(ModelViewSet):
         "name",
         "birth_date",
     ]
+    
+permission_classes = [OwnerAnimalPermission]

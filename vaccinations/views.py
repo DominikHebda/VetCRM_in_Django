@@ -3,6 +3,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
+from accounts.permissions import ClinicalPermission
+
 from .models import Vaccination
 from .serializers import VaccinationSerializer
 
@@ -39,3 +41,5 @@ class VaccinationViewSet(ModelViewSet):
         "vaccination_date",
         "next_due_date",
     )
+
+permission_classes = [ClinicalPermission]
