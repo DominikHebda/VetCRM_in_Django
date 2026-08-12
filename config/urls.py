@@ -22,6 +22,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
+    path("api/", include("analytics.urls")),
     path("api/", include("dashboard.urls")),
     path("api/", include("accounts.urls")),
     path("api/", include("owners.urls")),
