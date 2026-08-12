@@ -27,3 +27,6 @@ def test_authenticated_user_can_view_overview(
     assert response.status_code == status.HTTP_200_OK
     assert "visits_by_month" in response.data
     assert "animals_by_species" in response.data
+    assert "top_vaccines" in response.data
+    assert "top_medications" in response.data
+    assert "visits_by_veterinarian" in response.data
