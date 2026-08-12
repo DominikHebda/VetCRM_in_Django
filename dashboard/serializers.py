@@ -15,7 +15,7 @@ class RecentAnimalSerializer(serializers.Serializer):
     species = serializers.CharField()
     owner__last_name = serializers.CharField()
 
-    
+
 class DashboardSummarySerializer(serializers.Serializer):
     owners_count = serializers.IntegerField()
     animals_count = serializers.IntegerField()
@@ -24,4 +24,5 @@ class DashboardSummarySerializer(serializers.Serializer):
     prescriptions_expiring = serializers.IntegerField()
     recent_visits = RecentVisitSerializer(many=True)
     recent_animals = RecentAnimalSerializer(many=True)
+    scheduled_visits = serializers.IntegerField()
 

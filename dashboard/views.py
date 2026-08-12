@@ -13,8 +13,7 @@ class DashboardView(APIView):
         responses=DashboardSummarySerializer,
     )
     def get(self, request):
-        data = DashboardService.get_summary()
-
+        data = DashboardService.get_summary(request.user)
         serializer = DashboardSummarySerializer(data)
 
         return Response(serializer.data)

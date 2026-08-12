@@ -1,5 +1,6 @@
 from django.utils import timezone
 
+from accounts.models import UserProfile
 from animals.models import Animal
 from owners.models import Owner
 from prescriptions.models import Prescription
@@ -9,14 +10,22 @@ from visits.models import Visit
 
 class DashboardService:
     @staticmethod
-    def get_summary():
+    def get_summary(user):
         today = timezone.localdate()
+
+        visits = Visit.objects.all()
+
+        if user.profile.role == UserProfile.Role.VET:
+            visits = visits.filter(veterinarian=user)
 
         return {
             "owners_count": Owner.objects.count(),
             "animals_count": Animal.objects.count(),
-            "today_visits": Visit.objects.filter(
+            "today_visits": visits.filter(
                 visit_date__date=today,
+            ).count(),
+            "scheduled_visits": visits.filter(
+                status=Visit.Status.SCHEDULED,
             ).count(),
             "vaccinations_due": Vaccination.objects.filter(
                 next_due_date__lte=today,
@@ -25,9 +34,7 @@ class DashboardService:
                 valid_until__lte=today,
             ).count(),
             "recent_visits": list(
-                Visit.objects.select_related(
-                    "animal",
-                )
+                visits.select_related("animal")
                 .order_by("-visit_date")[:5]
                 .values(
                     "id",
@@ -37,11 +44,8 @@ class DashboardService:
                     "animal__name",
                 )
             ),
-
             "recent_animals": list(
-                Animal.objects.select_related(
-                    "owner",
-                )
+                Animal.objects.select_related("owner")
                 .order_by("-created_at")[:5]
                 .values(
                     "id",
