@@ -4,6 +4,7 @@ from rest_framework import status
 
 from tests.factories.animals import AnimalFactory
 from tests.factories.owners import OwnerFactory
+from tests.factories.visits import VisitFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -31,3 +32,19 @@ def test_authenticated_user_can_access_dashboard(authenticated_client):
     assert "today_visits" in response.data
     assert "vaccinations_due" in response.data
     assert "prescriptions_expiring" in response.data
+
+
+def test_dashboard_returns_recent_lists(
+    authenticated_client,
+):
+    AnimalFactory.create_batch(6)
+    VisitFactory.create_batch(7)
+
+    response = authenticated_client.get(
+        reverse("dashboard")
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    assert len(response.data["recent_animals"]) == 5
+    assert len(response.data["recent_visits"]) == 5

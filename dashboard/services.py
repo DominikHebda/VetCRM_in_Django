@@ -24,4 +24,30 @@ class DashboardService:
             "prescriptions_expiring": Prescription.objects.filter(
                 valid_until__lte=today,
             ).count(),
+            "recent_visits": list(
+                Visit.objects.select_related(
+                    "animal",
+                )
+                .order_by("-visit_date")[:5]
+                .values(
+                    "id",
+                    "visit_date",
+                    "reason",
+                    "status",
+                    "animal__name",
+                )
+            ),
+
+            "recent_animals": list(
+                Animal.objects.select_related(
+                    "owner",
+                )
+                .order_by("-created_at")[:5]
+                .values(
+                    "id",
+                    "name",
+                    "species",
+                    "owner__last_name",
+                )
+            ),
         }

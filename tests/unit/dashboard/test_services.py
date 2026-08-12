@@ -61,3 +61,19 @@ def test_dashboard_summary_counts_expiring_prescriptions():
     data = DashboardService.get_summary()
 
     assert data["prescriptions_expiring"] == 2
+
+
+def test_dashboard_returns_recent_animals():
+    AnimalFactory.create_batch(6)
+
+    data = DashboardService.get_summary()
+
+    assert len(data["recent_animals"]) == 5
+
+
+def test_dashboard_returns_recent_visits():
+    VisitFactory.create_batch(7)
+
+    data = DashboardService.get_summary()
+
+    assert len(data["recent_visits"]) == 5
