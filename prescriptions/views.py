@@ -2,7 +2,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import IsAuthenticated
+
+from accounts.permissions import ClinicalPermission
 
 from .models import Prescription
 from .serializers import PrescriptionSerializer
@@ -43,9 +44,7 @@ class PrescriptionViewSet(viewsets.ModelViewSet):
         "issue_date",
     ]
 
-    permission_classes = [
-        IsAuthenticated,
-    ]
+    permission_classes = [ClinicalPermission]
 
     def perform_create(self, serializer):
 

@@ -3,6 +3,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
 
+from accounts.permissions import OwnerAnimalPermission
+
 from .models import Owner
 from .serializers import OwnerSerializer
 
@@ -43,3 +45,5 @@ class OwnerViewSet(ModelViewSet):
         "last_name",
         "first_name",
     ]
+
+    permission_classes = [OwnerAnimalPermission]

@@ -10,6 +10,11 @@ from tests.factories.visits import VisitFactory
 
 pytestmark = pytest.mark.django_db
 
+@pytest.fixture
+def veterinarian_client(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
+    return api_client
+
 
 def test_list_prescriptions(authenticated_client):
     PrescriptionFactory.create_batch(3)
@@ -36,7 +41,7 @@ def test_retrieve_prescription(authenticated_client):
     assert response.data["medication_name"] == prescription.medication_name
 
 
-def test_create_prescription(authenticated_client, user):
+def test_create_prescription(veterinarian_client, veterinarian_user):
     visit = VisitFactory()
     issue_date = date.today()
 
@@ -55,7 +60,7 @@ def test_create_prescription(authenticated_client, user):
     }
 
     url = reverse("prescription-list")
-    response = authenticated_client.post(url, payload, format="json")
+    response = veterinarian_client.post(url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
     assert Prescription.objects.count() == 1
@@ -64,7 +69,7 @@ def test_create_prescription(authenticated_client, user):
 
     assert prescription.animal == visit.animal
     assert prescription.visit == visit
-    assert prescription.veterinarian == user
+    assert prescription.veterinarian == veterinarian_user
     assert prescription.medication_name == "Amoxicillin"
     assert prescription.quantity == 14
     assert prescription.prescription_number == (
@@ -73,8 +78,8 @@ def test_create_prescription(authenticated_client, user):
 
 
 def test_create_prescriptions_generates_consecutive_numbers(
-    authenticated_client,
-    user,
+    veterinarian_client,
+    veterinarian_user,
 ):
     first_visit = VisitFactory()
     second_visit = VisitFactory()
@@ -105,12 +110,12 @@ def test_create_prescriptions_generates_consecutive_numbers(
 
     url = reverse("prescription-list")
 
-    first_response = authenticated_client.post(
+    first_response = veterinarian_client.post(
         url,
         first_payload,
         format="json",
     )
-    second_response = authenticated_client.post(
+    second_response = veterinarian_client.post(
         url,
         second_payload,
         format="json",
@@ -125,12 +130,16 @@ def test_create_prescriptions_generates_consecutive_numbers(
         f"RX-{issue_date.year}-000002"
     )
 
-    assert Prescription.objects.filter(veterinarian=user).count() == 2
+    assert (
+        Prescription.objects.filter(
+            veterinarian=veterinarian_user
+            ).count()
+    )
 
 
 def test_create_prescription_ignores_read_only_fields(
-    authenticated_client,
-    user,
+    veterinarian_client,
+    veterinarian_user,
 ):
     visit = VisitFactory()
     issue_date = date.today()
@@ -150,13 +159,13 @@ def test_create_prescription_ignores_read_only_fields(
     }
 
     url = reverse("prescription-list")
-    response = authenticated_client.post(url, payload, format="json")
+    response = veterinarian_client.post(url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
 
     prescription = Prescription.objects.get()
 
-    assert prescription.veterinarian == user
+    assert prescription.veterinarian == veterinarian_user
     assert prescription.prescription_number != "CUSTOM-NUMBER"
     assert prescription.prescription_number == (
         f"RX-{issue_date.year}-000001"
@@ -164,7 +173,7 @@ def test_create_prescription_ignores_read_only_fields(
 
 
 def test_create_prescription_rejects_invalid_dates(
-    authenticated_client,
+    veterinarian_client,
 ):
     visit = VisitFactory()
 
@@ -181,7 +190,7 @@ def test_create_prescription_rejects_invalid_dates(
     }
 
     url = reverse("prescription-list")
-    response = authenticated_client.post(url, payload, format="json")
+    response = veterinarian_client.post(url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "valid_until" in response.data
@@ -189,7 +198,7 @@ def test_create_prescription_rejects_invalid_dates(
 
 
 def test_create_prescription_rejects_zero_quantity(
-    authenticated_client,
+    veterinarian_client,
 ):
     visit = VisitFactory()
 
@@ -206,14 +215,14 @@ def test_create_prescription_rejects_zero_quantity(
     }
 
     url = reverse("prescription-list")
-    response = authenticated_client.post(url, payload, format="json")
+    response = veterinarian_client.post(url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "quantity" in response.data
     assert Prescription.objects.count() == 0
 
 
-def test_partial_update_prescription(authenticated_client):
+def test_partial_update_prescription(veterinarian_client):
     prescription = PrescriptionFactory(
         medication_name="Initial medication",
         quantity=10,
@@ -225,7 +234,7 @@ def test_partial_update_prescription(authenticated_client):
     }
 
     url = reverse("prescription-detail", args=[prescription.id])
-    response = authenticated_client.patch(url, payload, format="json")
+    response = veterinarian_client.patch(url, payload, format="json")
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -235,11 +244,11 @@ def test_partial_update_prescription(authenticated_client):
     assert prescription.quantity == 20
 
 
-def test_delete_prescription(authenticated_client):
+def test_delete_prescription(veterinarian_client):
     prescription = PrescriptionFactory()
 
     url = reverse("prescription-detail", args=[prescription.id])
-    response = authenticated_client.delete(url)
+    response = veterinarian_client.delete(url)
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not Prescription.objects.filter(
