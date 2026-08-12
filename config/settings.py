@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "prescriptions",
     "common",
     "corsheaders",
+    "dashboard",
 ]
 
 MIDDLEWARE = [
