@@ -1,14 +1,15 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from accounts.permissions import IsAdminOrVeterinarian
 
 from .serializers import AnalyticsOverviewSerializer
 from .services import AnalyticsService
 
 
 class AnalyticsOverviewView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrVeterinarian]
 
     @extend_schema(
         tags=["Analytics"],
