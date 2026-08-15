@@ -4,6 +4,7 @@ import pytest
 from django.utils import timezone
 
 from notifications.services import NotificationService
+from tests.factories.prescriptions import PrescriptionFactory
 from tests.factories.vaccinations import VaccinationFactory
 
 pytestmark = pytest.mark.django_db
@@ -78,3 +79,63 @@ def test_orders_vaccinations_by_due_date():
 
     assert notifications[0]["vaccination_id"] == sooner.id
     assert notifications[1]["vaccination_id"] == later.id
+
+
+def test_returns_prescription_expiring_within_7_days():
+    today = timezone.localdate()
+
+    prescription = PrescriptionFactory(
+        valid_until=today + timedelta(days=3),
+    )
+
+    notifications = NotificationService.get_expiring_prescriptions()
+
+    assert len(notifications) == 1
+
+    notification = notifications[0]
+
+    assert notification["type"] == "prescription_expiring"
+    assert notification["severity"] == "warning"
+    assert notification["due_date"] == prescription.valid_until
+    assert notification["animal_id"] == prescription.animal_id
+    assert notification["prescription_id"] == prescription.id
+
+
+def test_does_not_return_prescription_expiring_after_7_days():
+    today = timezone.localdate()
+
+    PrescriptionFactory(
+        valid_until=today + timedelta(days=8),
+    )
+
+    notifications = NotificationService.get_expiring_prescriptions()
+
+    assert notifications == []
+
+
+def test_does_not_return_expired_prescription():
+    today = timezone.localdate()
+
+    PrescriptionFactory(
+        valid_until=today - timedelta(days=1),
+    )
+
+    notifications = NotificationService.get_expiring_prescriptions()
+
+    assert notifications == []
+
+
+def test_orders_prescriptions_by_expiration_date():
+    today = timezone.localdate()
+
+    later = PrescriptionFactory(
+        valid_until=today + timedelta(days=6),
+    )
+    sooner = PrescriptionFactory(
+        valid_until=today + timedelta(days=2),
+    )
+
+    notifications = NotificationService.get_expiring_prescriptions()
+
+    assert notifications[0]["prescription_id"] == sooner.id
+    assert notifications[1]["prescription_id"] == later.id
