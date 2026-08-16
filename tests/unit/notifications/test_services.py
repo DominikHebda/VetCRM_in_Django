@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from datetime import datetime
+
 
 import pytest
 from django.utils import timezone
@@ -193,3 +195,52 @@ def test_does_not_return_completed_or_cancelled_visits():
     notifications = NotificationService.get_today_visits()
 
     assert notifications == []
+
+
+def test_does_not_return_visit_from_another_day():
+    tomorrow = timezone.localdate() + timedelta(days=1)
+
+    visit_date = timezone.make_aware(
+        datetime.combine(
+            tomorrow,
+            datetime.min.time(),
+        )
+    )
+
+    VisitFactory(
+        visit_date=visit_date,
+        status=Visit.Status.SCHEDULED,
+    )
+
+    notifications = NotificationService.get_today_visits()
+
+    assert notifications == []
+
+
+def test_orders_today_visits_by_time():
+    today = timezone.localdate()
+
+    later = VisitFactory(
+        visit_date=timezone.make_aware(
+            datetime.combine(
+                today,
+                datetime.min.time().replace(hour=15),
+            )
+        ),
+        status=Visit.Status.SCHEDULED,
+    )
+
+    sooner = VisitFactory(
+        visit_date=timezone.make_aware(
+            datetime.combine(
+                today,
+                datetime.min.time().replace(hour=9),
+            )
+        ),
+        status=Visit.Status.SCHEDULED,
+    )
+
+    notifications = NotificationService.get_today_visits()
+
+    assert notifications[0]["visit_id"] == sooner.id
+    assert notifications[1]["visit_id"] == later.id
