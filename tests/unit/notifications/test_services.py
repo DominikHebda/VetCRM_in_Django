@@ -1,6 +1,4 @@
-from datetime import timedelta
-from datetime import datetime
-
+from datetime import datetime, timedelta
 
 import pytest
 from django.utils import timezone
@@ -30,7 +28,7 @@ def test_returns_vaccination_due_within_30_days():
 
     assert notification["type"] == "vaccination_due"
     assert notification["severity"] == "warning"
-    assert notification["due_date"] == vaccination.next_due_date
+    assert notification["due_date"] == vaccination.next_due_date.isoformat()
     assert notification["animal_id"] == vaccination.animal_id
     assert notification["vaccination_id"] == vaccination.id
 
@@ -100,7 +98,7 @@ def test_returns_prescription_expiring_within_7_days():
 
     assert notification["type"] == "prescription_expiring"
     assert notification["severity"] == "warning"
-    assert notification["due_date"] == prescription.valid_until
+    assert notification["due_date"] == prescription.valid_until.isoformat()
     assert notification["animal_id"] == prescription.animal_id
     assert notification["prescription_id"] == prescription.id
 
@@ -170,7 +168,7 @@ def test_returns_scheduled_visit_for_today():
     assert notification["severity"] == "info"
     assert notification["visit_id"] == visit.id
     assert notification["animal_id"] == visit.animal_id
-    assert notification["due_date"] == visit.visit_date
+    assert notification["due_date"] == visit.visit_date.isoformat()
 
 
 def test_does_not_return_completed_or_cancelled_visits():
@@ -244,3 +242,42 @@ def test_orders_today_visits_by_time():
 
     assert notifications[0]["visit_id"] == sooner.id
     assert notifications[1]["visit_id"] == later.id
+
+
+def test_get_notifications_combines_all_notification_types():
+    today = timezone.localdate()
+
+    VaccinationFactory(
+        next_due_date=today + timedelta(days=10),
+    )
+
+    PrescriptionFactory(
+        valid_until=today + timedelta(days=3),
+    )
+
+    visit_date = timezone.make_aware(
+        datetime.combine(
+            today,
+            datetime.min.time().replace(hour=12),
+        )
+    )
+
+    VisitFactory(
+        visit_date=visit_date,
+        status=Visit.Status.SCHEDULED,
+    )
+
+    data = NotificationService.get_notifications()
+
+    assert data["count"] == 3
+
+    types = {
+        item["type"]
+        for item in data["items"]
+    }
+
+    assert types == {
+        "vaccination_due",
+        "prescription_expiring",
+        "visit_today",
+    }
