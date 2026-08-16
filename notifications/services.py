@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from prescriptions.models import Prescription
 from vaccinations.models import Vaccination
+from visits.models import Visit
 
 
 class NotificationService:
@@ -73,4 +74,34 @@ class NotificationService:
                 "prescription_id": prescription.id,
             }
             for prescription in prescriptions
+        ]
+
+    @staticmethod
+    def get_today_visits():
+        today = timezone.localdate()
+
+        visits = (
+            Visit.objects.select_related(
+                "animal",
+                "veterinarian",
+            )
+            .filter(
+                visit_date__date=today,
+                status=Visit.Status.SCHEDULED,
+            )
+            .order_by("visit_date")
+        )
+
+        return [
+            {
+                "type": "visit_today",
+                "severity": "info",
+                "message": (
+                    f"Visit for {visit.animal.name} is scheduled for today"
+                ),
+                "due_date": visit.visit_date,
+                "animal_id": visit.animal_id,
+                "visit_id": visit.id,
+            }
+            for visit in visits
         ]

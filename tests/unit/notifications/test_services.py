@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from django.utils import timezone
@@ -6,6 +6,8 @@ from django.utils import timezone
 from notifications.services import NotificationService
 from tests.factories.prescriptions import PrescriptionFactory
 from tests.factories.vaccinations import VaccinationFactory
+from tests.factories.visits import VisitFactory
+from visits.models import Visit
 
 pytestmark = pytest.mark.django_db
 
@@ -139,3 +141,55 @@ def test_orders_prescriptions_by_expiration_date():
 
     assert notifications[0]["prescription_id"] == sooner.id
     assert notifications[1]["prescription_id"] == later.id
+
+
+def test_returns_scheduled_visit_for_today():
+    today = timezone.localdate()
+
+    visit_date = timezone.make_aware(
+        datetime.combine(
+            today,
+            datetime.min.time(),
+        )
+    )
+
+    visit = VisitFactory(
+        visit_date=visit_date,
+        status=Visit.Status.SCHEDULED,
+    )
+
+    notifications = NotificationService.get_today_visits()
+
+    assert len(notifications) == 1
+
+    notification = notifications[0]
+
+    assert notification["type"] == "visit_today"
+    assert notification["severity"] == "info"
+    assert notification["visit_id"] == visit.id
+    assert notification["animal_id"] == visit.animal_id
+    assert notification["due_date"] == visit.visit_date
+
+
+def test_does_not_return_completed_or_cancelled_visits():
+    today = timezone.localdate()
+
+    visit_date = timezone.make_aware(
+        datetime.combine(
+            today,
+            datetime.min.time(),
+        )
+    )
+
+    VisitFactory(
+        visit_date=visit_date,
+        status=Visit.Status.COMPLETED,
+    )
+    VisitFactory(
+        visit_date=visit_date,
+        status=Visit.Status.CANCELLED,
+    )
+
+    notifications = NotificationService.get_today_visits()
+
+    assert notifications == []
