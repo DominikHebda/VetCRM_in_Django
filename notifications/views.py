@@ -16,8 +16,7 @@ class NotificationListView(APIView):
         responses=NotificationListSerializer,
     )
     def get(self, request):
-        data = NotificationService.get_notifications()
+        data = NotificationService.get_notifications(request.user)
         serializer = NotificationListSerializer(data)
 
         return Response(serializer.data)
-# Create your views here.

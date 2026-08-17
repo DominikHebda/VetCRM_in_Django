@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
+from accounts.models import UserProfile
 from prescriptions.models import Prescription
 from vaccinations.models import Vaccination
 from visits.models import Visit
@@ -12,16 +13,25 @@ class NotificationService:
     PRESCRIPTION_EXPIRING_DAYS = 7
 
     @classmethod
-    def get_upcoming_vaccinations(cls):
+    def get_upcoming_vaccinations(cls, user=None):
         today = timezone.localdate()
         deadline = today + timedelta(days=cls.VACCINATION_DUE_DAYS)
 
-        vaccinations = (
-            Vaccination.objects.select_related(
-                "animal",
-                "animal__owner",
+        vaccinations = Vaccination.objects.select_related(
+            "animal",
+            "animal__owner",
+        )
+
+        if (
+            user is not None
+            and user.profile.role == UserProfile.Role.VET
+        ):
+            vaccinations = vaccinations.filter(
+                veterinarian=user,
             )
-            .filter(
+
+        vaccinations = (
+            vaccinations.filter(
                 next_due_date__isnull=False,
                 next_due_date__gte=today,
                 next_due_date__lte=deadline,
@@ -45,16 +55,27 @@ class NotificationService:
         ]
 
     @classmethod
-    def get_expiring_prescriptions(cls):
+    def get_expiring_prescriptions(cls, user=None):
         today = timezone.localdate()
-        deadline = today + timedelta(days=cls.PRESCRIPTION_EXPIRING_DAYS)
+        deadline = today + timedelta(
+            days=cls.PRESCRIPTION_EXPIRING_DAYS
+        )
+
+        prescriptions = Prescription.objects.select_related(
+            "animal",
+            "veterinarian",
+        )
+
+        if (
+            user is not None
+            and user.profile.role == UserProfile.Role.VET
+        ):
+            prescriptions = prescriptions.filter(
+                veterinarian=user,
+            )
 
         prescriptions = (
-            Prescription.objects.select_related(
-                "animal",
-                "veterinarian",
-            )
-            .filter(
+            prescriptions.filter(
                 valid_until__gte=today,
                 valid_until__lte=deadline,
             )
@@ -77,15 +98,24 @@ class NotificationService:
         ]
 
     @staticmethod
-    def get_today_visits():
+    def get_today_visits(user=None):
         today = timezone.localdate()
 
-        visits = (
-            Visit.objects.select_related(
-                "animal",
-                "veterinarian",
+        visits = Visit.objects.select_related(
+            "animal",
+            "veterinarian",
+        )
+
+        if (
+            user is not None
+            and user.profile.role == UserProfile.Role.VET
+        ):
+            visits = visits.filter(
+                veterinarian=user,
             )
-            .filter(
+
+        visits = (
+            visits.filter(
                 visit_date__date=today,
                 status=Visit.Status.SCHEDULED,
             )
@@ -107,20 +137,16 @@ class NotificationService:
         ]
 
     @classmethod
-    def get_notifications(cls):
+    def get_notifications(cls, user=None):
         items = [
-            *cls.get_upcoming_vaccinations(),
-            *cls.get_expiring_prescriptions(),
-            *cls.get_today_visits(),
-            ]
-            
-        items.sort(
-            key=lambda item: (
-            item["due_date"],
-            )
-        )
-           
+            *cls.get_upcoming_vaccinations(user),
+            *cls.get_expiring_prescriptions(user),
+            *cls.get_today_visits(user),
+        ]
+
+        items.sort(key=lambda item: item["due_date"])
+
         return {
             "count": len(items),
             "items": items,
-        }            
+        }
