@@ -11,14 +11,15 @@ class CurrentUserSerializer(serializers.Serializer):
     phone = serializers.SerializerMethodField()
     license_number = serializers.SerializerMethodField()
 
-    def get_role(self, user):
+
+    def get_role(self, user) -> str | None:
         profile = getattr(user, "profile", None)
         return profile.role if profile else None
 
-    def get_phone(self, user):
+    def get_phone(self, user) -> str:
         profile = getattr(user, "profile", None)
         return profile.phone if profile else ""
 
-    def get_license_number(self, user):
+    def get_license_number(self, user) -> str:
         profile = getattr(user, "profile", None)
         return profile.license_number if profile else ""
