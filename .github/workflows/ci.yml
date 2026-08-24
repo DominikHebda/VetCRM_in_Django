@@ -58,5 +58,13 @@ jobs:
       - name: Check migrations
         run: python manage.py makemigrations --check
 
+      - name: Run deployment security check
+        env:
+          DJANGO_DEBUG: "False"
+          DJANGO_SECRET_KEY: ci-only-secure-check-key-7f41c9e8a2b64d53a1098c74e6f213bd8a5c1d90
+        run: python manage.py check --deploy
+
       - name: Run tests
+        env:
+          DJANGO_DEBUG: "True"
         run: pytest
