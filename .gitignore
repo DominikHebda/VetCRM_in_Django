@@ -4,6 +4,8 @@
 !.env.example
 .venv/
 venv/
+.env.docker
+!.env.docker.example
 
 # Python
 __pycache__/
