@@ -19,7 +19,8 @@ services:
     build: .
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     environment:
       DJANGO_SECRET_KEY: docker-development-secret-key-change-in-production
       DJANGO_DEBUG: "True"
