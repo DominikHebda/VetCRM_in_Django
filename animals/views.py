@@ -37,5 +37,5 @@ class AnimalViewSet(ModelViewSet):
         "name",
         "birth_date",
     ]
-    
-permission_classes = [OwnerAnimalPermission]
+
+    permission_classes = [OwnerAnimalPermission]
