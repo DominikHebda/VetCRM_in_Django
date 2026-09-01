@@ -79,6 +79,29 @@ def test_authenticated_user_can_create_animal(
     assert response.data["name"] == "Rex"
 
 
+def test_veterinarian_cannot_create_animal(
+    api_client,
+    veterinarian_user,
+    animal_list_url,
+):
+    api_client.force_authenticate(user=veterinarian_user)
+
+    owner = OwnerFactory()
+    payload = {
+        "owner": owner.pk,
+        "name": "Rex",
+        "species": "dog",
+    }
+
+    response = api_client.post(
+        animal_list_url,
+        payload,
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
 def test_create_rejects_invalid_species(
     authenticated_client,
     animal_list_url,
