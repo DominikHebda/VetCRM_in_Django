@@ -42,4 +42,4 @@ class VaccinationViewSet(ModelViewSet):
         "next_due_date",
     )
 
-permission_classes = [ClinicalPermission]
+    permission_classes = [ClinicalPermission]

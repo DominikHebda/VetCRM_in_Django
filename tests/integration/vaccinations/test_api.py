@@ -30,7 +30,8 @@ def test_retrieve_vaccination(authenticated_client):
     assert response.data["vaccine_name"] == vaccination.vaccine_name
 
 
-def test_create_vaccination(authenticated_client, veterinarian_user):
+def test_create_vaccination(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
     animal = AnimalFactory()
 
     payload = {
@@ -45,7 +46,7 @@ def test_create_vaccination(authenticated_client, veterinarian_user):
     }
 
     url = reverse("vaccination-list")
-    response = authenticated_client.post(url, payload, format="json")
+    response = api_client.post(url, payload, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
     assert Vaccination.objects.count() == 1
@@ -59,7 +60,8 @@ def test_create_vaccination(authenticated_client, veterinarian_user):
     assert vaccination.batch_number == "BATCH-123"
 
 
-def test_update_vaccination(authenticated_client):
+def test_update_vaccination(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
     vaccination = VaccinationFactory(
         vaccine_name="Old vaccine",
         notes="Old notes",
@@ -81,7 +83,7 @@ def test_update_vaccination(authenticated_client):
     }
 
     url = reverse("vaccination-detail", args=[vaccination.id])
-    response = authenticated_client.put(url, payload, format="json")
+    response = api_client.put(url, payload, format="json")
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -91,11 +93,12 @@ def test_update_vaccination(authenticated_client):
     assert vaccination.notes == "Updated notes"
 
 
-def test_delete_vaccination(authenticated_client):
+def test_delete_vaccination(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
     vaccination = VaccinationFactory()
 
     url = reverse("vaccination-detail", args=[vaccination.id])
-    response = authenticated_client.delete(url)
+    response = api_client.delete(url)
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not Vaccination.objects.filter(id=vaccination.id).exists()
@@ -184,3 +187,30 @@ def test_order_vaccinations_by_vaccination_date(authenticated_client):
         older_vaccination.id,
         newer_vaccination.id,
     ]
+
+
+def test_receptionist_cannot_create_vaccination(
+    api_client,
+    receptionist_user,
+    veterinarian_user,
+):
+    api_client.force_authenticate(user=receptionist_user)
+
+    animal = AnimalFactory()
+
+    payload = {
+        "animal": animal.id,
+        "veterinarian": veterinarian_user.id,
+        "vaccine_name": "Rabies",
+        "manufacturer": "VetPharma",
+        "batch_number": "BATCH-123",
+        "vaccination_date": "2026-07-28",
+        "next_due_date": "2027-07-28",
+        "notes": "Annual vaccination",
+    }
+
+    url = reverse("vaccination-list")
+    response = api_client.post(url, payload, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert Vaccination.objects.count() == 0
