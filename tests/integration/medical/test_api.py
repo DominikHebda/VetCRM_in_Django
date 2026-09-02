@@ -30,7 +30,8 @@ def test_retrieve_medical_record(authenticated_client):
     assert response.data["diagnosis"] == medical_record.diagnosis
 
 
-def test_create_medical_record(authenticated_client):
+def test_create_medical_record(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
     visit = VisitFactory()
 
     payload = {
@@ -43,8 +44,7 @@ def test_create_medical_record(authenticated_client):
     }
 
     url = reverse("medical-record-list")
-    response = authenticated_client.post(url, payload, format="json")
-
+    response = api_client.post(url, payload, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     assert MedicalRecord.objects.count() == 1
 
@@ -56,8 +56,10 @@ def test_create_medical_record(authenticated_client):
 
 
 def test_create_second_record_for_same_visit_is_rejected(
-    authenticated_client,
+    api_client,
+    veterinarian_user,
 ):
+    api_client.force_authenticate(user=veterinarian_user)
     medical_record = MedicalRecordFactory()
 
     payload = {
@@ -66,14 +68,15 @@ def test_create_second_record_for_same_visit_is_rejected(
     }
 
     url = reverse("medical-record-list")
-    response = authenticated_client.post(url, payload, format="json")
+    response = api_client.post(url, payload, format="json")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert MedicalRecord.objects.count() == 1
     assert "visit" in response.data
 
 
-def test_update_medical_record(authenticated_client):
+def test_update_medical_record(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
     medical_record = MedicalRecordFactory(
         diagnosis="Initial diagnosis",
         treatment="Initial treatment",
@@ -97,7 +100,7 @@ def test_update_medical_record(authenticated_client):
     }
 
     url = reverse("medical-record-detail", args=[medical_record.id])
-    response = authenticated_client.put(url, payload, format="json")
+    response = api_client.put(url, payload, format="json")
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -107,11 +110,12 @@ def test_update_medical_record(authenticated_client):
     assert medical_record.treatment == "Updated treatment"
 
 
-def test_delete_medical_record(authenticated_client):
+def test_delete_medical_record(api_client, veterinarian_user):
+    api_client.force_authenticate(user=veterinarian_user)
     medical_record = MedicalRecordFactory()
 
     url = reverse("medical-record-detail", args=[medical_record.id])
-    response = authenticated_client.delete(url)
+    response = api_client.delete(url)
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not MedicalRecord.objects.filter(
@@ -198,3 +202,24 @@ def test_order_medical_records_by_created_at(authenticated_client):
         older_record.id,
         newer_record.id,
     ]
+
+
+def test_receptionist_cannot_create_medical_record(
+    api_client,
+    receptionist_user,
+):
+    api_client.force_authenticate(user=receptionist_user)
+
+    visit = VisitFactory()
+
+    payload = {
+        "visit": visit.id,
+        "diagnosis": "Ear infection",
+        "treatment": "Antibiotic therapy",
+    }
+
+    url = reverse("medical-record-list")
+    response = api_client.post(url, payload, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert MedicalRecord.objects.count() == 0

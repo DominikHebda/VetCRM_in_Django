@@ -41,4 +41,4 @@ class MedicalRecordViewSet(ModelViewSet):
         "created_at",
     ]
 
-permission_classes = [ClinicalPermission]
+    permission_classes = [ClinicalPermission]
