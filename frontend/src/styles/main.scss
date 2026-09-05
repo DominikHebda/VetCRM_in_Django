@@ -1,0 +1,27 @@
+$font-family: Arial, sans-serif;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: $font-family;
+}
+
+main {
+  padding: 2rem;
+}
+
+.app-layout {
+  min-height: 100vh;
+}
+
+.app-header {
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.app-content {
+  padding: 2rem;
+}
