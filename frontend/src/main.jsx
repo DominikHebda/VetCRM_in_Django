@@ -1,5 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+
+import AuthProvider from './auth/AuthProvider.jsx'
 import './styles/main.scss'
 import App from './App.jsx'
 
@@ -11,6 +13,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </StrictMode>,
 )
