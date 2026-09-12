@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { getCurrentUser } from '../services/authService.js'
 import { AuthContext } from './authContext.js'
+import { clearOAuthTokens } from './oauth.js'
 
 /**
  * @typedef {Awaited<ReturnType<typeof getCurrentUser>>} CurrentUser
@@ -37,9 +38,16 @@ function AuthProvider({ children }) {
     loadCurrentUser()
   }, [])
 
+  function logout() {
+  clearOAuthTokens()
+  setUser(null)
+  setStatus('unauthenticated')
+  }
+
   const value = {
     user,
     status,
+    logout,
   }
 
   return (

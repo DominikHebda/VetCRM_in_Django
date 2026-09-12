@@ -10,6 +10,8 @@ const PKCE_VERIFIER_KEY = 'vetcrm_pkce_verifier'
 const OAUTH_STATE_KEY = 'vetcrm_oauth_state'
 const ACCESS_TOKEN_KEY = 'vetcrm_access_token'
 const REFRESH_TOKEN_KEY = 'vetcrm_refresh_token'
+/** @type {Promise<string> | null} */
+let refreshPromise = null
 
 async function loginWithOAuth() {
   if (!OAUTH_CLIENT_ID) {
@@ -91,12 +93,87 @@ function getAccessToken() {
   return sessionStorage.getItem(ACCESS_TOKEN_KEY)
 }
 
+function getRefreshToken() {
+  return sessionStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
+/**
+ * Uses the refresh token to obtain a new access token.
+ *
+ * @returns {Promise<string>}
+ */
+async function performTokenRefresh() {
+  const refreshToken = getRefreshToken()
+
+  if (!refreshToken) {
+    throw new Error('OAuth refresh token is missing')
+  }
+
+  if (!OAUTH_CLIENT_ID) {
+    throw new Error('VITE_OAUTH_CLIENT_ID is not configured')
+  }
+
+  const body = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: OAUTH_CLIENT_ID,
+  })
+
+  const response = await fetch(OAUTH_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body,
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    clearOAuthTokens()
+
+    throw new Error(
+      data.error_description ??
+        data.error ??
+        'OAuth token refresh failed',
+    )
+  }
+
+  sessionStorage.setItem(ACCESS_TOKEN_KEY, data.access_token)
+
+  if (data.refresh_token) {
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token)
+  }
+
+  return data.access_token
+}
+
+async function refreshAccessToken() {
+  if (!refreshPromise) {
+    refreshPromise = performTokenRefresh().finally(() => {
+      refreshPromise = null
+    })
+  }
+
+  return refreshPromise
+}
+
+function clearOAuthTokens() {
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY)
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY)
+  sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+  sessionStorage.removeItem(OAUTH_STATE_KEY)
+}
+
 export {
   ACCESS_TOKEN_KEY,
   OAUTH_STATE_KEY,
   PKCE_VERIFIER_KEY,
   REFRESH_TOKEN_KEY,
-  getAccessToken,
+  clearOAuthTokens,
   exchangeAuthorizationCode,
+  getAccessToken,
+  getRefreshToken,
   loginWithOAuth,
+  refreshAccessToken,
 }

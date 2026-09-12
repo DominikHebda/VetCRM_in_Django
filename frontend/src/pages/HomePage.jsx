@@ -5,8 +5,7 @@ import { getLiveness } from '../services/healthService.js'
 
 function HomePage() {
   const [status, setStatus] = useState('checking')
-  const { user, status: authStatus } = useAuth()
-
+  const { user, status: authStatus, logout } = useAuth()
   useEffect(() => {
     async function checkBackend() {
       try {
@@ -32,6 +31,12 @@ function HomePage() {
       <p>
         Authentication: <strong>{authStatus}</strong>
       </p>
+
+      {authStatus === 'authenticated' && (
+        <button type="button" onClick={logout}>
+          Wyloguj
+        </button>
+      )}
 
       {user && <pre>{JSON.stringify(user, null, 2)}</pre>}
     </>
