@@ -5,7 +5,11 @@ import { AuthContext } from './authContext.js'
 import { clearOAuthTokens } from './oauth.js'
 
 /**
- * @typedef {Awaited<ReturnType<typeof getCurrentUser>>} CurrentUser
+ * @typedef {Object} CurrentUser
+ * @property {number} id
+ * @property {string} username
+ * @property {string} email
+ * @property {string} role
  */
 
 /**
