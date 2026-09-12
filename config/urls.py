@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.contrib.auth.views import LoginView
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
@@ -23,6 +24,8 @@ from common.health import liveness, readiness
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("accounts/login/", LoginView.as_view(template_name="registration/login.html"),
+         name="login"),
     path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
     path("health/live/", liveness, name="health-live"),
     path("health/ready/", readiness, name="health-ready"),
