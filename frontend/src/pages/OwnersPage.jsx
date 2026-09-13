@@ -17,31 +17,43 @@ function OwnersPage() {
     /** @type {Owner[]} */ ([]),
   )
   const [status, setStatus] = useState('loading')
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  useEffect(() => {
-    let isMounted = true
-
-    async function loadOwners() {
-      try {
-        const data = await getOwners()
-
-        if (isMounted) {
-        setOwners(data.results)
-        setStatus('success')
-        }
-      } catch {
-        if (isMounted) {
-          setStatus('error')
-        }
-      }
-    }
-
-    loadOwners()
+    useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+        setDebouncedSearch(search)
+    }, 300)
 
     return () => {
-      isMounted = false
+        window.clearTimeout(timeoutId)
     }
-  }, [])
+    }, [search])
+
+  useEffect(() => {
+  let isMounted = true
+
+  async function loadOwners() {
+    try {
+      const data = await getOwners(debouncedSearch)
+
+      if (isMounted) {
+        setOwners(data.results)
+        setStatus('success')
+      }
+    } catch {
+      if (isMounted) {
+        setStatus('error')
+      }
+    }
+  }
+
+  loadOwners()
+
+  return () => {
+    isMounted = false
+  }
+}, [debouncedSearch])
 
   if (status === 'loading') {
     return <p>Ładowanie właścicieli...</p>
@@ -65,6 +77,15 @@ function OwnersPage() {
         <span>Łącznie</span>
         <strong>{owners.length}</strong>
       </div>
+    </div>
+    <div className="owners-toolbar">
+    <input
+        type="search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="Szukaj po imieniu, nazwisku, e-mailu lub telefonie..."
+        aria-label="Szukaj właścicieli"
+    />
     </div>
 
     {owners.length === 0 ? (

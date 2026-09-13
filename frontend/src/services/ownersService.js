@@ -23,10 +23,16 @@ import { apiRequest } from './apiClient.js'
 /**
  * Returns a paginated list of owners.
  *
+ * @param {string} [search]
  * @returns {Promise<OwnersResponse>}
  */
-async function getOwners() {
-  const data = await apiRequest('/api/owners/')
+async function getOwners(search = '') {
+  const query = search.trim()
+  const path = query
+    ? `/api/owners/?search=${encodeURIComponent(query)}`
+    : '/api/owners/'
+
+  const data = await apiRequest(path)
 
   return /** @type {OwnersResponse} */ (data)
 }
