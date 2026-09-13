@@ -52,22 +52,35 @@ function OwnersPage() {
   }
 
   return (
-    <div className="owners-page">
-      <div className="page-heading">
-        <div>
-          <h1>Właściciele</h1>
-          <p>Lista właścicieli zwierząt zarejestrowanych w klinice.</p>
-        </div>
+  <div className="owners-page">
+    <div className="page-heading">
+      <div>
+        <h1>Właściciele</h1>
+        <p>
+          Lista właścicieli zwierząt zarejestrowanych w klinice.
+        </p>
       </div>
 
-      {owners.length === 0 ? (
-        <p>Brak właścicieli.</p>
-      ) : (
+      <div className="page-summary">
+        <span>Łącznie</span>
+        <strong>{owners.length}</strong>
+      </div>
+    </div>
+
+    {owners.length === 0 ? (
+      <div className="empty-state">
+        <h2>Brak właścicieli</h2>
+        <p>
+          W bazie nie ma jeszcze żadnych właścicieli.
+        </p>
+      </div>
+    ) : (
+      <div className="data-card">
         <div className="table-container">
-          <table>
+          <table className="data-table">
             <thead>
               <tr>
-                <th>Imię i nazwisko</th>
+                <th>Właściciel</th>
                 <th>E-mail</th>
                 <th>Telefon</th>
                 <th>Adres</th>
@@ -78,10 +91,21 @@ function OwnersPage() {
               {owners.map((owner) => (
                 <tr key={owner.id}>
                   <td>
-                    <strong>
-                      {owner.first_name} {owner.last_name}
-                    </strong>
+                    <div className="owner-name">
+                      <div className="owner-avatar">
+                        {owner.first_name.charAt(0)}
+                        {owner.last_name.charAt(0)}
+                      </div>
+
+                      <div>
+                        <strong>
+                          {owner.first_name} {owner.last_name}
+                        </strong>
+                        <span>ID: {owner.id}</span>
+                      </div>
+                    </div>
                   </td>
+
                   <td>{owner.email}</td>
                   <td>{owner.phone || '—'}</td>
                   <td>{owner.address || '—'}</td>
@@ -90,9 +114,10 @@ function OwnersPage() {
             </tbody>
           </table>
         </div>
-      )}
-    </div>
-  )
+      </div>
+    )}
+  </div>
+)
 }
 
 export default OwnersPage
