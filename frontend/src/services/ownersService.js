@@ -37,4 +37,28 @@ async function getOwners(search = '') {
   return /** @type {OwnersResponse} */ (data)
 }
 
-export { getOwners }
+/**
+ * @typedef {Object} OwnerPayload
+ * @property {string} first_name
+ * @property {string} last_name
+ * @property {string} email
+ * @property {string} phone
+ * @property {string} address
+ */
+
+/**
+ * Creates a new owner.
+ *
+ * @param {OwnerPayload} owner
+ * @returns {Promise<Owner>}
+ */
+async function createOwner(owner) {
+  const data = await apiRequest('/api/owners/', {
+    method: 'POST',
+    body: JSON.stringify(owner),
+  })
+
+  return /** @type {Owner} */ (data)
+}
+
+export { getOwners, createOwner }
