@@ -38,7 +38,7 @@ function AuthCallbackPage() {
           window.location.pathname,
         )
 
-        setStatus('Logowanie zakończone pomyślnie.')
+        window.location.replace('/')
       } catch (callbackError) {
         setStatus(
           callbackError instanceof Error
