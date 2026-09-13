@@ -58,56 +58,93 @@ function HomePage() {
   }
 
   return (
-    <>
-      <h1>Dashboard</h1>
+  <div className="dashboard">
+    <div className="dashboard-heading">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Podsumowanie najważniejszych informacji w klinice.</p>
+      </div>
+    </div>
 
-      <section>
-        <h2>Podsumowanie</h2>
+    <section className="dashboard-stats">
+      <article className="dashboard-card">
+        <span>Właściciele</span>
+        <strong>{dashboard.owners_count}</strong>
+      </article>
 
-        <ul>
-          <li>Właściciele: {dashboard.owners_count}</li>
-          <li>Zwierzęta: {dashboard.animals_count}</li>
-          <li>Dzisiejsze wizyty: {dashboard.today_visits}</li>
-          <li>Zaplanowane wizyty: {dashboard.scheduled_visits}</li>
-          <li>Szczepienia do wykonania: {dashboard.vaccinations_due}</li>
-          <li>Wygasające recepty: {dashboard.prescriptions_expiring}</li>
-        </ul>
-      </section>
+      <article className="dashboard-card">
+        <span>Zwierzęta</span>
+        <strong>{dashboard.animals_count}</strong>
+      </article>
 
-      <section>
+      <article className="dashboard-card">
+        <span>Dzisiejsze wizyty</span>
+        <strong>{dashboard.today_visits}</strong>
+      </article>
+
+      <article className="dashboard-card">
+        <span>Zaplanowane wizyty</span>
+        <strong>{dashboard.scheduled_visits}</strong>
+      </article>
+
+      <article className="dashboard-card">
+        <span>Szczepienia do wykonania</span>
+        <strong>{dashboard.vaccinations_due}</strong>
+      </article>
+
+      <article className="dashboard-card">
+        <span>Wygasające recepty</span>
+        <strong>{dashboard.prescriptions_expiring}</strong>
+      </article>
+    </section>
+
+    <div className="dashboard-grid">
+      <section className="dashboard-panel">
         <h2>Ostatnie wizyty</h2>
 
         {dashboard.recent_visits.length === 0 ? (
-          <p>Brak ostatnich wizyt.</p>
+          <p className="dashboard-empty">Brak ostatnich wizyt.</p>
         ) : (
-          <ul>
+          <div className="dashboard-list">
             {dashboard.recent_visits.map((visit) => (
-              <li key={visit.id}>
-                {visit.animal__name} — {visit.reason} — {visit.status}
-              </li>
+              <article key={visit.id} className="dashboard-list-item">
+                <div>
+                  <strong>{visit.animal__name}</strong>
+                  <p>{visit.reason}</p>
+                </div>
+
+                <span>{visit.status}</span>
+              </article>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
-      <section>
+      <section className="dashboard-panel">
         <h2>Ostatnio dodane zwierzęta</h2>
 
         {dashboard.recent_animals.length === 0 ? (
-          <p>Brak ostatnio dodanych zwierząt.</p>
+          <p className="dashboard-empty">
+            Brak ostatnio dodanych zwierząt.
+          </p>
         ) : (
-          <ul>
+          <div className="dashboard-list">
             {dashboard.recent_animals.map((animal) => (
-              <li key={animal.id}>
-                {animal.name} — {animal.species} — właściciel:{' '}
-                {animal.owner__last_name}
-              </li>
+              <article key={animal.id} className="dashboard-list-item">
+                <div>
+                  <strong>{animal.name}</strong>
+                  <p>{animal.species}</p>
+                </div>
+
+                <span>{animal.owner__last_name}</span>
+              </article>
             ))}
-          </ul>
+          </div>
         )}
       </section>
-    </>
-  )
+    </div>
+  </div>
+)
 }
 
 export default HomePage
