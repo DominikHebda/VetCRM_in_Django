@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../auth/useAuth.js'
 import {
   createOwner,
+  deleteOwner,
   getOwners,
   updateOwner,
 } from '../services/ownersService.js'
@@ -34,6 +35,9 @@ function OwnersPage() {
   const [formStatus, setFormStatus] = useState(
   /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
   )
+  const [deletingOwnerId, setDeletingOwnerId] = useState(
+  /** @type {number | null} */ (null),
+)
   const [status, setStatus] = useState('loading')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -105,6 +109,44 @@ async function handleUpdateOwner(owner) {
     setEditingOwner(null)
   } catch {
     setFormStatus('error')
+  }
+}
+
+/**
+ * @param {Owner} owner
+ */
+async function handleDeleteOwner(owner) {
+  const confirmed = window.confirm(
+    `Czy na pewno chcesz usunąć właściciela ${owner.first_name} ${owner.last_name}?`,
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  setDeletingOwnerId(owner.id)
+
+  try {
+    await deleteOwner(owner.id)
+
+    if (owners.length === 1 && page > 1) {
+      setPage((currentPage) => currentPage - 1)
+      return
+    }
+
+    const data = await getOwners({
+      search: debouncedSearch,
+      page,
+    })
+
+    setOwners(data.results)
+    setTotalCount(data.count)
+    setHasNextPage(Boolean(data.next))
+    setHasPreviousPage(Boolean(data.previous))
+  } catch {
+    window.alert('Nie udało się usunąć właściciela.')
+  } finally {
+    setDeletingOwnerId(null)
   }
 }
 
@@ -280,18 +322,31 @@ async function handleUpdateOwner(owner) {
                       <td>{owner.address || '—'}</td>
                       {canManageOwners && (
                         <td>
-                            <button
-                            type="button"
-                            className="table-action-button"
-                            onClick={() => {
-                                setFormStatus('idle')
-                                setIsCreateFormOpen(false)
-                                setEditingOwner(owner)
+                            <div className="table-actions">
+                                <button
+                                type="button"
+                                className="table-action-button"
+                                onClick={() => {
+                                    setFormStatus('idle')
+                                    setIsCreateFormOpen(false)
+                                    setEditingOwner(owner)
                                 }}
-                            >
-                            Edytuj
-                            </button>
-                        </td>
+                                >
+                                Edytuj
+                                </button>
+
+                                <button
+                                type="button"
+                                className="table-action-button"
+                                disabled={deletingOwnerId === owner.id}
+                                onClick={() => handleDeleteOwner(owner)}
+                                >
+                                {deletingOwnerId === owner.id
+                                    ? 'Usuwanie...'
+                                    : 'Usuń'}
+                                </button>
+                            </div>
+                            </td>
                         )}
                     </tr>
                   ))}

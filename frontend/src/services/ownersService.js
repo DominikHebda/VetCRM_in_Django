@@ -93,4 +93,16 @@ async function updateOwner(ownerId, owner) {
   return /** @type {Owner} */ (data)
 }
 
-export { getOwners, createOwner, updateOwner }
+/**
+ * Deletes an existing owner.
+ *
+ * @param {number} ownerId
+ * @returns {Promise<void>}
+ */
+async function deleteOwner(ownerId) {
+  await apiRequest(`/api/owners/${ownerId}/`, {
+    method: 'DELETE',
+  })
+}
+
+export { getOwners, createOwner, updateOwner, deleteOwner }
