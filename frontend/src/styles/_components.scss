@@ -1,0 +1,223 @@
+@use 'variables' as *;
+
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  h1 {
+    margin-bottom: 0.4rem;
+  }
+
+  p {
+    margin: 0;
+    color: $muted-text-color;
+  }
+}
+
+.page-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  background: $surface-color;
+  border: 1px solid $border-color;
+  border-radius: 0.75rem;
+
+  span {
+    color: $muted-text-color;
+    font-size: 0.9rem;
+  }
+
+  strong {
+    font-size: 1.1rem;
+  }
+}
+
+.data-card {
+  overflow: hidden;
+  background: $surface-color;
+  border: 1px solid $border-color;
+  border-radius: 0.75rem;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid $border-color;
+  }
+
+  th {
+    background: #f8fafc;
+    color: $muted-text-color;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  tbody tr {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+}
+
+.empty-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: $surface-color;
+  border: 1px solid $border-color;
+  border-radius: 0.75rem;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  p {
+    margin-bottom: 0;
+    color: $muted-text-color;
+  }
+}
+
+.primary-button {
+  padding: 0.75rem 1.1rem;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  background: #334155;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    background: #1e293b;
+    border-color: #1e293b;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #cbd5e1;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+
+  span {
+    color: $muted-text-color;
+    font-size: 0.9rem;
+  }
+
+  button {
+    padding: 0.65rem 1rem;
+    border: 1px solid $border-color;
+    border-radius: 0.5rem;
+    background: $surface-color;
+    color: $text-color;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    &:focus-visible {
+      outline: 3px solid #e2e8f0;
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: #94a3b8;
+      background: #f8fafc;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-action-button {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.table-action-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.table-action-button:focus-visible {
+  outline: 2px solid #334155;
+  outline-offset: 2px;
+}
+
+.table-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 700px) {
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-summary {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination {
+    justify-content: space-between;
+
+    button {
+      flex: 1;
+    }
+  }
+}

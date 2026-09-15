@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
 import ModulePlaceholderPage from './pages/ModulePlaceholderPage.jsx'
+import OwnersPage from './pages/OwnersPage.jsx'
 
 function App() {
   return (
@@ -14,10 +15,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
-            <Route
-              path="/owners"
-              element={<ModulePlaceholderPage title="Właściciele" />}
-            />
+            <Route path="/owners" element={<OwnersPage />} />
             <Route
               path="/animals"
               element={<ModulePlaceholderPage title="Zwierzęta" />}
