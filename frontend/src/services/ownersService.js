@@ -77,4 +77,20 @@ async function createOwner(owner) {
   return /** @type {Owner} */ (data)
 }
 
-export { getOwners, createOwner }
+/**
+ * Updates an existing owner.
+ *
+ * @param {number} ownerId
+ * @param {OwnerPayload} owner
+ * @returns {Promise<Owner>}
+ */
+async function updateOwner(ownerId, owner) {
+  const data = await apiRequest(`/api/owners/${ownerId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(owner),
+  })
+
+  return /** @type {Owner} */ (data)
+}
+
+export { getOwners, createOwner, updateOwner }

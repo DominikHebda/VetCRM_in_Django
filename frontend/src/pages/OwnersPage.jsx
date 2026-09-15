@@ -4,7 +4,9 @@ import { useAuth } from '../auth/useAuth.js'
 import {
   createOwner,
   getOwners,
+  updateOwner,
 } from '../services/ownersService.js'
+import OwnerForm from '../components/OwnerForm.jsx'
 
 /**
  * @typedef {Object} Owner
@@ -26,7 +28,12 @@ function OwnersPage() {
     /** @type {Owner[]} */ ([]),
   )
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
-  const [createStatus, setCreateStatus] = useState('idle')
+  const [editingOwner, setEditingOwner] = useState(
+  /** @type {Owner | null} */ (null),
+  )
+  const [formStatus, setFormStatus] = useState(
+  /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
+  )
   const [status, setStatus] = useState('loading')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -36,40 +43,70 @@ function OwnersPage() {
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
 
   /**
-   * @param {React.FormEvent<HTMLFormElement>} event
-   */
-  async function handleCreateOwner(event) {
-    event.preventDefault()
-    setCreateStatus('saving')
+ * @param {{
+ *   first_name: string,
+ *   last_name: string,
+ *   email: string,
+ *   phone: string,
+ *   address: string
+ * }} owner
+ */
+async function handleCreateOwner(owner) {
+  setFormStatus('saving')
 
-    const formData = new FormData(event.currentTarget)
+  try {
+    await createOwner(owner)
 
-    const owner = {
-      first_name: String(formData.get('first_name') ?? '').trim(),
-      last_name: String(formData.get('last_name') ?? '').trim(),
-      email: String(formData.get('email') ?? '').trim(),
-      phone: String(formData.get('phone') ?? '').trim(),
-      address: String(formData.get('address') ?? '').trim(),
-    }
+    const data = await getOwners({
+      search: debouncedSearch,
+      page,
+    })
 
-    try {
-      await createOwner(owner)
-
-      const data = await getOwners({
-        search: debouncedSearch,
-        page,
-      })
-
-      setOwners(data.results)
-      setTotalCount(data.count)
-      setHasNextPage(Boolean(data.next))
-      setHasPreviousPage(Boolean(data.previous))
-      setCreateStatus('idle')
-      setIsCreateFormOpen(false)
-    } catch {
-      setCreateStatus('error')
-    }
+    setOwners(data.results)
+    setTotalCount(data.count)
+    setHasNextPage(Boolean(data.next))
+    setHasPreviousPage(Boolean(data.previous))
+    setFormStatus('idle')
+    setIsCreateFormOpen(false)
+  } catch {
+    setFormStatus('error')
   }
+}
+
+/**
+ * @param {{
+ *   first_name: string,
+ *   last_name: string,
+ *   email: string,
+ *   phone: string,
+ *   address: string
+ * }} owner
+ */
+async function handleUpdateOwner(owner) {
+  if (!editingOwner) {
+    return
+  }
+
+  setFormStatus('saving')
+
+  try {
+    await updateOwner(editingOwner.id, owner)
+
+    const data = await getOwners({
+      search: debouncedSearch,
+      page,
+    })
+
+    setOwners(data.results)
+    setTotalCount(data.count)
+    setHasNextPage(Boolean(data.next))
+    setHasPreviousPage(Boolean(data.previous))
+    setFormStatus('idle')
+    setEditingOwner(null)
+  } catch {
+    setFormStatus('error')
+  }
+}
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -135,7 +172,11 @@ function OwnersPage() {
           <button
             type="button"
             className="primary-button"
-            onClick={() => setIsCreateFormOpen(true)}
+            onClick={() => {
+                setFormStatus('idle')
+                setEditingOwner(null)
+                setIsCreateFormOpen(true)
+                }}
           >
             Dodaj właściciela
           </button>
@@ -147,90 +188,39 @@ function OwnersPage() {
         </div>
       </div>
 
+      {editingOwner && (
+        <OwnerForm
+            key={editingOwner.id}
+            title="Edytuj właściciela"
+            description={`${editingOwner.first_name} ${editingOwner.last_name}`}
+            initialValues={{
+            first_name: editingOwner.first_name,
+            last_name: editingOwner.last_name,
+            email: editingOwner.email,
+            phone: editingOwner.phone ?? '',
+            address: editingOwner.address ?? '',
+            }}
+            status={formStatus}
+            onSubmit={handleUpdateOwner}
+            onCancel={() => {
+            setFormStatus('idle')
+            setEditingOwner(null)
+            }}
+        />
+        )}
+
       {isCreateFormOpen && (
-        <div className="owner-form-card">
-          <div className="owner-form-heading">
-            <div>
-              <h2>Nowy właściciel</h2>
-              <p>Wprowadź dane właściciela zwierzęcia.</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsCreateFormOpen(false)}
-            >
-              Anuluj
-            </button>
-          </div>
-
-          <form
-            className="owner-form"
+        <OwnerForm
+            title="Nowy właściciel"
+            description="Wprowadź dane właściciela zwierzęcia."
+            status={formStatus}
             onSubmit={handleCreateOwner}
-          >
-            <label>
-              Imię
-              <input
-                type="text"
-                name="first_name"
-                required
-              />
-            </label>
-
-            <label>
-              Nazwisko
-              <input
-                type="text"
-                name="last_name"
-                required
-              />
-            </label>
-
-            <label>
-              E-mail
-              <input
-                type="email"
-                name="email"
-                required
-              />
-            </label>
-
-            <label>
-              Telefon
-              <input
-                type="tel"
-                name="phone"
-              />
-            </label>
-
-            <label className="owner-form-full-width">
-              Adres
-              <textarea
-                name="address"
-                rows={3}
-              />
-            </label>
-
-            {createStatus === 'error' && (
-              <p className="form-error">
-                Nie udało się zapisać właściciela.
-                Sprawdź dane i spróbuj ponownie.
-              </p>
-            )}
-
-            <div className="owner-form-actions">
-              <button
-                type="submit"
-                className="primary-button"
-                disabled={createStatus === 'saving'}
-              >
-                {createStatus === 'saving'
-                  ? 'Zapisywanie...'
-                  : 'Zapisz właściciela'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+            onCancel={() => {
+            setFormStatus('idle')
+            setIsCreateFormOpen(false)
+            }}
+        />
+        )}
 
       <div className="owners-toolbar">
         <input
@@ -262,6 +252,7 @@ function OwnersPage() {
                     <th>E-mail</th>
                     <th>Telefon</th>
                     <th>Adres</th>
+                    {canManageOwners && <th>Akcje</th>}
                   </tr>
                 </thead>
 
@@ -287,6 +278,21 @@ function OwnersPage() {
                       <td>{owner.email}</td>
                       <td>{owner.phone || '—'}</td>
                       <td>{owner.address || '—'}</td>
+                      {canManageOwners && (
+                        <td>
+                            <button
+                            type="button"
+                            className="table-action-button"
+                            onClick={() => {
+                                setFormStatus('idle')
+                                setIsCreateFormOpen(false)
+                                setEditingOwner(owner)
+                                }}
+                            >
+                            Edytuj
+                            </button>
+                        </td>
+                        )}
                     </tr>
                   ))}
                 </tbody>
