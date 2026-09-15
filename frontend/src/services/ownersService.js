@@ -23,13 +23,29 @@ import { apiRequest } from './apiClient.js'
 /**
  * Returns a paginated list of owners.
  *
- * @param {string} [search]
+ * @param {Object} [options]
+ * @param {string} [options.search]
+ * @param {number} [options.page]
  * @returns {Promise<OwnersResponse>}
  */
-async function getOwners(search = '') {
+async function getOwners({
+  search = '',
+  page = 1,
+} = {}) {
+  const params = new URLSearchParams()
   const query = search.trim()
-  const path = query
-    ? `/api/owners/?search=${encodeURIComponent(query)}`
+
+  if (query) {
+    params.set('search', query)
+  }
+
+  if (page > 1) {
+    params.set('page', String(page))
+  }
+
+  const queryString = params.toString()
+  const path = queryString
+    ? `/api/owners/?${queryString}`
     : '/api/owners/'
 
   const data = await apiRequest(path)
