@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 
-import { getAnimals } from '../services/animalsService.js'
+import AnimalForm from '../components/AnimalForm.jsx'
+import { useAuth } from '../auth/useAuth.js'
+import {
+  createAnimal,
+  getAnimals,
+} from '../services/animalsService.js'
 import { getOwners } from '../services/ownersService.js'
 
 /**
@@ -28,6 +33,11 @@ const speciesLabels = {
 }
 
 function AnimalsPage() {
+  const { user } = useAuth()
+
+  const canManageAnimals =
+    user?.role === 'ADMIN' || user?.role === 'RECEPTIONIST'
+
   const [animals, setAnimals] = useState(
     /** @type {Animal[]} */ ([]),
   )
@@ -43,6 +53,43 @@ function AnimalsPage() {
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [formStatus, setFormStatus] = useState(
+    /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
+  )
+
+    /**
+   * @param {{
+   *   owner: number,
+   *   name: string,
+   *   species: 'dog' | 'cat' | 'other',
+   *   breed: string,
+   *   birth_date: string | null,
+   *   chip_number: string,
+   *   notes: string,
+   * }} animal
+   */
+  async function handleCreateAnimal(animal) {
+    setFormStatus('saving')
+
+    try {
+      await createAnimal(animal)
+
+      const data = await getAnimals({
+        search: debouncedSearch,
+        page,
+      })
+
+      setAnimals(data.results)
+      setTotalCount(data.count)
+      setHasNextPage(Boolean(data.next))
+      setHasPreviousPage(Boolean(data.previous))
+      setFormStatus('idle')
+      setIsCreateFormOpen(false)
+    } catch {
+      setFormStatus('error')
+    }
+  }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -104,28 +151,53 @@ function AnimalsPage() {
 
   return (
     <div className="animals-page">
-      <div className="page-heading">
-        <div>
-          <h1>Zwierzęta</h1>
-          <p>
-            Lista pacjentów zarejestrowanych w klinice.
-          </p>
+        <div className="page-heading">
+            <div>
+            <h1>Zwierzęta</h1>
+            <p>
+                Lista pacjentów zarejestrowanych w klinice.
+            </p>
+            </div>
+
+            {canManageAnimals && (
+            <button
+                type="button"
+                className="primary-button"
+                onClick={() => {
+                setFormStatus('idle')
+                setIsCreateFormOpen(true)
+                }}
+            >
+                Dodaj zwierzę
+            </button>
+            )}
+
+            <div className="page-summary">
+            <span>Łącznie</span>
+            <strong>{totalCount}</strong>
+            </div>
         </div>
 
-        <div className="page-summary">
-          <span>Łącznie</span>
-          <strong>{totalCount}</strong>
-        </div>
-      </div>
+        {canManageAnimals && isCreateFormOpen && (
+            <AnimalForm
+            owners={owners}
+            status={formStatus}
+            onSubmit={handleCreateAnimal}
+            onCancel={() => {
+                setFormStatus('idle')
+                setIsCreateFormOpen(false)
+            }}
+            />
+        )}
 
-      <div className="owners-toolbar">
-        <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Szukaj po nazwie, rasie lub numerze chipa..."
-            aria-label="Szukaj zwierząt"
-        />
+        <div className="owners-toolbar">
+            <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Szukaj po nazwie, rasie lub numerze chipa..."
+                aria-label="Szukaj zwierząt"
+            />
         </div>
 
       {animals.length === 0 ? (
