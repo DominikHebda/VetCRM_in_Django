@@ -81,4 +81,20 @@ async function createAnimal(animal) {
   return /** @type {Animal} */ (data)
 }
 
-export { getAnimals, createAnimal }
+/**
+ * Updates an existing animal.
+ *
+ * @param {number} animalId
+ * @param {AnimalPayload} animal
+ * @returns {Promise<Animal>}
+ */
+async function updateAnimal(animalId, animal) {
+  const data = await apiRequest(`/api/animals/${animalId}/`, {
+    method: 'PUT',
+    body: JSON.stringify(animal),
+  })
+
+  return /** @type {Animal} */ (data)
+}
+
+export { getAnimals, createAnimal, updateAnimal }
