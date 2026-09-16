@@ -37,11 +37,16 @@ function AnimalsPage() {
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
 
+  const [page, setPage] = useState(1)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [hasPreviousPage, setHasPreviousPage] = useState(false)
+
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
+        setPage(1)
         setDebouncedSearch(search)
     }, 300)
 
@@ -56,7 +61,7 @@ function AnimalsPage() {
     async function loadAnimals() {
       try {
         const [animalsData, ownersData] = await Promise.all([
-        getAnimals({ search: debouncedSearch }),
+        getAnimals({ search: debouncedSearch, page }),
         getOwners({ pageSize: 100 }),
         ])
 
@@ -64,6 +69,8 @@ function AnimalsPage() {
         setAnimals(animalsData.results)
         setOwners(ownersData.results)
         setTotalCount(animalsData.count)
+        setHasNextPage(Boolean(animalsData.next))
+        setHasPreviousPage(Boolean(animalsData.previous))
         setStatus('success')
         }
       } catch {
@@ -78,7 +85,7 @@ function AnimalsPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch])
+  }, [debouncedSearch, page])
 
   if (status === 'loading') {
     return <p>Ładowanie zwierząt...</p>
@@ -129,6 +136,7 @@ function AnimalsPage() {
           </p>
         </div>
       ) : (
+        <>
         <div className="data-card">
           <div className="table-container">
             <table className="data-table">
@@ -164,6 +172,30 @@ function AnimalsPage() {
             </table>
           </div>
         </div>
+        <div className="pagination">
+            <button
+                type="button"
+                disabled={!hasPreviousPage}
+                onClick={() =>
+                setPage((currentPage) => currentPage - 1)
+                }
+            >
+                Poprzednia
+            </button>
+
+            <span>Strona {page}</span>
+
+            <button
+                type="button"
+                disabled={!hasNextPage}
+                onClick={() =>
+                setPage((currentPage) => currentPage + 1)
+                }
+            >
+                Następna
+            </button>
+            </div>
+        </>
       )}
     </div>
   )
