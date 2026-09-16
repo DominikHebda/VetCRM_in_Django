@@ -55,4 +55,30 @@ async function getAnimals({
   return /** @type {AnimalsResponse} */ (data)
 }
 
-export { getAnimals }
+/**
+ * @typedef {Object} AnimalPayload
+ * @property {number} owner
+ * @property {string} name
+ * @property {'dog' | 'cat' | 'other'} species
+ * @property {string} breed
+ * @property {string | null} birth_date
+ * @property {string} chip_number
+ * @property {string} notes
+ */
+
+/**
+ * Creates a new animal.
+ *
+ * @param {AnimalPayload} animal
+ * @returns {Promise<Animal>}
+ */
+async function createAnimal(animal) {
+  const data = await apiRequest('/api/animals/', {
+    method: 'POST',
+    body: JSON.stringify(animal),
+  })
+
+  return /** @type {Animal} */ (data)
+}
+
+export { getAnimals, createAnimal }
