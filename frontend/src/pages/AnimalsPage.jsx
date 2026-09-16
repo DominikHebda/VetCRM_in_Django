@@ -37,13 +37,26 @@ function AnimalsPage() {
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
 
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+        setDebouncedSearch(search)
+    }, 300)
+
+    return () => {
+        window.clearTimeout(timeoutId)
+    }
+    }, [search])
+
   useEffect(() => {
     let isMounted = true
 
     async function loadAnimals() {
       try {
         const [animalsData, ownersData] = await Promise.all([
-        getAnimals(),
+        getAnimals({ search: debouncedSearch }),
         getOwners({ pageSize: 100 }),
         ])
 
@@ -65,7 +78,7 @@ function AnimalsPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [debouncedSearch])
 
   if (status === 'loading') {
     return <p>Ładowanie zwierząt...</p>
@@ -97,6 +110,16 @@ function AnimalsPage() {
           <strong>{totalCount}</strong>
         </div>
       </div>
+
+      <div className="owners-toolbar">
+        <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Szukaj po nazwie, rasie lub numerze chipa..."
+            aria-label="Szukaj zwierząt"
+        />
+        </div>
 
       {animals.length === 0 ? (
         <div className="empty-state">
