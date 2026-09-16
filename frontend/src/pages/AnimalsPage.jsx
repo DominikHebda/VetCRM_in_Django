@@ -1,0 +1,149 @@
+import { useEffect, useState } from 'react'
+
+import { getAnimals } from '../services/animalsService.js'
+import { getOwners } from '../services/ownersService.js'
+
+/**
+ * @typedef {Object} Animal
+ * @property {number} id
+ * @property {number} owner
+ * @property {string} name
+ * @property {'dog' | 'cat' | 'other'} species
+ * @property {string | null} breed
+ * @property {string | null} birth_date
+ * @property {string | null} chip_number
+ */
+
+/**
+ * @typedef {Object} Owner
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
+ */
+
+const speciesLabels = {
+  dog: 'Pies',
+  cat: 'Kot',
+  other: 'Inny',
+}
+
+function AnimalsPage() {
+  const [animals, setAnimals] = useState(
+    /** @type {Animal[]} */ ([]),
+  )
+  const [owners, setOwners] = useState(
+  /** @type {Owner[]} */ ([]),
+)
+  const [status, setStatus] = useState('loading')
+  const [totalCount, setTotalCount] = useState(0)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadAnimals() {
+      try {
+        const [animalsData, ownersData] = await Promise.all([
+        getAnimals(),
+        getOwners({ pageSize: 100 }),
+        ])
+
+        if (isMounted) {
+        setAnimals(animalsData.results)
+        setOwners(ownersData.results)
+        setTotalCount(animalsData.count)
+        setStatus('success')
+        }
+      } catch {
+        if (isMounted) {
+          setStatus('error')
+        }
+      }
+    }
+
+    loadAnimals()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  if (status === 'loading') {
+    return <p>Ładowanie zwierząt...</p>
+  }
+
+  if (status === 'error') {
+    return <p>Nie udało się pobrać zwierząt.</p>
+  }
+
+  const ownersById = new Map(
+    owners.map((owner) => [
+        owner.id,
+        `${owner.first_name} ${owner.last_name}`,
+    ]),
+  )
+
+  return (
+    <div className="animals-page">
+      <div className="page-heading">
+        <div>
+          <h1>Zwierzęta</h1>
+          <p>
+            Lista pacjentów zarejestrowanych w klinice.
+          </p>
+        </div>
+
+        <div className="page-summary">
+          <span>Łącznie</span>
+          <strong>{totalCount}</strong>
+        </div>
+      </div>
+
+      {animals.length === 0 ? (
+        <div className="empty-state">
+          <h2>Brak zwierząt</h2>
+          <p>
+            W klinice nie ma jeszcze zarejestrowanych zwierząt.
+          </p>
+        </div>
+      ) : (
+        <div className="data-card">
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Zwierzę</th>
+                  <th>Gatunek</th>
+                  <th>Rasa</th>
+                  <th>Data urodzenia</th>
+                  <th>Numer chipa</th>
+                  <th>Właściciel</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {animals.map((animal) => (
+                  <tr key={animal.id}>
+                    <td>
+                      <strong>{animal.name}</strong>
+                    </td>
+                    <td>
+                      {speciesLabels[animal.species] ?? animal.species}
+                    </td>
+                    <td>{animal.breed || '—'}</td>
+                    <td>{animal.birth_date || '—'}</td>
+                    <td>{animal.chip_number || '—'}</td>
+                    <td>
+                        {ownersById.get(animal.owner) ?? `ID: ${animal.owner}`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default AnimalsPage
