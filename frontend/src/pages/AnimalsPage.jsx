@@ -285,7 +285,7 @@ async function handleDeleteAnimal(animal) {
             />
             )}
 
-        <div className="owners-toolbar">
+        <div className="list-toolbar">
             <input
                 type="search"
                 value={search}
