@@ -264,7 +264,7 @@ async function handleDeleteOwner(owner) {
         />
         )}
 
-      <div className="owners-toolbar">
+      <div className="list-toolbar">
         <input
           type="search"
           value={search}

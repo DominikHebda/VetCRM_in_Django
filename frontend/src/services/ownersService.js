@@ -26,11 +26,13 @@ import { apiRequest } from './apiClient.js'
  * @param {Object} [options]
  * @param {string} [options.search]
  * @param {number} [options.page]
+ * @param {number} [options.pageSize]
  * @returns {Promise<OwnersResponse>}
  */
 async function getOwners({
   search = '',
   page = 1,
+  pageSize,
 } = {}) {
   const params = new URLSearchParams()
   const query = search.trim()
@@ -42,6 +44,10 @@ async function getOwners({
   if (page > 1) {
     params.set('page', String(page))
   }
+
+  if (pageSize) {
+  params.set('page_size', String(pageSize))
+}
 
   const queryString = params.toString()
   const path = queryString

@@ -30,29 +30,6 @@
   font-weight: 700;
 }
 
-.owners-toolbar {
-  margin-bottom: 1rem;
-
-  input {
-    width: 100%;
-    max-width: 500px;
-    padding: 0.8rem 1rem;
-    border: 1px solid $border-color;
-    border-radius: 0.5rem;
-    background: $surface-color;
-    color: $text-color;
-    outline: none;
-
-    &:focus {
-      border-color: #94a3b8;
-    }
-
-    &::placeholder {
-      color: $muted-text-color;
-    }
-  }
-}
-
 .owner-form-card {
   margin-bottom: 1.5rem;
   padding: 1.5rem;
