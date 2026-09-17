@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth.js'
 import {
   createAnimal,
   getAnimals,
+  updateAnimal,
 } from '../services/animalsService.js'
 import { getOwners } from '../services/ownersService.js'
 
@@ -17,6 +18,7 @@ import { getOwners } from '../services/ownersService.js'
  * @property {string | null} breed
  * @property {string | null} birth_date
  * @property {string | null} chip_number
+ * @property {string | null} notes
  */
 
 /**
@@ -54,6 +56,9 @@ function AnimalsPage() {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [editingAnimal, setEditingAnimal] = useState(
+  /** @type {Animal | null} */ (null),
+  )
   const [formStatus, setFormStatus] = useState(
     /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
   )
@@ -90,6 +95,43 @@ function AnimalsPage() {
       setFormStatus('error')
     }
   }
+
+  /**
+ * @param {{
+ *   owner: number,
+ *   name: string,
+ *   species: 'dog' | 'cat' | 'other',
+ *   breed: string,
+ *   birth_date: string | null,
+ *   chip_number: string,
+ *   notes: string,
+ * }} animal
+ */
+async function handleUpdateAnimal(animal) {
+  if (!editingAnimal) {
+    return
+  }
+
+  setFormStatus('saving')
+
+  try {
+    await updateAnimal(editingAnimal.id, animal)
+
+    const data = await getAnimals({
+      search: debouncedSearch,
+      page,
+    })
+
+    setAnimals(data.results)
+    setTotalCount(data.count)
+    setHasNextPage(Boolean(data.next))
+    setHasPreviousPage(Boolean(data.previous))
+    setFormStatus('idle')
+    setEditingAnimal(null)
+  } catch {
+    setFormStatus('error')
+  }
+}
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -165,6 +207,7 @@ function AnimalsPage() {
                 className="primary-button"
                 onClick={() => {
                 setFormStatus('idle')
+                setEditingAnimal(null)
                 setIsCreateFormOpen(true)
                 }}
             >
@@ -180,6 +223,8 @@ function AnimalsPage() {
 
         {canManageAnimals && isCreateFormOpen && (
             <AnimalForm
+            title="Dodaj zwierzę"
+            description="Wprowadź dane nowego pacjenta i przypisz go do właściciela."
             owners={owners}
             status={formStatus}
             onSubmit={handleCreateAnimal}
@@ -189,6 +234,21 @@ function AnimalsPage() {
             }}
             />
         )}
+
+        {canManageAnimals && editingAnimal && (
+            <AnimalForm
+                title="Edytuj zwierzę"
+                description="Zaktualizuj dane pacjenta."
+                owners={owners}
+                initialValues={editingAnimal}
+                status={formStatus}
+                onSubmit={handleUpdateAnimal}
+                onCancel={() => {
+                setFormStatus('idle')
+                setEditingAnimal(null)
+                }}
+            />
+            )}
 
         <div className="owners-toolbar">
             <input
@@ -220,6 +280,7 @@ function AnimalsPage() {
                   <th>Data urodzenia</th>
                   <th>Numer chipa</th>
                   <th>Właściciel</th>
+                  {canManageAnimals && <th>Akcje</th>}
                 </tr>
               </thead>
 
@@ -238,6 +299,20 @@ function AnimalsPage() {
                     <td>
                         {ownersById.get(animal.owner) ?? `ID: ${animal.owner}`}
                     </td>
+                    {canManageAnimals && (
+                    <td>
+                        <button
+                        type="button"
+                        onClick={() => {
+                            setFormStatus('idle')
+                            setIsCreateFormOpen(false)
+                            setEditingAnimal(animal)
+                        }}
+                        >
+                        Edytuj
+                        </button>
+                    </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

@@ -17,14 +17,33 @@
  */
 
 /**
+ * @typedef {Object} AnimalFormInitialValues
+ * @property {number} owner
+ * @property {string} name
+ * @property {'dog' | 'cat' | 'other'} species
+ * @property {string | null} breed
+ * @property {string | null} birth_date
+ * @property {string | null} chip_number
+ * @property {string | null} notes
+ */
+
+/**
  * @param {Object} props
+ * @param {string} props.title
+ * @param {string} props.description
  * @param {OwnerOption[]} props.owners
+ * @param {AnimalFormInitialValues} [props.initialValues]
  * @param {'idle' | 'saving' | 'error'} props.status
  * @param {(values: AnimalFormValues) => Promise<void>} props.onSubmit
  * @param {() => void} props.onCancel
  */
+
+
 function AnimalForm({
+  title,
+  description,
   owners,
+  initialValues,
   status,
   onSubmit,
   onCancel,
@@ -59,10 +78,8 @@ function AnimalForm({
     <div className="animal-form-card">
       <div className="animal-form-heading">
         <div>
-          <h2>Dodaj zwierzę</h2>
-          <p>
-            Wprowadź dane nowego pacjenta i przypisz go do właściciela.
-          </p>
+            <h2>{title}</h2>
+            <p>{description}</p>
         </div>
 
         <button
@@ -81,7 +98,7 @@ function AnimalForm({
           Właściciel
           <select
             name="owner"
-            defaultValue=""
+            defaultValue={initialValues?.owner ?? ''}
             required
           >
             <option value="" disabled>
@@ -101,6 +118,7 @@ function AnimalForm({
           <input
             type="text"
             name="name"
+            defaultValue={initialValues?.name ?? ''}
             required
           />
         </label>
@@ -109,7 +127,7 @@ function AnimalForm({
           Gatunek
           <select
             name="species"
-            defaultValue=""
+            defaultValue={initialValues?.species ?? ''}
             required
           >
             <option value="" disabled>
@@ -126,6 +144,7 @@ function AnimalForm({
           <input
             type="text"
             name="breed"
+            defaultValue={initialValues?.breed ?? ''}
           />
         </label>
 
@@ -134,6 +153,7 @@ function AnimalForm({
           <input
             type="date"
             name="birth_date"
+            defaultValue={initialValues?.birth_date ?? ''}
           />
         </label>
 
@@ -142,6 +162,7 @@ function AnimalForm({
           <input
             type="text"
             name="chip_number"
+            defaultValue={initialValues?.chip_number ?? ''}
           />
         </label>
 
@@ -150,6 +171,7 @@ function AnimalForm({
           <textarea
             name="notes"
             rows={3}
+            defaultValue={initialValues?.notes ?? ''}
           />
         </label>
 
