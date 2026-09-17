@@ -4,6 +4,7 @@ import AnimalForm from '../components/AnimalForm.jsx'
 import { useAuth } from '../auth/useAuth.js'
 import {
   createAnimal,
+  deleteAnimal,
   getAnimals,
   updateAnimal,
 } from '../services/animalsService.js'
@@ -130,6 +131,40 @@ async function handleUpdateAnimal(animal) {
     setEditingAnimal(null)
   } catch {
     setFormStatus('error')
+  }
+}
+
+/**
+ * @param {Animal} animal
+ */
+async function handleDeleteAnimal(animal) {
+  const confirmed = window.confirm(
+    `Czy na pewno chcesz usunąć zwierzę „${animal.name}”?`,
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await deleteAnimal(animal.id)
+
+    if (animals.length === 1 && page > 1) {
+      setPage((currentPage) => currentPage - 1)
+      return
+    }
+
+    const data = await getAnimals({
+      search: debouncedSearch,
+      page,
+    })
+
+    setAnimals(data.results)
+    setTotalCount(data.count)
+    setHasNextPage(Boolean(data.next))
+    setHasPreviousPage(Boolean(data.previous))
+  } catch {
+    window.alert('Nie udało się usunąć zwierzęcia.')
   }
 }
 
@@ -300,19 +335,30 @@ async function handleUpdateAnimal(animal) {
                         {ownersById.get(animal.owner) ?? `ID: ${animal.owner}`}
                     </td>
                     {canManageAnimals && (
-                    <td>
-                        <button
-                        type="button"
-                        onClick={() => {
-                            setFormStatus('idle')
-                            setIsCreateFormOpen(false)
-                            setEditingAnimal(animal)
-                        }}
-                        >
-                        Edytuj
-                        </button>
-                    </td>
-                    )}
+                        <td>
+                            <div className="table-actions">
+                            <button
+                                type="button"
+                                className="table-action-button"
+                                onClick={() => {
+                                setFormStatus('idle')
+                                setIsCreateFormOpen(false)
+                                setEditingAnimal(animal)
+                                }}
+                            >
+                                Edytuj
+                            </button>
+
+                            <button
+                                type="button"
+                                className="table-action-button"
+                                onClick={() => handleDeleteAnimal(animal)}
+                            >
+                                Usuń
+                            </button>
+                            </div>
+                        </td>
+                        )}
                   </tr>
                 ))}
               </tbody>
