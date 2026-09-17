@@ -97,4 +97,16 @@ async function updateAnimal(animalId, animal) {
   return /** @type {Animal} */ (data)
 }
 
-export { getAnimals, createAnimal, updateAnimal }
+/**
+ * Deletes an animal.
+ *
+ * @param {number} animalId
+ * @returns {Promise<void>}
+ */
+async function deleteAnimal(animalId) {
+  await apiRequest(`/api/animals/${animalId}/`, {
+    method: 'DELETE',
+  })
+}
+
+export { getAnimals, createAnimal, updateAnimal, deleteAnimal }
