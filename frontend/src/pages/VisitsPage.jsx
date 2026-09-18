@@ -40,6 +40,9 @@ function VisitsPage() {
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState(
+    /** @type {'' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED'} */ (''),
+    )
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
@@ -61,6 +64,7 @@ function VisitsPage() {
       try {
         const data = await getVisits({
             search: debouncedSearch,
+            status: statusFilter,
             page,
         })
 
@@ -83,7 +87,7 @@ function VisitsPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, page])
+  }, [debouncedSearch, statusFilter, page])
 
   if (status === 'loading') {
     return <p>Ładowanie wizyt...</p>
@@ -120,7 +124,24 @@ function VisitsPage() {
             placeholder="Szukaj po powodzie wizyty..."
             aria-label="Szukaj wizyt"
         />
-        </div>
+        <select
+            value={statusFilter}
+            onChange={(event) => {
+                setStatusFilter(
+                    /** @type {'' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED'} */ (
+                    event.target.value
+                    ),
+                )
+                setPage(1)
+            }}
+            aria-label="Filtruj po statusie"
+        >
+            <option value="">Wszystkie</option>
+            <option value="SCHEDULED">Zaplanowane</option>
+            <option value="COMPLETED">Zakończone</option>
+            <option value="CANCELLED">Anulowane</option>
+        </select>
+      </div>
 
       {visits.length === 0 ? (
         <div className="empty-state">
