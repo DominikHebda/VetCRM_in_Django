@@ -9,7 +9,12 @@ pytestmark = pytest.mark.unit
 pytestmark = pytest.mark.django_db
 
 def test_serializer_returns_animal_data():
+    owner = OwnerFactory(
+    first_name="Jan",
+    last_name="Kowalski",
+)
     animal = AnimalFactory(
+        owner=owner,
         name="Luna",
         species="cat",
         breed="British Shorthair",
@@ -19,6 +24,7 @@ def test_serializer_returns_animal_data():
 
     assert data["id"] == animal.id
     assert data["owner"] == animal.owner_id
+    assert data["owner_name"] == "Jan Kowalski"
     assert data["name"] == "Luna"
     assert data["species"] == "cat"
     assert data["breed"] == "British Shorthair"
