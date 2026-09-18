@@ -40,6 +40,9 @@ function VisitsPage() {
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [hasPreviousPage, setHasPreviousPage] = useState(false)
+  const [hasNextPage, setHasNextPage] = useState(false)
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -58,11 +61,14 @@ function VisitsPage() {
       try {
         const data = await getVisits({
             search: debouncedSearch,
-            })
+            page,
+        })
 
         if (isMounted) {
           setVisits(data.results)
           setTotalCount(data.count)
+          setHasPreviousPage(Boolean(data.previous))
+          setHasNextPage(Boolean(data.next))
           setStatus('success')
         }
       } catch {
@@ -77,7 +83,7 @@ function VisitsPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch])
+  }, [debouncedSearch, page])
 
   if (status === 'loading') {
     return <p>Ładowanie wizyt...</p>
@@ -107,7 +113,10 @@ function VisitsPage() {
         <input
             type="search"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+                setSearch(event.target.value)
+                setPage(1)
+            }}
             placeholder="Szukaj po powodzie wizyty..."
             aria-label="Szukaj wizyt"
         />
@@ -121,37 +130,63 @@ function VisitsPage() {
           </p>
         </div>
       ) : (
-        <div className="data-card">
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Zwierzę</th>
-                  <th>Lekarz</th>
-                  <th>Powód wizyty</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
+        <>
+            <div className="data-card">
+            <div className="table-container">
+                <table className="data-table">
+                <thead>
+                    <tr>
+                    <th>Data</th>
+                    <th>Zwierzę</th>
+                    <th>Lekarz</th>
+                    <th>Powód wizyty</th>
+                    <th>Status</th>
+                    </tr>
+                </thead>
 
-              <tbody>
-                {visits.map((visit) => (
-                  <tr key={visit.id}>
-                    <td>{formatVisitDate(visit.visit_date)}</td>
-                    <td>
-                      <strong>{visit.animal_name}</strong>
-                    </td>
-                    <td>{visit.veterinarian_name || '—'}</td>
-                    <td>{visit.reason}</td>
-                    <td>
-                      {statusLabels[visit.status] ?? visit.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                <tbody>
+                    {visits.map((visit) => (
+                    <tr key={visit.id}>
+                        <td>{formatVisitDate(visit.visit_date)}</td>
+                        <td>
+                        <strong>{visit.animal_name}</strong>
+                        </td>
+                        <td>{visit.veterinarian_name || '—'}</td>
+                        <td>{visit.reason}</td>
+                        <td>
+                        {statusLabels[visit.status] ?? visit.status}
+                        </td>
+                    </tr>
+                    ))}
+                </tbody>
+                </table>
+            </div>
+            </div>
+
+            <div className="pagination">
+                <button
+                    type="button"
+                    disabled={!hasPreviousPage}
+                    onClick={() =>
+                    setPage((currentPage) => currentPage - 1)
+                    }
+                >
+                    Poprzednia
+                </button>
+
+                <span>Strona {page}</span>
+
+                <button
+                    type="button"
+                    disabled={!hasNextPage}
+                    onClick={() =>
+                    setPage((currentPage) => currentPage + 1)
+                    }
+                >
+                    Następna
+                </button>
+            </div>
+        </>
       )}
     </div>
   )
