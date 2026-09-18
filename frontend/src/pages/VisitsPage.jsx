@@ -38,12 +38,27 @@ function VisitsPage() {
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
 
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [search])
+
   useEffect(() => {
     let isMounted = true
 
     async function loadVisits() {
       try {
-        const data = await getVisits()
+        const data = await getVisits({
+            search: debouncedSearch,
+            })
 
         if (isMounted) {
           setVisits(data.results)
@@ -62,7 +77,7 @@ function VisitsPage() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [debouncedSearch])
 
   if (status === 'loading') {
     return <p>Ładowanie wizyt...</p>
@@ -87,6 +102,16 @@ function VisitsPage() {
           <strong>{totalCount}</strong>
         </div>
       </div>
+
+      <div className="list-toolbar">
+        <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Szukaj po powodzie wizyty..."
+            aria-label="Szukaj wizyt"
+        />
+        </div>
 
       {visits.length === 0 ? (
         <div className="empty-state">
