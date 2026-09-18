@@ -4,6 +4,7 @@ import { apiRequest } from './apiClient.js'
  * @typedef {Object} Animal
  * @property {number} id
  * @property {number} owner
+ * @property {string} owner_name
  * @property {string} name
  * @property {'dog' | 'cat' | 'other'} species
  * @property {string | null} breed
