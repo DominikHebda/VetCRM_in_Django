@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 
 import { getVisits } from '../services/visitsService.js'
+import { getAnimals } from '../services/animalsService.js'
 
 /**
  * @typedef {Object} Visit
  * @property {number} id
  * @property {number} animal
  * @property {string} animal_name
+ * @property {'dog' | 'cat' | 'other'} animal_species
+ * @property {string} animal_owner_name
  * @property {number} veterinarian
  * @property {string} veterinarian_name
  * @property {string} visit_date
@@ -15,10 +18,24 @@ import { getVisits } from '../services/visitsService.js'
  * @property {'SCHEDULED' | 'COMPLETED' | 'CANCELLED'} status
  */
 
+/**
+ * @typedef {Object} Animal
+ * @property {number} id
+ * @property {string} name
+ * @property {'dog' | 'cat' | 'other'} species
+ * @property {string} owner_name
+ */
+
 const statusLabels = {
   SCHEDULED: 'Zaplanowana',
   COMPLETED: 'Zakończona',
   CANCELLED: 'Anulowana',
+}
+
+const speciesLabels = {
+  dog: 'pies',
+  cat: 'kot',
+  other: 'inne',
 }
 
 /**
@@ -35,6 +52,13 @@ function VisitsPage() {
   const [visits, setVisits] = useState(
     /** @type {Visit[]} */ ([]),
   )
+  const [animals, setAnimals] = useState(
+  /** @type {Animal[]} */ ([]),
+  )
+  const [animalFilter, setAnimalFilter] = useState(
+  /** @type {number | null} */ (null),
+  )
+
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
 
@@ -60,11 +84,36 @@ function VisitsPage() {
   useEffect(() => {
     let isMounted = true
 
+    async function loadAnimals() {
+        try {
+        const data = await getAnimals({
+            pageSize: 100,
+        })
+
+        if (isMounted) {
+            setAnimals(data.results)
+        }
+        } catch {
+        // Lista wizyt nadal może działać bez filtra pacjenta.
+        }
+    }
+
+    loadAnimals()
+
+    return () => {
+        isMounted = false
+    }
+    }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
     async function loadVisits() {
       try {
         const data = await getVisits({
             search: debouncedSearch,
             status: statusFilter,
+            animal: animalFilter,
             page,
         })
 
@@ -87,7 +136,7 @@ function VisitsPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, statusFilter, page])
+  }, [debouncedSearch, statusFilter, page, animalFilter])
 
   if (status === 'loading') {
     return <p>Ładowanie wizyt...</p>
@@ -141,6 +190,24 @@ function VisitsPage() {
             <option value="COMPLETED">Zakończone</option>
             <option value="CANCELLED">Anulowane</option>
         </select>
+        <select
+            value={animalFilter ?? ''}
+            onChange={(event) => {
+                const value = event.target.value
+
+                setAnimalFilter(value ? Number(value) : null)
+                setPage(1)
+            }}
+            aria-label="Filtruj wizyty według pacjenta"
+            >
+            <option value="">Wszystkie zwierzęta</option>
+
+            {animals.map((animal) => (
+                <option key={animal.id} value={animal.id}>
+                {animal.name} — {speciesLabels[animal.species]} — {animal.owner_name}
+                </option>
+            ))}
+        </select>
       </div>
 
       {visits.length === 0 ? (
@@ -170,7 +237,10 @@ function VisitsPage() {
                     <tr key={visit.id}>
                         <td>{formatVisitDate(visit.visit_date)}</td>
                         <td>
-                        <strong>{visit.animal_name}</strong>
+                            <strong>{visit.animal_name}</strong>
+                            <div className="table-secondary">
+                                {speciesLabels[visit.animal_species]} · {visit.animal_owner_name}
+                            </div>
                         </td>
                         <td>{visit.veterinarian_name || '—'}</td>
                         <td>{visit.reason}</td>
