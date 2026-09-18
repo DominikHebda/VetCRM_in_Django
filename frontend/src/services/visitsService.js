@@ -26,26 +26,33 @@ import { apiRequest } from './apiClient.js'
  * Returns a paginated list of visits.
  *
  * @param {Object} [options]
+ * @param {string} [options.search]
  * @param {number} [options.page]
  * @returns {Promise<VisitsResponse>}
  */
 async function getVisits({
+  search = '',
   page = 1,
 } = {}) {
   const params = new URLSearchParams()
+  const query = search.trim()
 
-  if (page > 1) {
-    params.set('page', String(page))
-  }
+    if (query) {
+        params.set('search', query)
+    }
 
-  const queryString = params.toString()
-  const path = queryString
-    ? `/api/visits/?${queryString}`
-    : '/api/visits/'
+    if (page > 1) {
+        params.set('page', String(page))
+    }
 
-  const data = await apiRequest(path)
+    const queryString = params.toString()
+    const path = queryString
+        ? `/api/visits/?${queryString}`
+        : '/api/visits/'
 
-  return /** @type {VisitsResponse} */ (data)
-}
+    const data = await apiRequest(path)
+
+    return /** @type {VisitsResponse} */ (data)
+    }
 
 export { getVisits }
