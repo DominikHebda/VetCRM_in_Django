@@ -15,6 +15,7 @@ from .serializers import VisitSerializer
 class VisitViewSet(ModelViewSet):
     queryset = Visit.objects.select_related(
         "animal",
+        "animal__owner",
         "veterinarian",
     )
 
