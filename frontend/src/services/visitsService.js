@@ -89,4 +89,27 @@ async function createVisit(visit) {
   return /** @type {Visit} */ (data)
 }
 
-export { getVisits, createVisit }
+/**
+ * Updates an existing visit.
+ *
+ * @param {number} visitId
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   visit_date: string,
+ *   reason: string,
+ *   notes: string,
+ *   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
+ * }} visit
+ * @returns {Promise<Visit>}
+ */
+async function updateVisit(visitId, visit) {
+  const data = await apiRequest(`/api/visits/${visitId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(visit),
+  })
+
+  return /** @type {Visit} */ (data)
+}
+
+export { getVisits, createVisit, updateVisit }
