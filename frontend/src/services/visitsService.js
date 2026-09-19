@@ -67,4 +67,26 @@ async function getVisits({
     return /** @type {VisitsResponse} */ (data)
     }
 
-export { getVisits }
+/**
+ * Creates a new visit.
+ *
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   visit_date: string,
+ *   reason: string,
+ *   notes: string,
+ *   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
+ * }} visit
+ * @returns {Promise<Visit>}
+ */
+async function createVisit(visit) {
+  const data = await apiRequest('/api/visits/', {
+    method: 'POST',
+    body: JSON.stringify(visit),
+  })
+
+  return /** @type {Visit} */ (data)
+}
+
+export { getVisits, createVisit }
