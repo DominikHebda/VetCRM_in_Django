@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
-import { getVisits } from '../services/visitsService.js'
+import VisitForm from '../components/VisitForm.jsx'
+import { createVisit, getVisits } from '../services/visitsService.js'
+import { getVeterinarians } from '../services/veterinariansService.js'
 import { getAnimals } from '../services/animalsService.js'
 
 /**
@@ -24,6 +26,13 @@ import { getAnimals } from '../services/animalsService.js'
  * @property {string} name
  * @property {'dog' | 'cat' | 'other'} species
  * @property {string} owner_name
+ */
+
+/**
+ * @typedef {Object} Veterinarian
+ * @property {number} id
+ * @property {string} first_name
+ * @property {string} last_name
  */
 
 const statusLabels = {
@@ -58,6 +67,13 @@ function VisitsPage() {
   const [animalFilter, setAnimalFilter] = useState(
   /** @type {number | null} */ (null),
   )
+  const [veterinarians, setVeterinarians] = useState(
+  /** @type {Veterinarian[]} */ ([]),
+  )
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [formStatus, setFormStatus] = useState(
+  /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
+)
 
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
@@ -81,6 +97,40 @@ function VisitsPage() {
     }
   }, [search])
 
+  /**
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   visit_date: string,
+ *   reason: string,
+ *   notes: string,
+ *   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
+ * }} visit
+ */
+async function handleCreateVisit(visit) {
+  setFormStatus('saving')
+
+  try {
+    await createVisit(visit)
+
+    const data = await getVisits({
+      search: debouncedSearch,
+      status: statusFilter,
+      animal: animalFilter,
+      page,
+    })
+
+    setVisits(data.results)
+    setTotalCount(data.count)
+    setHasPreviousPage(Boolean(data.previous))
+    setHasNextPage(Boolean(data.next))
+    setFormStatus('idle')
+    setIsCreateFormOpen(false)
+  } catch {
+    setFormStatus('error')
+  }
+}
+
   useEffect(() => {
     let isMounted = true
 
@@ -99,6 +149,28 @@ function VisitsPage() {
     }
 
     loadAnimals()
+
+    return () => {
+        isMounted = false
+    }
+    }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadVeterinarians() {
+        try {
+        const data = await getVeterinarians()
+
+        if (isMounted) {
+            setVeterinarians(data)
+        }
+        } catch {
+        // Lista wizyt nadal może działać bez formularza tworzenia.
+        }
+    }
+
+    loadVeterinarians()
 
     return () => {
         isMounted = false
@@ -156,11 +228,35 @@ function VisitsPage() {
           </p>
         </div>
 
+        <button
+            type="button"
+            className="primary-button"
+            onClick={() => {
+                setFormStatus('idle')
+                setIsCreateFormOpen(true)
+            }}
+            >
+            Dodaj wizytę
+        </button>
+
         <div className="page-summary">
           <span>Łącznie</span>
           <strong>{totalCount}</strong>
         </div>
       </div>
+
+      {isCreateFormOpen && (
+        <VisitForm
+            animals={animals}
+            veterinarians={veterinarians}
+            status={formStatus}
+            onSubmit={handleCreateVisit}
+            onCancel={() => {
+            setFormStatus('idle')
+            setIsCreateFormOpen(false)
+            }}
+        />
+    )}
 
       <div className="list-toolbar">
         <input
