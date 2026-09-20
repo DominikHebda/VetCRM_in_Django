@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import VisitForm from '../components/VisitForm.jsx'
-import { createVisit, getVisits } from '../services/visitsService.js'
+import { createVisit, getVisits, updateVisit } from '../services/visitsService.js'
 import { getVeterinarians } from '../services/veterinariansService.js'
 import { getAnimals } from '../services/animalsService.js'
 
@@ -71,6 +71,9 @@ function VisitsPage() {
   /** @type {Veterinarian[]} */ ([]),
   )
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [editingVisit, setEditingVisit] = useState(
+  /** @type {Visit | null} */ (null),
+  )
   const [formStatus, setFormStatus] = useState(
   /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
 )
@@ -126,6 +129,44 @@ async function handleCreateVisit(visit) {
     setHasNextPage(Boolean(data.next))
     setFormStatus('idle')
     setIsCreateFormOpen(false)
+  } catch {
+    setFormStatus('error')
+  }
+}
+
+/**
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   visit_date: string,
+ *   reason: string,
+ *   notes: string,
+ *   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
+ * }} visit
+ */
+async function handleUpdateVisit(visit) {
+  if (!editingVisit) {
+    return
+  }
+
+  setFormStatus('saving')
+
+  try {
+    await updateVisit(editingVisit.id, visit)
+
+    const data = await getVisits({
+      search: debouncedSearch,
+      status: statusFilter,
+      animal: animalFilter,
+      page,
+    })
+
+    setVisits(data.results)
+    setTotalCount(data.count)
+    setHasPreviousPage(Boolean(data.previous))
+    setHasNextPage(Boolean(data.next))
+    setFormStatus('idle')
+    setEditingVisit(null)
   } catch {
     setFormStatus('error')
   }
@@ -232,8 +273,9 @@ async function handleCreateVisit(visit) {
             type="button"
             className="primary-button"
             onClick={() => {
-                setFormStatus('idle')
-                setIsCreateFormOpen(true)
+              setFormStatus('idle')
+              setEditingVisit(null)
+              setIsCreateFormOpen(true)
             }}
             >
             Dodaj wizytę
@@ -249,6 +291,7 @@ async function handleCreateVisit(visit) {
         <VisitForm
             animals={animals}
             veterinarians={veterinarians}
+            initialValues={null}
             status={formStatus}
             onSubmit={handleCreateVisit}
             onCancel={() => {
@@ -256,7 +299,29 @@ async function handleCreateVisit(visit) {
             setIsCreateFormOpen(false)
             }}
         />
-    )}
+      )}
+
+      {editingVisit && (
+        <VisitForm
+          key={editingVisit.id}
+          animals={animals}
+          veterinarians={veterinarians}
+          initialValues={{
+          animal: editingVisit.animal,
+          veterinarian: editingVisit.veterinarian,
+          visit_date: editingVisit.visit_date,
+          reason: editingVisit.reason,
+          notes: editingVisit.notes,
+          status: editingVisit.status,
+        }}
+          status={formStatus}
+          onSubmit={handleUpdateVisit}
+          onCancel={() => {
+            setFormStatus('idle')
+            setEditingVisit(null)
+          }}
+        />
+      )}
 
       <div className="list-toolbar">
         <input
@@ -325,24 +390,45 @@ async function handleCreateVisit(visit) {
                     <th>Lekarz</th>
                     <th>Powód wizyty</th>
                     <th>Status</th>
+                    <th>Akcje</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     {visits.map((visit) => (
                     <tr key={visit.id}>
-                        <td>{formatVisitDate(visit.visit_date)}</td>
-                        <td>
-                            <strong>{visit.animal_name}</strong>
-                            <div className="table-secondary">
-                                {speciesLabels[visit.animal_species]} · {visit.animal_owner_name}
-                            </div>
-                        </td>
-                        <td>{visit.veterinarian_name || '—'}</td>
-                        <td>{visit.reason}</td>
-                        <td>
+                      <td>{formatVisitDate(visit.visit_date)}</td>
+
+                      <td>
+                        <strong>{visit.animal_name}</strong>
+                        <div className="table-secondary">
+                          {speciesLabels[visit.animal_species]} · {visit.animal_owner_name}
+                        </div>
+                      </td>
+
+                      <td>{visit.veterinarian_name || '—'}</td>
+
+                      <td>{visit.reason}</td>
+
+                      <td>
                         {statusLabels[visit.status] ?? visit.status}
-                        </td>
+                      </td>
+
+                      <td>
+                        <div className="table-actions">
+                          <button
+                            type="button"
+                            className="table-action-button"
+                            onClick={() => {
+                              setFormStatus('idle')
+                              setIsCreateFormOpen(false)
+                              setEditingVisit(visit)
+                            }}
+                          >
+                            Edytuj
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                     ))}
                 </tbody>

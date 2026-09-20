@@ -27,6 +27,7 @@
  * @typedef {Object} VisitFormProps
  * @property {AnimalOption[]} animals
  * @property {VeterinarianOption[]} veterinarians
+ * @property {VisitFormValues | null} initialValues
  * @property {'idle' | 'saving' | 'error'} status
  * @property {(values: VisitFormValues) => Promise<void>} onSubmit
  * @property {() => void} onCancel
@@ -40,12 +41,33 @@ const speciesLabels = {
 }
 
 /**
+ * Converts an API date-time value to the format required
+ * by an HTML datetime-local input.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+function formatDateTimeLocal(value) {
+  if (!value) {
+    return ''
+  }
+
+  const date = new Date(value)
+  const offset = date.getTimezoneOffset() * 60_000
+
+  return new Date(date.getTime() - offset)
+    .toISOString()
+    .slice(0, 16)
+}
+
+/**
  * @param {VisitFormProps} props
  */
 function VisitForm(props) {
   const {
     animals,
     veterinarians,
+    initialValues,
     status,
     onSubmit,
     onCancel,
@@ -74,8 +96,14 @@ function VisitForm(props) {
     <div className="animal-form-card">
       <div className="animal-form-heading">
         <div>
-          <h2>Dodaj wizytę</h2>
-          <p>Wprowadź dane nowej wizyty.</p>
+          <h2>
+            {initialValues ? 'Edytuj wizytę' : 'Dodaj wizytę'}
+          </h2>
+          <p>
+            {initialValues
+              ? 'Zmień dane wybranej wizyty.'
+              : 'Wprowadź dane nowej wizyty.'}
+          </p>
         </div>
 
         <button
@@ -94,7 +122,7 @@ function VisitForm(props) {
           Pacjent
           <select
             name="animal"
-            defaultValue=""
+            defaultValue={initialValues?.animal ?? ''}
             required
           >
             <option value="" disabled>
@@ -113,7 +141,7 @@ function VisitForm(props) {
           Weterynarz
           <select
             name="veterinarian"
-            defaultValue=""
+            defaultValue={initialValues?.veterinarian ?? ''}
             required
           >
             <option value="" disabled>
@@ -136,6 +164,11 @@ function VisitForm(props) {
           <input
             type="datetime-local"
             name="visit_date"
+            defaultValue={
+              initialValues
+                ? formatDateTimeLocal(initialValues.visit_date)
+                : ''
+            }
             required
           />
         </label>
@@ -144,7 +177,7 @@ function VisitForm(props) {
           Status
           <select
             name="status"
-            defaultValue="SCHEDULED"
+            defaultValue={initialValues?.status ?? 'SCHEDULED'}
             required
           >
             <option value="SCHEDULED">Zaplanowana</option>
@@ -158,6 +191,7 @@ function VisitForm(props) {
           <input
             type="text"
             name="reason"
+            defaultValue={initialValues?.reason ?? ''}
             maxLength={255}
             required
           />
@@ -168,6 +202,7 @@ function VisitForm(props) {
           <textarea
             name="notes"
             rows={3}
+            defaultValue={initialValues?.notes ?? ''}
           />
         </label>
 
@@ -186,7 +221,9 @@ function VisitForm(props) {
           >
             {status === 'saving'
               ? 'Zapisywanie...'
-              : 'Zapisz wizytę'}
+              : initialValues
+                ? 'Zapisz zmiany'
+                : 'Zapisz wizytę'}
           </button>
         </div>
       </form>
