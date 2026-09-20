@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { getMedicalRecords } from '../services/medicalRecordsService.js'
+import { getAnimals } from '../services/animalsService.js'
 
 /**
  * @typedef {Object} MedicalRecord
@@ -14,6 +15,13 @@ import { getMedicalRecords } from '../services/medicalRecordsService.js'
  * @property {string} recommendations
  * @property {string | null} weight
  * @property {string | null} temperature
+ */
+
+/**
+ * @typedef {Object} Animal
+ * @property {number} id
+ * @property {string} name
+ * @property {string} owner_name
  */
 
 const speciesLabels = {
@@ -33,6 +41,12 @@ function MedicalRecordsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [animals, setAnimals] = useState(
+  /** @type {Animal[]} */ ([]),
+  )
+  const [animalFilter, setAnimalFilter] = useState(
+  /** @type {number | null} */ (null),
+  )
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -48,12 +62,37 @@ function MedicalRecordsPage() {
   useEffect(() => {
     let isMounted = true
 
+    async function loadAnimals() {
+      try {
+        const data = await getAnimals({ pageSize: 100 })
+
+        if (isMounted) {
+          setAnimals(data.results)
+        }
+      } catch {
+        if (isMounted) {
+          setAnimals([])
+       }
+      }
+    }
+
+    loadAnimals()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
     async function loadMedicalRecords() {
       setStatus('loading')
 
       try {
         const data = await getMedicalRecords({
           search: debouncedSearch,
+          animal: animalFilter,
           page,
         })
 
@@ -78,7 +117,7 @@ function MedicalRecordsPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, page])
+  }, [debouncedSearch, animalFilter, page])
 
   return (
     <div className="page-container">
@@ -107,6 +146,24 @@ function MedicalRecordsPage() {
             setSearch(event.target.value)
             }}
         />
+        <select
+            value={animalFilter ?? ''}
+            aria-label="Filtruj po pacjencie"
+            onChange={(event) => {
+                const value = event.target.value
+
+                setAnimalFilter(value ? Number(value) : null)
+                setPage(1)
+            }}
+            >
+            <option value="">Wszyscy pacjenci</option>
+
+            {animals.map((animal) => (
+                <option key={animal.id} value={animal.id}>
+                {animal.name} — {animal.owner_name}
+                </option>
+            ))}
+        </select>
       </div>
 
       {status === 'loading' && (
