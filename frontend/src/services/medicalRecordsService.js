@@ -40,8 +40,10 @@ async function getMedicalRecords({
 } = {}) {
   const params = new URLSearchParams()
 
-  if (search) {
-    params.set('search', search)
+  const query = search.trim()
+
+  if (query) {
+    params.set('search', query)
   }
 
   if (animal) {
@@ -50,10 +52,11 @@ async function getMedicalRecords({
 
   params.set('page', String(page))
 
-  const query = params.toString()
-  const data = await apiRequest(`/api/medical-records/?${query}`)
+  const queryString = params.toString()
+  const data = await apiRequest(
+    `/api/medical-records/?${queryString}`,
+  )
 
   return /** @type {MedicalRecordsResponse} */ (data)
-}
-
+  }
 export { getMedicalRecords }
