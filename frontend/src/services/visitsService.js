@@ -112,4 +112,10 @@ async function updateVisit(visitId, visit) {
   return /** @type {Visit} */ (data)
 }
 
-export { getVisits, createVisit, updateVisit }
+async function deleteVisit(visitId) {
+  await apiRequest(`/api/visits/${visitId}/`, {
+    method: 'DELETE',
+  })
+}
+
+export { getVisits, createVisit, updateVisit, deleteVisit }
