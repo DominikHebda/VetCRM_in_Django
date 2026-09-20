@@ -28,9 +28,22 @@ function MedicalRecordsPage() {
   )
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search)
+      setPage(1)
+    }, 300)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [search])
 
   useEffect(() => {
     let isMounted = true
@@ -39,7 +52,10 @@ function MedicalRecordsPage() {
       setStatus('loading')
 
       try {
-        const data = await getMedicalRecords({ page })
+        const data = await getMedicalRecords({
+          search: debouncedSearch,
+          page,
+        })
 
         if (!isMounted) {
           return
@@ -62,7 +78,7 @@ function MedicalRecordsPage() {
     return () => {
       isMounted = false
     }
-  }, [page])
+  }, [debouncedSearch, page])
 
   return (
     <div className="page-container">
@@ -79,6 +95,18 @@ function MedicalRecordsPage() {
           <span>Rekordy</span>
           <strong>{totalCount}</strong>
         </div>
+      </div>
+
+      <div className="list-toolbar">
+        <input
+            type="search"
+            value={search}
+            placeholder="Szukaj po diagnozie lub leczeniu..."
+            aria-label="Szukaj dokumentacji medycznej"
+            onChange={(event) => {
+            setSearch(event.target.value)
+            }}
+        />
       </div>
 
       {status === 'loading' && (
