@@ -112,6 +112,12 @@ async function updateVisit(visitId, visit) {
   return /** @type {Visit} */ (data)
 }
 
+/**
+ * Deletes a visit.
+ *
+ * @param {number} visitId
+ * @returns {Promise<void>}
+ */
 async function deleteVisit(visitId) {
   await apiRequest(`/api/visits/${visitId}/`, {
     method: 'DELETE',

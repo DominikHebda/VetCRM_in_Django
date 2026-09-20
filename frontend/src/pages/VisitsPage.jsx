@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import VisitForm from '../components/VisitForm.jsx'
-import { createVisit, getVisits, updateVisit } from '../services/visitsService.js'
+import { createVisit, getVisits, updateVisit, deleteVisit } from '../services/visitsService.js'
 import { getVeterinarians } from '../services/veterinariansService.js'
 import { getAnimals } from '../services/animalsService.js'
 
@@ -169,6 +169,37 @@ async function handleUpdateVisit(visit) {
     setEditingVisit(null)
   } catch {
     setFormStatus('error')
+  }
+}
+
+/**
+ * @param {Visit} visit
+ */
+async function handleDeleteVisit(visit) {
+  const confirmed = window.confirm(
+    `Czy na pewno chcesz usunąć wizytę pacjenta ${visit.animal_name}?`,
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await deleteVisit(visit.id)
+
+    const data = await getVisits({
+      search: debouncedSearch,
+      status: statusFilter,
+      animal: animalFilter,
+      page,
+    })
+
+    setVisits(data.results)
+    setTotalCount(data.count)
+    setHasPreviousPage(Boolean(data.previous))
+    setHasNextPage(Boolean(data.next))
+  } catch {
+    window.alert('Nie udało się usunąć wizyty.')
   }
 }
 
@@ -426,6 +457,15 @@ async function handleUpdateVisit(visit) {
                             }}
                           >
                             Edytuj
+                          </button>
+                          <button
+                            type="button"
+                            className="table-action-button"
+                            onClick={() => {
+                              handleDeleteVisit(visit)
+                            }}
+                          >
+                            Usuń
                           </button>
                         </div>
                       </td>
