@@ -37,25 +37,38 @@
 }
 
 .list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 
-  input {
-    width: 100%;
-    max-width: 500px;
+  input,
+  select {
     padding: 0.8rem 1rem;
     border: 1px solid $border-color;
     border-radius: 0.5rem;
     background: $surface-color;
     color: $text-color;
+    font: inherit;
     outline: none;
 
     &:focus {
       border-color: #94a3b8;
     }
+  }
+
+  input {
+    width: 100%;
+    max-width: 500px;
 
     &::placeholder {
       color: $muted-text-color;
     }
+  }
+
+  select {
+    min-width: 190px;
+    cursor: pointer;
   }
 }
 
@@ -102,6 +115,13 @@
       border-bottom: 0;
     }
   }
+}
+
+.table-secondary {
+  margin-top: 0.2rem;
+  color: $muted-text-color;
+  font-size: 0.85rem;
+  font-weight: 400;
 }
 
 .empty-state {

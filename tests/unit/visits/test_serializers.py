@@ -24,6 +24,8 @@ def test_serialize_visit():
     assert data["id"] == visit.id
     assert data["animal"] == visit.animal.id
     assert data["animal_name"] == visit.animal.name
+    assert data["animal_species"] == visit.animal.species
+    assert data["animal_owner_name"] == str(visit.animal.owner)
     assert data["veterinarian"] == visit.veterinarian.id
     assert data["veterinarian_name"] == visit.veterinarian.get_full_name()
     assert data["reason"] == "Routine checkup"

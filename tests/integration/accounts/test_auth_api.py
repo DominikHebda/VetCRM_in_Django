@@ -105,3 +105,48 @@ def test_current_user_rejects_unknown_token(api_client):
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_veterinarian_list_requires_authentication(api_client):
+    response = api_client.get(reverse("veterinarian-list"))
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_veterinarian_list_returns_only_veterinarians(
+    api_client,
+    user,
+    access_token,
+    django_user_model,
+):
+    veterinarian = django_user_model.objects.create_user(
+        username="veterinarian",
+        first_name="Anna",
+        last_name="Nowak",
+        password="test-password",
+    )
+    veterinarian.profile.role = UserProfile.Role.VET
+    veterinarian.profile.save()
+
+    admin = django_user_model.objects.create_user(
+        username="administrator",
+        first_name="Adam",
+        last_name="Admin",
+        password="test-password",
+    )
+    admin.profile.role = UserProfile.Role.ADMIN
+    admin.profile.save()
+
+    response = api_client.get(
+        reverse("veterinarian-list"),
+        HTTP_AUTHORIZATION=f"Bearer {access_token.token}",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data == [
+        {
+            "id": veterinarian.id,
+            "first_name": "Anna",
+            "last_name": "Nowak",
+        }
+    ]

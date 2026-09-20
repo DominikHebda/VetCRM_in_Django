@@ -8,6 +8,7 @@ import ProtectedRoute from './auth/ProtectedRoute.jsx'
 import ModulePlaceholderPage from './pages/ModulePlaceholderPage.jsx'
 import OwnersPage from './pages/OwnersPage.jsx'
 import AnimalsPage from './pages/AnimalsPage.jsx'
+import VisitsPage from './pages/VisitsPage.jsx'
 
 function App() {
   return (
@@ -18,10 +19,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/owners" element={<OwnersPage />} />
             <Route path="/animals" element={<AnimalsPage />} />
-            <Route
-              path="/visits"
-              element={<ModulePlaceholderPage title="Wizyty" />}
-            />
+            <Route path="/visits" element={<VisitsPage />} />
             <Route
               path="/medical"
               element={<ModulePlaceholderPage title="Dokumentacja medyczna" />}
