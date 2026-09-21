@@ -33,6 +33,7 @@ import { apiRequest } from './apiClient.js'
  * @param {'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | ''} [options.status]
  * @param {number | null} [options.animal]
  * @param {number} [options.page]
+ * @param {number} [options.pageSize]
  * @returns {Promise<VisitsResponse>}
  */
 
@@ -41,6 +42,7 @@ async function getVisits({
   status = '',
   animal = null,
   page = 1,
+  pageSize,
 } = {}) {
   const params = new URLSearchParams()
   const query = search.trim()
@@ -56,6 +58,9 @@ async function getVisits({
     }
     if (page > 1) {
         params.set('page', String(page))
+    }
+    if (pageSize) {
+        params.set('page_size', String(pageSize))
     }
 
     const queryString = params.toString()
