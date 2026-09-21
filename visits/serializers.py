@@ -23,6 +23,11 @@ class VisitSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    has_medical_record = serializers.SerializerMethodField()
+
+    def get_has_medical_record(self, obj):
+        return hasattr(obj, "medical_record")
+
     class Meta:
         model = Visit
 
@@ -39,4 +44,5 @@ class VisitSerializer(serializers.ModelSerializer):
             "notes",
             "status",
             "created_at",
+            "has_medical_record",
         )

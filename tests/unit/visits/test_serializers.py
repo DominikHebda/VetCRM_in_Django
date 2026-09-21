@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from tests.factories.animals import AnimalFactory
+from tests.factories.medical import MedicalRecordFactory
 from tests.factories.visits import VisitFactory
 from visits.models import Visit
 from visits.serializers import VisitSerializer
@@ -148,3 +149,14 @@ def test_update_visit_with_serializer():
     assert updated_visit.reason == "Updated reason"
     assert updated_visit.notes == "Updated notes"
     assert updated_visit.status == Visit.Status.COMPLETED
+
+
+def test_has_medical_record():
+    visit_without_record = VisitFactory()
+    medical_record = MedicalRecordFactory()
+
+    without_record_data = VisitSerializer(visit_without_record).data
+    with_record_data = VisitSerializer(medical_record.visit).data
+
+    assert without_record_data["has_medical_record"] is False
+    assert with_record_data["has_medical_record"] is True
