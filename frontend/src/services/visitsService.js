@@ -7,6 +7,7 @@ import { apiRequest } from './apiClient.js'
  * @property {string} animal_name
  * @property {'dog' | 'cat' | 'other'} animal_species
  * @property {string} animal_owner_name
+ * @property {boolean} has_medical_record
  * @property {number} veterinarian
  * @property {string} veterinarian_name
  * @property {string} visit_date
