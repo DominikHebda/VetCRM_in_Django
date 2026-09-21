@@ -59,4 +59,27 @@ async function getMedicalRecords({
 
   return /** @type {MedicalRecordsResponse} */ (data)
   }
-export { getMedicalRecords }
+
+/**
+ * Creates a new medical record.
+ *
+ * @param {{
+ *   visit: number,
+ *   diagnosis: string,
+ *   treatment: string,
+ *   recommendations: string,
+ *   weight: string | null,
+ *   temperature: string | null,
+ * }} medicalRecord
+ * @returns {Promise<MedicalRecord>}
+ */
+async function createMedicalRecord(medicalRecord) {
+  const data = await apiRequest('/api/medical-records/', {
+    method: 'POST',
+    body: JSON.stringify(medicalRecord),
+  })
+
+  return /** @type {MedicalRecord} */ (data)
+}
+
+export { getMedicalRecords, createMedicalRecord }
