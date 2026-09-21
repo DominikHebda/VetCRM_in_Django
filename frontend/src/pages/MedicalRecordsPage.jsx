@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 
-import { getMedicalRecords } from '../services/medicalRecordsService.js'
+import MedicalRecordForm from '../components/MedicalRecordForm.jsx'
+import { useAuth } from '../auth/useAuth.js'
+import { getVisits } from '../services/visitsService.js'
+
+import {
+    createMedicalRecord,
+    getMedicalRecords
+} from '../services/medicalRecordsService.js'
 import { getAnimals } from '../services/animalsService.js'
 
 /**
@@ -24,6 +31,15 @@ import { getAnimals } from '../services/animalsService.js'
  * @property {string} owner_name
  */
 
+/**
+ * @typedef {Object} Visit
+ * @property {number} id
+ * @property {string} animal_name
+ * @property {string} animal_owner_name
+ * @property {string} visit_date
+ * @property {boolean} has_medical_record
+ */
+
 const speciesLabels = {
   dog: 'pies',
   cat: 'kot',
@@ -31,8 +47,18 @@ const speciesLabels = {
 }
 
 function MedicalRecordsPage() {
+  const { user } = useAuth()
+  const canManageMedicalRecords =
+    user?.role === 'ADMIN' || user?.role === 'VET'
   const [medicalRecords, setMedicalRecords] = useState(
     /** @type {MedicalRecord[]} */ ([]),
+  )
+  const [visits, setVisits] = useState(
+    /** @type {Visit[]} */ ([]),
+  )
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [formStatus, setFormStatus] = useState(
+    /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
   )
   const [status, setStatus] = useState('loading')
   const [totalCount, setTotalCount] = useState(0)
@@ -47,6 +73,46 @@ function MedicalRecordsPage() {
   const [animalFilter, setAnimalFilter] = useState(
   /** @type {number | null} */ (null),
   )
+
+  /**
+   * @param {{
+   *   visit: number,
+   *   diagnosis: string,
+   *   treatment: string,
+   *   recommendations: string,
+   *   weight: string | null,
+   *   temperature: string | null,
+   * }} medicalRecord
+   */
+  async function handleCreateMedicalRecord(medicalRecord) {
+    setFormStatus('saving')
+
+    try {
+      await createMedicalRecord(medicalRecord)
+
+      const data = await getMedicalRecords({
+        search: debouncedSearch,
+        animal: animalFilter,
+        page,
+      })
+
+      setMedicalRecords(data.results)
+      setTotalCount(data.count)
+      setHasPreviousPage(Boolean(data.previous))
+      setHasNextPage(Boolean(data.next))
+
+      setVisits((currentVisits) =>
+        currentVisits.filter(
+          (visit) => visit.id !== medicalRecord.visit,
+        ),
+      )
+
+      setFormStatus('idle')
+      setIsCreateFormOpen(false)
+    } catch {
+      setFormStatus('error')
+    }
+  }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -82,6 +148,38 @@ function MedicalRecordsPage() {
       isMounted = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!canManageMedicalRecords) {
+      return undefined
+    }
+
+    let isMounted = true
+
+    async function loadVisits() {
+      try {
+        const data = await getVisits({ pageSize: 100 })
+
+        if (isMounted) {
+          setVisits(
+            data.results.filter(
+              (visit) => !visit.has_medical_record,
+            ),
+          )
+        }
+      } catch {
+        if (isMounted) {
+          setVisits([])
+        }
+      }
+    }
+
+    loadVisits()
+
+    return () => {
+      isMounted = false
+    }
+  }, [canManageMedicalRecords])
 
   useEffect(() => {
     let isMounted = true
@@ -120,21 +218,45 @@ function MedicalRecordsPage() {
   }, [debouncedSearch, animalFilter, page])
 
   return (
-    <div className="page-container">
-      <div className="page-header">
+    <div className="visits-page">
+      <div className="page-heading">
         <div>
-          <p className="eyebrow">Dokumentacja kliniczna</p>
           <h1>Dokumentacja medyczna</h1>
           <p>
             Diagnozy, leczenie i zalecenia zapisane podczas wizyt.
           </p>
         </div>
 
-        <div className="page-count">
-          <span>Rekordy</span>
+        {canManageMedicalRecords && (
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => {
+              setIsCreateFormOpen(true)
+              setFormStatus('idle')
+            }}
+          >
+            Dodaj dokumentację
+          </button>
+        )}
+
+        <div className="page-summary">
+          <span>Łącznie</span>
           <strong>{totalCount}</strong>
         </div>
       </div>
+
+      {canManageMedicalRecords && isCreateFormOpen && (
+        <MedicalRecordForm
+          visits={visits}
+          status={formStatus}
+          onSubmit={handleCreateMedicalRecord}
+          onCancel={() => {
+          setFormStatus('idle')
+          setIsCreateFormOpen(false)
+          }}
+        />
+      )}
 
       <div className="list-toolbar">
         <input
