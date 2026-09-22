@@ -82,4 +82,33 @@ async function createMedicalRecord(medicalRecord) {
   return /** @type {MedicalRecord} */ (data)
 }
 
-export { getMedicalRecords, createMedicalRecord }
+/**
+ * Updates an existing medical record.
+ *
+ * @param {number} medicalRecordId
+ * @param {{
+ *   visit: number,
+ *   diagnosis: string,
+ *   treatment: string,
+ *   recommendations: string,
+ *   weight: string | null,
+ *   temperature: string | null,
+ * }} medicalRecord
+ * @returns {Promise<MedicalRecord>}
+ */
+async function updateMedicalRecord(
+  medicalRecordId,
+  medicalRecord,
+) {
+  const data = await apiRequest(
+    `/api/medical-records/${medicalRecordId}/`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(medicalRecord),
+    },
+  )
+
+  return /** @type {MedicalRecord} */ (data)
+}
+
+export { getMedicalRecords, createMedicalRecord, updateMedicalRecord }
