@@ -4,6 +4,7 @@ import { useAuth } from '../auth/useAuth.js'
 import { getVeterinarians } from '../services/veterinariansService.js'
 
 import { createVaccination,
+         deleteVaccination,
          getVaccinations,
          updateVaccination,
 } from '../services/vaccinationsService.js'
@@ -117,6 +118,36 @@ function VaccinationsPage() {
         setFormStatus('error')
     }
   }
+
+    /**
+     * @param {import('../services/vaccinationsService.js').Vaccination} vaccination
+     */
+    async function handleDeleteVaccination(vaccination) {
+      const confirmed = window.confirm(
+        `Czy na pewno chcesz usunąć szczepienie ${vaccination.vaccine_name} pacjenta ${vaccination.animal_name}?`,
+      )
+
+      if (!confirmed) {
+        return
+      }
+
+      try {
+        await deleteVaccination(vaccination.id)
+
+        const data = await getVaccinations({
+          search: debouncedSearch,
+          animal: animalFilter || undefined,
+          page,
+        })
+
+        setVaccinations(data.results)
+        setTotalCount(data.count)
+        setHasPreviousPage(Boolean(data.previous))
+        setHasNextPage(Boolean(data.next))
+      } catch {
+        setStatus('error')
+      }
+    }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -389,6 +420,14 @@ function VaccinationsPage() {
                             }}
                           >
                             Edytuj
+                          </button>
+
+                          <button
+                            type="button"
+                            className="table-action-button"
+                            onClick={() => handleDeleteVaccination(vaccination)}
+                          >
+                            Usuń
                           </button>
                         </div>
                       </td>
