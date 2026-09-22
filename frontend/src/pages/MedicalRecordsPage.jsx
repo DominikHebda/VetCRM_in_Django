@@ -6,7 +6,8 @@ import { getVisits } from '../services/visitsService.js'
 
 import {
     createMedicalRecord,
-    getMedicalRecords
+    getMedicalRecords,
+    updateMedicalRecord,
 } from '../services/medicalRecordsService.js'
 import { getAnimals } from '../services/animalsService.js'
 
@@ -57,6 +58,9 @@ function MedicalRecordsPage() {
     /** @type {Visit[]} */ ([]),
   )
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [editingMedicalRecord, setEditingMedicalRecord] = useState(
+    /** @type {MedicalRecord | null} */ (null),
+  )
   const [formStatus, setFormStatus] = useState(
     /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
   )
@@ -109,6 +113,47 @@ function MedicalRecordsPage() {
 
       setFormStatus('idle')
       setIsCreateFormOpen(false)
+    } catch {
+      setFormStatus('error')
+    }
+  }
+
+    /**
+   * @param {{
+   *   visit: number,
+   *   diagnosis: string,
+   *   treatment: string,
+   *   recommendations: string,
+   *   weight: string | null,
+   *   temperature: string | null,
+   * }} medicalRecord
+   */
+  async function handleUpdateMedicalRecord(medicalRecord) {
+    if (!editingMedicalRecord) {
+      return
+    }
+
+    setFormStatus('saving')
+
+    try {
+      await updateMedicalRecord(
+        editingMedicalRecord.id,
+        medicalRecord,
+      )
+
+      const data = await getMedicalRecords({
+        search: debouncedSearch,
+        animal: animalFilter,
+        page,
+      })
+
+      setMedicalRecords(data.results)
+      setTotalCount(data.count)
+      setHasPreviousPage(Boolean(data.previous))
+      setHasNextPage(Boolean(data.next))
+
+      setFormStatus('idle')
+      setEditingMedicalRecord(null)
     } catch {
       setFormStatus('error')
     }
@@ -217,6 +262,19 @@ function MedicalRecordsPage() {
     }
   }, [debouncedSearch, animalFilter, page])
 
+  const editVisitOptions = editingMedicalRecord
+    ? [
+        {
+          id: editingMedicalRecord.visit,
+          animal_name: editingMedicalRecord.animal_name,
+          animal_owner_name: editingMedicalRecord.animal_owner_name,
+        },
+        ...visits.filter(
+          (visit) => visit.id !== editingMedicalRecord.visit,
+        ),
+      ]
+    : visits
+
   return (
     <div className="visits-page">
       <div className="page-heading">
@@ -232,6 +290,7 @@ function MedicalRecordsPage() {
             type="button"
             className="primary-button"
             onClick={() => {
+              setEditingMedicalRecord(null)
               setIsCreateFormOpen(true)
               setFormStatus('idle')
             }}
@@ -255,6 +314,27 @@ function MedicalRecordsPage() {
           onCancel={() => {
           setFormStatus('idle')
           setIsCreateFormOpen(false)
+          }}
+        />
+      )}
+
+      {canManageMedicalRecords && editingMedicalRecord && (
+        <MedicalRecordForm
+          key={editingMedicalRecord.id}
+          visits={editVisitOptions}
+          initialValues={{
+            visit: editingMedicalRecord.visit,
+            diagnosis: editingMedicalRecord.diagnosis,
+            treatment: editingMedicalRecord.treatment,
+            recommendations: editingMedicalRecord.recommendations,
+            weight: editingMedicalRecord.weight,
+            temperature: editingMedicalRecord.temperature,
+          }}
+          status={formStatus}
+          onSubmit={handleUpdateMedicalRecord}
+          onCancel={() => {
+            setFormStatus('idle')
+            setEditingMedicalRecord(null)
           }}
         />
       )}
@@ -321,6 +401,7 @@ function MedicalRecordsPage() {
                     <th>Leczenie</th>
                     <th>Waga</th>
                     <th>Temperatura</th>
+                    {canManageMedicalRecords && <th>Akcje</th>}
                   </tr>
                 </thead>
 
@@ -347,6 +428,23 @@ function MedicalRecordsPage() {
                           ? `${record.temperature} °C`
                           : '—'}
                       </td>
+                      {canManageMedicalRecords && (
+                        <td>
+                            <div className="table-actions">
+                            <button
+                                type="button"
+                                className="table-action-button"
+                                onClick={() => {
+                                setFormStatus('idle')
+                                setIsCreateFormOpen(false)
+                                setEditingMedicalRecord(record)
+                                }}
+                            >
+                                Edytuj
+                            </button>
+                            </div>
+                        </td>
+                        )}
                     </tr>
                   ))}
                 </tbody>

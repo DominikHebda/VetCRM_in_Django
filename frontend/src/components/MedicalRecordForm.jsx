@@ -3,7 +3,6 @@
  * @property {number} id
  * @property {string} animal_name
  * @property {string} animal_owner_name
- * @property {string} visit_date
  */
 
 /**
