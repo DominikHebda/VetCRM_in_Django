@@ -17,10 +17,14 @@ function VaccinationsPage() {
   const [animalFilter, setAnimalFilter] = useState(
     /** @type {number | null} */ (null),
   )
+  const [page, setPage] = useState(1)
+  const [hasPreviousPage, setHasPreviousPage] = useState(false)
+  const [hasNextPage, setHasNextPage] = useState(false)
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setDebouncedSearch(search)
+      setPage(1)
     }, 300)
 
     return () => {
@@ -62,6 +66,7 @@ function VaccinationsPage() {
         const data = await getVaccinations({
           search: debouncedSearch,
           animal: animalFilter || undefined,
+          page,
         })
 
         if (!isActive) {
@@ -70,6 +75,8 @@ function VaccinationsPage() {
 
         setVaccinations(data.results)
         setTotalCount(data.count)
+        setHasPreviousPage(Boolean(data.previous))
+        setHasNextPage(Boolean(data.next))
         setStatus('success')
       } catch {
         if (isActive) {
@@ -83,7 +90,7 @@ function VaccinationsPage() {
     return () => {
       isActive = false
     }
-  }, [debouncedSearch, animalFilter])
+  }, [debouncedSearch, animalFilter, page])
 
   return (
     <div className="visits-page">
@@ -119,6 +126,7 @@ function VaccinationsPage() {
             const value = event.target.value
 
             setAnimalFilter(value ? Number(value) : null)
+            setPage(1)
           }}
       >
           <option value="">Wszyscy pacjenci</option>
@@ -151,6 +159,7 @@ function VaccinationsPage() {
       )}
 
       {status === 'success' && vaccinations.length > 0 && (
+        <>
         <div className="data-card">
           <div className="table-wrapper">
             <table className="data-table">
@@ -190,6 +199,32 @@ function VaccinationsPage() {
             </table>
           </div>
         </div>
+        <div className="pagination">
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={!hasPreviousPage}
+            onClick={() => {
+              setPage((currentPage) => Math.max(1, currentPage - 1))
+            }}
+          >
+            Poprzednia
+          </button>
+
+          <span>Strona {page}</span>
+
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={!hasNextPage}
+            onClick={() => {
+              setPage((currentPage) => currentPage + 1)
+            }}
+          >
+            Następna
+          </button>
+        </div>
+        </>
       )}
     </div>
   )
