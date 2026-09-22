@@ -64,4 +64,28 @@ async function getVaccinations({
   return /** @type {VaccinationsResponse} */ (data)
 }
 
-export { getVaccinations }
+/**
+ * Creates a new vaccination.
+ *
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   vaccine_name: string,
+ *   manufacturer: string,
+ *   batch_number: string,
+ *   vaccination_date: string,
+ *   next_due_date: string | null,
+ *   notes: string,
+ * }} vaccination
+ * @returns {Promise<Vaccination>}
+ */
+async function createVaccination(vaccination) {
+  const data = await apiRequest('/api/vaccinations/', {
+    method: 'POST',
+    body: JSON.stringify(vaccination),
+  })
+
+  return /** @type {Vaccination} */ (data)
+}
+
+export { getVaccinations, createVaccination }
