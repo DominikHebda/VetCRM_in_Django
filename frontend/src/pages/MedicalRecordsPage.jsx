@@ -6,6 +6,7 @@ import { getVisits } from '../services/visitsService.js'
 
 import {
     createMedicalRecord,
+    deleteMedicalRecord,
     getMedicalRecords,
     updateMedicalRecord,
 } from '../services/medicalRecordsService.js'
@@ -156,6 +157,44 @@ function MedicalRecordsPage() {
       setEditingMedicalRecord(null)
     } catch {
       setFormStatus('error')
+    }
+  }
+
+    /**
+   * @param {MedicalRecord} record
+   */
+  async function handleDeleteMedicalRecord(record) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunąć dokumentację pacjenta ${record.animal_name}?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      await deleteMedicalRecord(record.id)
+
+      const data = await getMedicalRecords({
+        search: debouncedSearch,
+        animal: animalFilter,
+        page,
+      })
+
+      setMedicalRecords(data.results)
+      setTotalCount(data.count)
+      setHasPreviousPage(Boolean(data.previous))
+      setHasNextPage(Boolean(data.next))
+
+      const visitsData = await getVisits({ pageSize: 100 })
+
+      setVisits(
+        visitsData.results.filter(
+          (visit) => !visit.has_medical_record,
+        ),
+      )
+    } catch {
+      window.alert('Nie udało się usunąć dokumentacji medycznej.')
     }
   }
 
@@ -441,6 +480,13 @@ function MedicalRecordsPage() {
                                 }}
                             >
                                 Edytuj
+                            </button>
+                            <button
+                                type="button"
+                                className="table-action-button"
+                                onClick={() => handleDeleteMedicalRecord(record)}
+                                >
+                                Usuń
                             </button>
                             </div>
                         </td>
