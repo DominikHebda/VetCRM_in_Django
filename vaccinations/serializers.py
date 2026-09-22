@@ -9,6 +9,11 @@ class VaccinationSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    animal_owner_name = serializers.CharField(
+        source="animal.owner.__str__",
+        read_only=True,
+    )
+
     veterinarian_name = serializers.CharField(
         source="veterinarian.get_full_name",
         read_only=True,
@@ -21,6 +26,7 @@ class VaccinationSerializer(serializers.ModelSerializer):
             "id",
             "animal",
             "animal_name",
+            "animal_owner_name",
             "veterinarian",
             "veterinarian_name",
             "vaccine_name",
