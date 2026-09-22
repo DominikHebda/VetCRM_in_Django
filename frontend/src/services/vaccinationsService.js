@@ -113,4 +113,16 @@ async function updateVaccination(vaccinationId, vaccination) {
   return /** @type {Vaccination} */ (data)
 }
 
-export { getVaccinations, createVaccination, updateVaccination }
+/**
+ * Deletes an existing vaccination.
+ *
+ * @param {number} vaccinationId
+ * @returns {Promise<void>}
+ */
+async function deleteVaccination(vaccinationId) {
+  await apiRequest(`/api/vaccinations/${vaccinationId}/`, {
+    method: 'DELETE',
+  })
+}
+
+export { getVaccinations, createVaccination, updateVaccination, deleteVaccination }
