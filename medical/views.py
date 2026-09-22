@@ -17,6 +17,7 @@ class MedicalRecordViewSet(ModelViewSet):
     queryset = MedicalRecord.objects.select_related(
         "visit",
         "visit__animal",
+        "visit__animal__owner",
     )
 
     serializer_class = MedicalRecordSerializer

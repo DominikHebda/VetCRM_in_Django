@@ -17,6 +17,7 @@ class VisitViewSet(ModelViewSet):
         "animal",
         "animal__owner",
         "veterinarian",
+        "medical_record",
     )
 
     serializer_class = VisitSerializer

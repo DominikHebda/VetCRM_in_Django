@@ -22,6 +22,9 @@ def test_serialize_medical_record():
 
     assert data["id"] == medical_record.id
     assert data["visit"] == medical_record.visit.id
+    assert data["animal_name"] == medical_record.visit.animal.name
+    assert data["animal_species"] == medical_record.visit.animal.species
+    assert data["animal_owner_name"] == str(medical_record.visit.animal.owner)
     assert data["diagnosis"] == "Skin allergy"
     assert data["treatment"] == "Antihistamine treatment"
     assert data["recommendations"] == "Avoid suspected allergen"

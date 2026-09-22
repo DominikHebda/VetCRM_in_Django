@@ -9,6 +9,7 @@ import ModulePlaceholderPage from './pages/ModulePlaceholderPage.jsx'
 import OwnersPage from './pages/OwnersPage.jsx'
 import AnimalsPage from './pages/AnimalsPage.jsx'
 import VisitsPage from './pages/VisitsPage.jsx'
+import MedicalRecordsPage from './pages/MedicalRecordsPage.jsx'
 
 function App() {
   return (
@@ -20,10 +21,7 @@ function App() {
             <Route path="/owners" element={<OwnersPage />} />
             <Route path="/animals" element={<AnimalsPage />} />
             <Route path="/visits" element={<VisitsPage />} />
-            <Route
-              path="/medical"
-              element={<ModulePlaceholderPage title="Dokumentacja medyczna" />}
-            />
+            <Route path="/medical" element={<MedicalRecordsPage />} />
             <Route
               path="/vaccinations"
               element={<ModulePlaceholderPage title="Szczepienia" />}
