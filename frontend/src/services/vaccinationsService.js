@@ -88,4 +88,29 @@ async function createVaccination(vaccination) {
   return /** @type {Vaccination} */ (data)
 }
 
-export { getVaccinations, createVaccination }
+/**
+ * Updates an existing vaccination.
+ *
+ * @param {number} vaccinationId
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   vaccine_name: string,
+ *   manufacturer: string,
+ *   batch_number: string,
+ *   vaccination_date: string,
+ *   next_due_date: string | null,
+ *   notes: string,
+ * }} vaccination
+ * @returns {Promise<Vaccination>}
+ */
+async function updateVaccination(vaccinationId, vaccination) {
+  const data = await apiRequest(`/api/vaccinations/${vaccinationId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(vaccination),
+  })
+
+  return /** @type {Vaccination} */ (data)
+}
+
+export { getVaccinations, createVaccination, updateVaccination }
