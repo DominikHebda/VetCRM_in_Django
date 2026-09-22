@@ -8,6 +8,18 @@ function VaccinationsPage() {
   )
   const [totalCount, setTotalCount] = useState(0)
   const [status, setStatus] = useState('loading')
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+    }, [search])
 
   useEffect(() => {
     let isActive = true
@@ -16,7 +28,9 @@ function VaccinationsPage() {
       setStatus('loading')
 
       try {
-        const data = await getVaccinations()
+        const data = await getVaccinations({
+          search: debouncedSearch,
+        })
 
         if (!isActive) {
           return
@@ -37,7 +51,7 @@ function VaccinationsPage() {
     return () => {
       isActive = false
     }
-  }, [])
+  }, [debouncedSearch])
 
   return (
     <div className="visits-page">
@@ -56,6 +70,18 @@ function VaccinationsPage() {
         </div>
       </div>
 
+      <div className="list-toolbar">
+        <input
+            type="search"
+            value={search}
+            placeholder="Szukaj po szczepionce lub producencie..."
+            aria-label="Szukaj szczepień"
+            onChange={(event) => {
+            setSearch(event.target.value)
+            }}
+        />
+      </div>
+
       {status === 'loading' && (
         <div className="data-card">
           <p>Ładowanie szczepień...</p>
@@ -69,8 +95,9 @@ function VaccinationsPage() {
       )}
 
       {status === 'success' && vaccinations.length === 0 && (
-        <div className="data-card">
-          <p>Brak zapisanych szczepień.</p>
+        <div className="data-card empty-state">
+          <h2>Brak zapisanych szczepień</h2>
+          <p>Nie ma jeszcze zapisanych szczepień pacjentów.</p>
         </div>
       )}
 
