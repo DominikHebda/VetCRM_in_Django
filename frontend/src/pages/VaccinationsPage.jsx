@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react'
+import VaccinationForm from '../components/VaccinationForm.jsx'
+import { useAuth } from '../auth/useAuth.js'
+import { getVeterinarians } from '../services/veterinariansService.js'
 
-import { getVaccinations } from '../services/vaccinationsService.js'
+import { createVaccination,
+         getVaccinations,
+} from '../services/vaccinationsService.js'
 import { getAnimals } from '../services/animalsService.js'
 
 function VaccinationsPage() {
+  const { user } = useAuth()
+
+  const canManageVaccinations =
+    user?.role === 'ADMIN' || user?.role === 'VET'
   const [vaccinations, setVaccinations] = useState(
     /** @type {import('../services/vaccinationsService.js').Vaccination[]} */ ([]),
   )
@@ -20,6 +29,50 @@ function VaccinationsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [veterinarians, setVeterinarians] = useState(
+    /** @type {Awaited<ReturnType<typeof getVeterinarians>>} */ ([]),
+  )
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [formStatus, setFormStatus] = useState(
+    /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
+  )
+
+    /**
+   * @param {{
+   *   animal: number,
+   *   veterinarian: number,
+   *   vaccine_name: string,
+   *   manufacturer: string,
+   *   batch_number: string,
+   *   vaccination_date: string,
+   *   next_due_date: string | null,
+   *   notes: string,
+   * }} values
+   */
+  async function handleCreateVaccination(values) {
+    setFormStatus('saving')
+
+    try {
+      await createVaccination(values)
+
+      setIsCreateFormOpen(false)
+      setFormStatus('idle')
+      setPage(1)
+
+      const data = await getVaccinations({
+        search: debouncedSearch,
+        animal: animalFilter || undefined,
+        page: 1,
+      })
+
+      setVaccinations(data.results)
+      setTotalCount(data.count)
+      setHasPreviousPage(Boolean(data.previous))
+      setHasNextPage(Boolean(data.next))
+    } catch {
+      setFormStatus('error')
+    }
+  }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -55,6 +108,34 @@ function VaccinationsPage() {
       isActive = false
    }
 }, [])
+
+  useEffect(() => {
+    if (!canManageVaccinations) {
+      return undefined
+    }
+
+    let isActive = true
+
+    async function loadVeterinarians() {
+      try {
+        const data = await getVeterinarians()
+
+        if (isActive) {
+          setVeterinarians(data)
+        }
+      } catch {
+        if (isActive) {
+          setVeterinarians([])
+        }
+      }
+    }
+
+    loadVeterinarians()
+
+    return () => {
+      isActive = false
+    }
+  }, [canManageVaccinations])
 
   useEffect(() => {
     let isActive = true
@@ -103,11 +184,38 @@ function VaccinationsPage() {
           </p>
         </div>
 
+        {canManageVaccinations && (
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => {
+              setFormStatus('idle')
+              setIsCreateFormOpen(true)
+            }}
+          >
+            Dodaj szczepienie
+          </button>
+        )}
+
         <div className="page-summary">
           <span>Łącznie</span>
           <strong>{totalCount}</strong>
         </div>
       </div>
+
+      {canManageVaccinations && isCreateFormOpen && (
+        <VaccinationForm
+          animals={animals}
+          veterinarians={veterinarians}
+          initialValues={null}
+          status={formStatus}
+          onSubmit={handleCreateVaccination}
+          onCancel={() => {
+            setIsCreateFormOpen(false)
+            setFormStatus('idle')
+          }}
+        />
+      )}
 
       <div className="list-toolbar">
         <input
@@ -177,17 +285,22 @@ function VaccinationsPage() {
                 {vaccinations.map((vaccination) => (
                   <tr key={vaccination.id}>
                     <td>
-                      <strong>{vaccination.animal_name}</strong>
-                      <span className="table-secondary">
+                      <div>
+                        <strong>{vaccination.animal_name}</strong>
+                      </div>
+                      <div className="table-secondary">
                         {vaccination.animal_owner_name}
-                      </span>
+                      </div>
                     </td>
+
                     <td>
-                      <strong>{vaccination.vaccine_name}</strong>
+                      <div>
+                        <strong>{vaccination.vaccine_name}</strong>
+                      </div>
                       {vaccination.manufacturer && (
-                        <span className="table-secondary">
+                        <div className="table-secondary">
                           {vaccination.manufacturer}
-                        </span>
+                        </div>
                       )}
                     </td>
                     <td>{vaccination.vaccination_date}</td>
