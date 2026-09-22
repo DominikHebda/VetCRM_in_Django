@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react'
 
 import { getVaccinations } from '../services/vaccinationsService.js'
+import { getAnimals } from '../services/animalsService.js'
 
 function VaccinationsPage() {
   const [vaccinations, setVaccinations] = useState(
-  /** @type {import('../services/vaccinationsService.js').Vaccination[]} */ ([]),
+    /** @type {import('../services/vaccinationsService.js').Vaccination[]} */ ([]),
   )
   const [totalCount, setTotalCount] = useState(0)
   const [status, setStatus] = useState('loading')
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [animals, setAnimals] = useState(
+    /** @type {Awaited<ReturnType<typeof getAnimals>>['results']} */ ([]),
+  )
+  const [animalFilter, setAnimalFilter] = useState(
+    /** @type {number | null} */ (null),
+  )
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -19,7 +26,31 @@ function VaccinationsPage() {
     return () => {
       window.clearTimeout(timeoutId)
     }
-    }, [search])
+  }, [search])
+
+  useEffect(() => {
+    let isActive = true
+
+    async function loadAnimals() {
+      try {
+        const data = await getAnimals({ pageSize: 100 })
+
+        if (isActive) {
+          setAnimals(data.results)
+        }
+      } catch {
+        if (isActive) {
+          setAnimals([])
+        }
+      }
+    }
+
+    loadAnimals()
+
+    return () => {
+      isActive = false
+   }
+}, [])
 
   useEffect(() => {
     let isActive = true
@@ -30,6 +61,7 @@ function VaccinationsPage() {
       try {
         const data = await getVaccinations({
           search: debouncedSearch,
+          animal: animalFilter || undefined,
         })
 
         if (!isActive) {
@@ -51,7 +83,7 @@ function VaccinationsPage() {
     return () => {
       isActive = false
     }
-  }, [debouncedSearch])
+  }, [debouncedSearch, animalFilter])
 
   return (
     <div className="visits-page">
@@ -80,6 +112,23 @@ function VaccinationsPage() {
             setSearch(event.target.value)
             }}
         />
+        <select
+          value={animalFilter ?? ''}
+          aria-label="Filtruj szczepienia po pacjencie"
+          onChange={(event) => {
+            const value = event.target.value
+
+            setAnimalFilter(value ? Number(value) : null)
+          }}
+      >
+          <option value="">Wszyscy pacjenci</option>
+
+          {animals.map((animal) => (
+            <option key={animal.id} value={animal.id}>
+            {animal.name} — {animal.owner_name}
+            </option>
+         ))}
+        </select>
       </div>
 
       {status === 'loading' && (
