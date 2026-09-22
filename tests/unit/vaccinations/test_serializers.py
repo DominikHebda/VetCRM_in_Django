@@ -24,6 +24,10 @@ def test_serialize_vaccination():
     assert data["id"] == vaccination.id
     assert data["animal"] == vaccination.animal.id
     assert data["animal_name"] == vaccination.animal.name
+    assert (
+        data["animal_owner_name"]
+        == str(vaccination.animal.owner)
+    )
     assert data["veterinarian"] == vaccination.veterinarian.id
     assert (
         data["veterinarian_name"]

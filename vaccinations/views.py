@@ -16,6 +16,7 @@ from .serializers import VaccinationSerializer
 class VaccinationViewSet(ModelViewSet):
     queryset = Vaccination.objects.select_related(
         "animal",
+        "animal__owner",
         "veterinarian",
     )
 
