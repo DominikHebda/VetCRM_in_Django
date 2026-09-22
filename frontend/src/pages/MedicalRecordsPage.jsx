@@ -249,6 +249,7 @@ function MedicalRecordsPage() {
       {canManageMedicalRecords && isCreateFormOpen && (
         <MedicalRecordForm
           visits={visits}
+          initialValues={null}
           status={formStatus}
           onSubmit={handleCreateMedicalRecord}
           onCancel={() => {

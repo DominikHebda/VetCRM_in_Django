@@ -17,14 +17,26 @@
  */
 
 /**
+ * @typedef {Object} MedicalRecordFormInitialValues
+ * @property {number} visit
+ * @property {string} diagnosis
+ * @property {string} treatment
+ * @property {string} recommendations
+ * @property {string | null} weight
+ * @property {string | null} temperature
+ */
+
+/**
  * @param {Object} props
  * @param {VisitOption[]} props.visits
+ * @param {MedicalRecordFormInitialValues | null} [props.initialValues]
  * @param {'idle' | 'saving' | 'error'} props.status
  * @param {(values: MedicalRecordFormValues) => Promise<void>} props.onSubmit
  * @param {() => void} props.onCancel
  */
 function MedicalRecordForm({
   visits,
+  initialValues,
   status,
   onSubmit,
   onCancel,
@@ -61,7 +73,11 @@ function MedicalRecordForm({
     <div className="animal-form-card">
       <div className="animal-form-heading">
         <div>
-          <h2>Nowa dokumentacja medyczna</h2>
+          <h2>
+            {initialValues
+                ? 'Edytuj dokumentację medyczną'
+                : 'Nowa dokumentacja medyczna'}
+            </h2>
           <p>
             Uzupełnij rozpoznanie i informacje dotyczące leczenia
             pacjenta.
@@ -84,7 +100,7 @@ function MedicalRecordForm({
           Wizyta
           <select
             name="visit"
-            defaultValue=""
+            defaultValue={initialValues?.visit ?? ''}
             required
           >
             <option value="" disabled>
@@ -104,6 +120,7 @@ function MedicalRecordForm({
           <textarea
             name="diagnosis"
             rows={3}
+            defaultValue={initialValues?.diagnosis ?? ''}
             required
           />
         </label>
@@ -113,6 +130,8 @@ function MedicalRecordForm({
           <textarea
             name="treatment"
             rows={3}
+            defaultValue={initialValues?.treatment ?? ''}
+            required
           />
         </label>
 
@@ -121,6 +140,7 @@ function MedicalRecordForm({
           <textarea
             name="recommendations"
             rows={3}
+            defaultValue={initialValues?.recommendations ?? ''}
           />
         </label>
 
@@ -131,6 +151,7 @@ function MedicalRecordForm({
             name="weight"
             min="0"
             step="0.01"
+            defaultValue={initialValues?.weight ?? ''}
           />
         </label>
 
@@ -140,6 +161,7 @@ function MedicalRecordForm({
             type="number"
             name="temperature"
             step="0.1"
+            defaultValue={initialValues?.temperature ?? ''}
           />
         </label>
 
