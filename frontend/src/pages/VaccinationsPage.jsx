@@ -5,6 +5,7 @@ import { getVeterinarians } from '../services/veterinariansService.js'
 
 import { createVaccination,
          getVaccinations,
+         updateVaccination,
 } from '../services/vaccinationsService.js'
 import { getAnimals } from '../services/animalsService.js'
 
@@ -33,6 +34,9 @@ function VaccinationsPage() {
     /** @type {Awaited<ReturnType<typeof getVeterinarians>>} */ ([]),
   )
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [editingVaccination, setEditingVaccination] = useState(
+    /** @type {import('../services/vaccinationsService.js').Vaccination | null} */ (null),
+  )
   const [formStatus, setFormStatus] = useState(
     /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
   )
@@ -71,6 +75,46 @@ function VaccinationsPage() {
       setHasNextPage(Boolean(data.next))
     } catch {
       setFormStatus('error')
+    }
+  }
+
+  /**
+ * @param {{
+ *   animal: number,
+ *   veterinarian: number,
+ *   vaccine_name: string,
+ *   manufacturer: string,
+ *   batch_number: string,
+ *   vaccination_date: string,
+ *   next_due_date: string | null,
+ *   notes: string,
+ * }} values
+ */
+    async function handleUpdateVaccination(values) {
+      if (!editingVaccination) {
+        return
+      }
+
+      setFormStatus('saving')
+
+      try {
+        await updateVaccination(editingVaccination.id, values)
+
+        const data = await getVaccinations({
+        search: debouncedSearch,
+        animal: animalFilter || undefined,
+        page,
+      })
+
+      setVaccinations(data.results)
+      setTotalCount(data.count)
+      setHasPreviousPage(Boolean(data.previous))
+      setHasNextPage(Boolean(data.next))
+
+      setFormStatus('idle')
+      setEditingVaccination(null)
+    } catch {
+        setFormStatus('error')
     }
   }
 
@@ -189,6 +233,7 @@ function VaccinationsPage() {
             type="button"
             className="primary-button"
             onClick={() => {
+              setEditingVaccination(null)
               setFormStatus('idle')
               setIsCreateFormOpen(true)
             }}
@@ -212,6 +257,30 @@ function VaccinationsPage() {
           onSubmit={handleCreateVaccination}
           onCancel={() => {
             setIsCreateFormOpen(false)
+            setFormStatus('idle')
+          }}
+        />
+      )}
+
+      {canManageVaccinations && editingVaccination && (
+        <VaccinationForm
+          key={editingVaccination.id}
+          animals={animals}
+          veterinarians={veterinarians}
+          initialValues={{
+            animal: editingVaccination.animal,
+            veterinarian: editingVaccination.veterinarian,
+            vaccine_name: editingVaccination.vaccine_name,
+            manufacturer: editingVaccination.manufacturer,
+            batch_number: editingVaccination.batch_number,
+            vaccination_date: editingVaccination.vaccination_date,
+            next_due_date: editingVaccination.next_due_date,
+            notes: editingVaccination.notes,
+          }}
+          status={formStatus}
+          onSubmit={handleUpdateVaccination}
+          onCancel={() => {
+            setEditingVaccination(null)
             setFormStatus('idle')
           }}
         />
@@ -278,6 +347,7 @@ function VaccinationsPage() {
                   <th>Data szczepienia</th>
                   <th>Kolejna dawka</th>
                   <th>Lekarz</th>
+                  {canManageVaccinations && <th>Akcje</th>}
                 </tr>
               </thead>
 
@@ -306,6 +376,23 @@ function VaccinationsPage() {
                     <td>{vaccination.vaccination_date}</td>
                     <td>{vaccination.next_due_date || '—'}</td>
                     <td>{vaccination.veterinarian_name || '—'}</td>
+                    {canManageVaccinations && (
+                      <td>
+                        <div className="table-actions">
+                          <button
+                            type="button"
+                            className="table-action-button"
+                            onClick={() => {
+                              setFormStatus('idle')
+                              setIsCreateFormOpen(false)
+                              setEditingVaccination(vaccination)
+                            }}
+                          >
+                            Edytuj
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
