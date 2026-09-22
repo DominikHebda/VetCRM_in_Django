@@ -111,4 +111,19 @@ async function updateMedicalRecord(
   return /** @type {MedicalRecord} */ (data)
 }
 
-export { getMedicalRecords, createMedicalRecord, updateMedicalRecord }
+/**
+ * Deletes a medical record.
+ *
+ * @param {number} medicalRecordId
+ * @returns {Promise<void>}
+ */
+async function deleteMedicalRecord(medicalRecordId) {
+  await apiRequest(
+    `/api/medical-records/${medicalRecordId}/`,
+    {
+      method: 'DELETE',
+    },
+  )
+}
+
+export { getMedicalRecords, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord }
