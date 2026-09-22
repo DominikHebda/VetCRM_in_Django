@@ -10,6 +10,7 @@ import OwnersPage from './pages/OwnersPage.jsx'
 import AnimalsPage from './pages/AnimalsPage.jsx'
 import VisitsPage from './pages/VisitsPage.jsx'
 import MedicalRecordsPage from './pages/MedicalRecordsPage.jsx'
+import VaccinationsPage from './pages/VaccinationsPage.jsx'
 
 function App() {
   return (
@@ -22,10 +23,7 @@ function App() {
             <Route path="/animals" element={<AnimalsPage />} />
             <Route path="/visits" element={<VisitsPage />} />
             <Route path="/medical" element={<MedicalRecordsPage />} />
-            <Route
-              path="/vaccinations"
-              element={<ModulePlaceholderPage title="Szczepienia" />}
-            />
+            <Route path="/vaccinations" element={<VaccinationsPage />} />
             <Route
               path="/prescriptions"
               element={<ModulePlaceholderPage title="Recepty" />}
