@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react'
 
 import { getAnimals } from '../services/animalsService.js'
-import { getPrescriptions } from '../services/prescriptionsService.js'
+import {
+  createPrescription,
+  getPrescriptions,
+} from '../services/prescriptionsService.js'
+import PrescriptionForm from '../components/PrescriptionForm.jsx'
+import { useAuth } from '../auth/useAuth.js'
+import { getVisits } from '../services/visitsService.js'
 
 function PrescriptionsPage() {
+  const { user } = useAuth()
+
+  const canManagePrescriptions =
+    user?.role === 'ADMIN' || user?.role === 'VET'
   const [prescriptions, setPrescriptions] = useState(
     /** @type {import('../services/prescriptionsService.js').Prescription[]} */ ([]),
   )
@@ -20,6 +30,81 @@ function PrescriptionsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [visits, setVisits] = useState(
+    /** @type {Awaited<ReturnType<typeof getVisits>>['results']} */ ([]),
+  )
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [formStatus, setFormStatus] = useState(
+    /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
+  )
+
+  /**
+ * @param {{
+ *   animal: number,
+ *   visit: number,
+ *   medication_name: string,
+ *   active_substance: string,
+ *   dosage: string,
+ *   frequency: string,
+ *   duration: string,
+ *   quantity: number,
+ *   issue_date: string,
+ *   valid_until: string,
+ *   instructions: string,
+ * }} values
+ */
+  async function handleCreatePrescription(values) {
+    setFormStatus('saving')
+
+    try {
+      await createPrescription(values)
+
+      setIsCreateFormOpen(false)
+      setFormStatus('idle')
+      setPage(1)
+
+      const data = await getPrescriptions({
+        search: debouncedSearch,
+        animal: animalFilter || undefined,
+        page: 1,
+      })
+
+    setPrescriptions(data.results)
+    setTotalCount(data.count)
+    setHasPreviousPage(Boolean(data.previous))
+    setHasNextPage(Boolean(data.next))
+    } catch {
+      setFormStatus('error')
+    }
+  }
+
+  useEffect(() => {
+    if (!canManagePrescriptions) {
+      return undefined
+    }
+
+    let isActive = true
+
+    async function loadVisits() {
+      try {
+        const data = await getVisits({ pageSize: 100 })
+
+        if (isActive) {
+          setVisits(data.results)
+        }
+      } catch {
+        if (isActive) {
+          setVisits([])
+        }
+      }
+    }
+
+    loadVisits()
+
+    return () => {
+      isActive = false
+    }
+  }, [canManagePrescriptions])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -103,11 +188,38 @@ function PrescriptionsPage() {
           </p>
         </div>
 
+        {canManagePrescriptions && (
+          <button
+              type="button"
+              className="primary-button"
+              onClick={() => {
+                setFormStatus('idle')
+                setIsCreateFormOpen(true)
+              }}
+          >
+                Dodaj receptę
+          </button>
+        )}
+
         <div className="page-summary">
           <span>Łącznie</span>
           <strong>{totalCount}</strong>
         </div>
       </div>
+
+      {canManagePrescriptions && isCreateFormOpen && (
+        <PrescriptionForm
+          animals={animals}
+          visits={visits}
+          initialValues={null}
+          status={formStatus}
+          onSubmit={handleCreatePrescription}
+          onCancel={() => {
+            setIsCreateFormOpen(false)
+            setFormStatus('idle')
+          }}
+        />
+      )}
 
       <div className="list-toolbar">
         <input

@@ -50,6 +50,20 @@ const speciesLabels = {
 }
 
 /**
+ * @param {string} value
+ * @returns {string}
+ */
+function formatVisitDate(value) {
+  return new Intl.DateTimeFormat('pl-PL', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
+/**
  * @param {PrescriptionFormProps} props
  */
 function PrescriptionForm(props) {
@@ -165,7 +179,7 @@ function PrescriptionForm(props) {
 
             {availableVisits.map((visit) => (
               <option key={visit.id} value={visit.id}>
-                {visit.visit_date} — {visit.reason}
+                {formatVisitDate(visit.visit_date)} — {visit.reason}
               </option>
             ))}
           </select>
