@@ -5,12 +5,12 @@ import AuthCallbackPage from './pages/AuthCallbackPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
-import ModulePlaceholderPage from './pages/ModulePlaceholderPage.jsx'
 import OwnersPage from './pages/OwnersPage.jsx'
 import AnimalsPage from './pages/AnimalsPage.jsx'
 import VisitsPage from './pages/VisitsPage.jsx'
 import MedicalRecordsPage from './pages/MedicalRecordsPage.jsx'
 import VaccinationsPage from './pages/VaccinationsPage.jsx'
+import PrescriptionsPage from './pages/PrescriptionsPage.jsx'
 
 function App() {
   return (
@@ -24,10 +24,7 @@ function App() {
             <Route path="/visits" element={<VisitsPage />} />
             <Route path="/medical" element={<MedicalRecordsPage />} />
             <Route path="/vaccinations" element={<VaccinationsPage />} />
-            <Route
-              path="/prescriptions"
-              element={<ModulePlaceholderPage title="Recepty" />}
-            />
+            <Route path="/prescriptions" element={<PrescriptionsPage />} />
           </Route>
         </Route>
 
