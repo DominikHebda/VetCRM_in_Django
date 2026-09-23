@@ -122,4 +122,14 @@ async function updatePrescription(prescriptionId, prescription) {
   return data
 }
 
-export { getPrescriptions, createPrescription, updatePrescription }
+/**
+ * @param {number} prescriptionId
+ * @returns {Promise<void>}
+ */
+async function deletePrescription(prescriptionId) {
+  await apiRequest(`/api/prescriptions/${prescriptionId}/`, {
+    method: 'DELETE',
+  })
+}       
+
+export { getPrescriptions, createPrescription, updatePrescription, deletePrescription }
