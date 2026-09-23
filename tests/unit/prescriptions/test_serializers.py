@@ -1,12 +1,14 @@
 import datetime
 
 import pytest
+from django.contrib.auth import get_user_model
 
 from prescriptions.serializers import PrescriptionSerializer
 from tests.factories.prescriptions import PrescriptionFactory
 from tests.factories.visits import VisitFactory
 
 pytestmark = pytest.mark.django_db
+User = get_user_model()
 
 
 def test_serialize_prescription():
@@ -189,3 +191,17 @@ def test_update_prescription_with_serializer():
 
     assert updated_prescription.medication_name == "Updated medication"
     assert updated_prescription.quantity == 20
+
+
+def test_veterinarian_name_falls_back_to_username():
+    veterinarian = User.objects.create_user(
+        username="admin-without-name",
+        password="test-password",
+    )
+    prescription = PrescriptionFactory(
+        veterinarian=veterinarian,
+    )
+
+    data = PrescriptionSerializer(prescription).data
+
+    assert data["veterinarian_name"] == "admin-without-name"

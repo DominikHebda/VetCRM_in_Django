@@ -14,10 +14,12 @@ class PrescriptionSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    veterinarian_name = serializers.CharField(
-        source="veterinarian.get_full_name",
-        read_only=True,
-    )
+    veterinarian_name = serializers.SerializerMethodField()
+
+    def get_veterinarian_name(self, obj):
+        full_name = obj.veterinarian.get_full_name().strip()
+
+        return full_name or obj.veterinarian.get_username()
 
     class Meta:
         model = Prescription
