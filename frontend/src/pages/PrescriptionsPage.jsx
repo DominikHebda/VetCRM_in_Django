@@ -4,6 +4,7 @@ import { getAnimals } from '../services/animalsService.js'
 import {
   createPrescription,
   getPrescriptions,
+  updatePrescription,
 } from '../services/prescriptionsService.js'
 import PrescriptionForm from '../components/PrescriptionForm.jsx'
 import { useAuth } from '../auth/useAuth.js'
@@ -34,6 +35,9 @@ function PrescriptionsPage() {
     /** @type {Awaited<ReturnType<typeof getVisits>>['results']} */ ([]),
   )
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
+  const [editingPrescription, setEditingPrescription] = useState(
+    /** @type {import('../services/prescriptionsService.js').Prescription | null} */ (null),
+  )
   const [formStatus, setFormStatus] = useState(
     /** @type {'idle' | 'saving' | 'error'} */ ('idle'),
   )
@@ -77,6 +81,49 @@ function PrescriptionsPage() {
       setFormStatus('error')
     }
   }
+
+/**
+ * @param {{
+ *   animal: number,
+ *   visit: number,
+ *   medication_name: string,
+ *   active_substance: string,
+ *   dosage: string,
+ *   frequency: string,
+ *   duration: string,
+ *   quantity: number,
+ *   issue_date: string,
+ *   valid_until: string,
+ *   instructions: string,
+ * }} values
+ */
+async function handleUpdatePrescription(values) {
+  if (!editingPrescription) {
+    return
+  }
+
+  setFormStatus('saving')
+
+  try {
+    await updatePrescription(editingPrescription.id, values)
+
+    const data = await getPrescriptions({
+      search: debouncedSearch,
+      animal: animalFilter || undefined,
+      page,
+    })
+
+    setPrescriptions(data.results)
+    setTotalCount(data.count)
+    setHasPreviousPage(Boolean(data.previous))
+    setHasNextPage(Boolean(data.next))
+
+    setFormStatus('idle')
+    setEditingPrescription(null)
+  } catch {
+    setFormStatus('error')
+  }
+}
 
   useEffect(() => {
     if (!canManagePrescriptions) {
@@ -193,6 +240,7 @@ function PrescriptionsPage() {
               type="button"
               className="primary-button"
               onClick={() => {
+                setEditingPrescription(null)
                 setFormStatus('idle')
                 setIsCreateFormOpen(true)
               }}
@@ -220,6 +268,33 @@ function PrescriptionsPage() {
           }}
         />
       )}
+
+      {canManagePrescriptions && editingPrescription && (
+        <PrescriptionForm
+          key={editingPrescription.id}
+          animals={animals}
+          visits={visits}
+          initialValues={{
+            animal: editingPrescription.animal,
+            visit: editingPrescription.visit,
+            medication_name: editingPrescription.medication_name,
+            active_substance: editingPrescription.active_substance,
+            dosage: editingPrescription.dosage,
+            frequency: editingPrescription.frequency,
+            duration: editingPrescription.duration,
+            quantity: editingPrescription.quantity,
+            issue_date: editingPrescription.issue_date,
+            valid_until: editingPrescription.valid_until,
+            instructions: editingPrescription.instructions,
+          }}
+          status={formStatus}
+          onSubmit={handleUpdatePrescription}
+          onCancel={() => {
+            setEditingPrescription(null)
+            setFormStatus('idle')
+          }}
+      />
+    )}
 
       <div className="list-toolbar">
         <input
@@ -285,6 +360,7 @@ function PrescriptionsPage() {
                     <th>Data wystawienia</th>
                     <th>Ważna do</th>
                     <th>Lekarz</th>
+                    {canManagePrescriptions && <th>Akcje</th>}
                   </tr>
                 </thead>
 
@@ -324,6 +400,23 @@ function PrescriptionsPage() {
                       <td>{prescription.issue_date}</td>
                       <td>{prescription.valid_until}</td>
                       <td>{prescription.veterinarian_name || '—'}</td>
+                      {canManagePrescriptions && (
+                        <td>
+                          <div className="table-actions">
+                            <button
+                              type="button"
+                              className="table-action-button"
+                              onClick={() => {
+                                setFormStatus('idle')
+                                setIsCreateFormOpen(false)
+                                setEditingPrescription(prescription)
+                              }}
+                            >
+                              Edytuj
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
