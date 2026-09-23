@@ -27,8 +27,17 @@ def test_serialize_prescription():
 
     assert data["id"] == prescription.id
     assert data["animal"] == prescription.animal.id
+    assert data["animal_name"] == prescription.animal.name
+    assert (
+        data["animal_owner_name"]
+        == str(prescription.animal.owner)
+    )
     assert data["visit"] == prescription.visit.id
     assert data["veterinarian"] == prescription.veterinarian.id
+    assert (
+        data["veterinarian_name"]
+        == prescription.veterinarian.get_full_name()
+    )
     assert data["prescription_number"] == "RX-2026-000001"
     assert data["medication_name"] == "Amoxicillin"
     assert data["active_substance"] == "Amoxicillin"

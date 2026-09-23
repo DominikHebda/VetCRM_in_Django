@@ -4,9 +4,44 @@ from .models import Prescription
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
+    animal_name = serializers.CharField(
+        source="animal.name",
+        read_only=True,
+    )
+
+    animal_owner_name = serializers.CharField(
+        source="animal.owner.__str__",
+        read_only=True,
+    )
+
+    veterinarian_name = serializers.CharField(
+        source="veterinarian.get_full_name",
+        read_only=True,
+    )
+
     class Meta:
         model = Prescription
-        fields = "__all__"
+        fields = (
+            "id",
+            "animal",
+            "animal_name",
+            "animal_owner_name",
+            "visit",
+            "veterinarian",
+            "veterinarian_name",
+            "prescription_number",
+            "medication_name",
+            "active_substance",
+            "dosage",
+            "frequency",
+            "duration",
+            "quantity",
+            "issue_date",
+            "valid_until",
+            "instructions",
+            "created_at",
+            "updated_at",
+        )
         read_only_fields = (
             "prescription_number",
             "veterinarian",
