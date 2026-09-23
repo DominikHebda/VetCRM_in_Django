@@ -94,4 +94,32 @@ async function createPrescription(prescription) {
   return data
 }
 
-export { getPrescriptions,createPrescription }
+/**
+ * @param {number} prescriptionId
+ * @param {{
+ *   animal: number,
+ *   visit: number,
+ *   medication_name: string,
+ *   active_substance: string,
+ *   dosage: string,
+ *   frequency: string,
+ *   duration: string,
+ *   quantity: number,
+ *   issue_date: string,
+ *   valid_until: string,
+ *   instructions: string,
+ * }} prescription
+ * @returns {Promise<Prescription>}
+ */
+async function updatePrescription(prescriptionId, prescription) {
+  const data = /** @type {Prescription} */ (
+    await apiRequest(`/api/prescriptions/${prescriptionId}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(prescription),
+    })
+  )
+
+  return data
+}
+
+export { getPrescriptions, createPrescription, updatePrescription }
