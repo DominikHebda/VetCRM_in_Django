@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { getAnimals } from '../services/animalsService.js'
 import {
   createPrescription,
+  deletePrescription,
   getPrescriptions,
   updatePrescription,
 } from '../services/prescriptionsService.js'
@@ -122,6 +123,36 @@ async function handleUpdatePrescription(values) {
     setEditingPrescription(null)
   } catch {
     setFormStatus('error')
+  }
+}
+
+/**
+ * @param {import('../services/prescriptionsService.js').Prescription} prescription
+ */
+async function handleDeletePrescription(prescription) {
+  const confirmed = window.confirm(
+    `Czy na pewno chcesz usunąć receptę ${prescription.prescription_number} dla pacjenta ${prescription.animal_name}?`,
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await deletePrescription(prescription.id)
+
+    const data = await getPrescriptions({
+      search: debouncedSearch,
+      animal: animalFilter || undefined,
+      page,
+    })
+
+    setPrescriptions(data.results)
+    setTotalCount(data.count)
+    setHasPreviousPage(Boolean(data.previous))
+    setHasNextPage(Boolean(data.next))
+  } catch {
+    setStatus('error')
   }
 }
 
@@ -413,6 +444,13 @@ async function handleUpdatePrescription(values) {
                               }}
                             >
                               Edytuj
+                            </button>
+                            <button
+                              type="button"
+                              className="table-action-button"
+                              onClick={() => handleDeletePrescription(prescription)}
+                            >
+                              Usuń
                             </button>
                           </div>
                         </td>
