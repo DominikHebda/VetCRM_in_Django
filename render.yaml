@@ -32,3 +32,19 @@ services:
 
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://vetcrm-api.onrender.com"
+
+  - type: web
+    name: vetcrm-web
+    runtime: static
+
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: "https://vetcrm-api.onrender.com"
+
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
