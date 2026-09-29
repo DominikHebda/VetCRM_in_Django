@@ -19,9 +19,6 @@ services:
       - key: CORS_ALLOWED_ORIGINS
         value: "https://vetcrm-web.onrender.com"
 
-      - key: DATABASE_URL
-        sync: false
-
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://vetcrm-api.onrender.com,https://vetcrm-web.onrender.com"
 
