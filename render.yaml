@@ -1,9 +1,3 @@
-databases:
-  - name: vetcrm-db
-    plan: free
-    databaseName: vetcrm
-    user: vetcrm
-
 services:
   - type: web
     name: vetcrm-api
@@ -26,9 +20,7 @@ services:
         value: "https://vetcrm-web.onrender.com"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: vetcrm-db
-          property: connectionString
+        sync: false
 
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://vetcrm-api.onrender.com,https://vetcrm-web.onrender.com"
