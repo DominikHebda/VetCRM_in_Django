@@ -1,7 +1,6 @@
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
-from django.utils import timezone
 
 from analytics.services import AnalyticsService
 from tests.factories.animals import AnimalFactory
@@ -24,10 +23,10 @@ def test_overview_groups_animals_by_species():
 
 
 def test_overview_groups_visits_by_month():
-    now = timezone.now()
+    visit_date = datetime(2026, 9, 15, 12, tzinfo=UTC)
 
-    VisitFactory(visit_date=now)
-    VisitFactory(visit_date=now + timedelta(days=1))
+    VisitFactory(visit_date=visit_date)
+    VisitFactory(visit_date=visit_date + timedelta(days=1))
 
     data = AnalyticsService.overview()
 
