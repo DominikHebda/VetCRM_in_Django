@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wylogowanie — VetCRM</title>
+</head>
+<body>
+  <p>Kończenie sesji VetCRM…</p>
+
+  <form id="logout-form" method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Zakończ wylogowanie</button>
+  </form>
+
+  <script>
+    document.getElementById('logout-form').submit();
+  </script>
+</body>
+</html>
