@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { getCurrentUser } from '../services/authService.js'
 import { AuthContext } from './authContext.js'
 import { clearOAuthTokens } from './oauth.js'
+import { LOGOUT_URL } from './oauthConfig.js'
 
 /**
  * @typedef {Object} CurrentUser
@@ -46,6 +47,7 @@ function AuthProvider({ children }) {
   clearOAuthTokens()
   setUser(null)
   setStatus('unauthenticated')
+  window.location.assign(LOGOUT_URL)
   }
 
   const value = {

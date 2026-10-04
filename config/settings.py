@@ -26,6 +26,11 @@ env = environ.Env(
 
 environ.Env.read_env(BASE_DIR / ".env")
 
+FRONTEND_URL = env(
+    "FRONTEND_URL",
+    default="http://localhost:5173",
+)
+
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG")
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")

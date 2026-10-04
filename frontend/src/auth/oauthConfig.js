@@ -9,8 +9,10 @@ const OAUTH_REDIRECT_URI =
 
 const OAUTH_AUTHORIZE_URL = `${API_BASE_URL}/o/authorize/`
 const OAUTH_TOKEN_URL = `${API_BASE_URL}/o/token/`
+const LOGOUT_URL = `${API_BASE_URL}/accounts/logout/`
 
 export {
+  LOGOUT_URL,
   OAUTH_AUTHORIZE_URL,
   OAUTH_CLIENT_ID,
   OAUTH_REDIRECT_URI,
