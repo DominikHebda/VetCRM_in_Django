@@ -1,6 +1,7 @@
 /**
  * @typedef {Object} VisitOption
  * @property {number} id
+ * @property {string} visit_date
  * @property {string} animal_name
  * @property {string} animal_owner_name
  */
@@ -24,6 +25,20 @@
  * @property {string | null} weight
  * @property {string | null} temperature
  */
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function formatVisitDate(value) {
+  return new Intl.DateTimeFormat('pl-PL', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
 
 /**
  * @param {Object} props
@@ -108,7 +123,7 @@ function MedicalRecordForm({
 
             {visits.map((visit) => (
               <option key={visit.id} value={visit.id}>
-                {visit.animal_name} — {visit.animal_owner_name}
+                {formatVisitDate(visit.visit_date)} — {visit.animal_name} — {visit.animal_owner_name}
               </option>
             ))}
           </select>
