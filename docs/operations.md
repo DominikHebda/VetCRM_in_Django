@@ -126,6 +126,20 @@ Użyj narzędzi zgodnych z wersją serwera źródłowego i odtwarzaj do zgodnej
 wersji PostgreSQL. Zweryfikowana ręcznie konfiguracja: Neon 18.6,
 lokalny serwer 18.6 oraz narzędzia 18.6.
 
+### Sprawdzenie nowych poleceń i Django — 2026-10-09
+
+- `backup_neon` utworzył archiwum o rozmiarze 96 644 bajty.
+- `backup_test` odtworzył je do lokalnej bazy
+  `vetcrm_restore_check_20261009`.
+- Odczytano 23 tabele i liczby rekordów zgodne z wcześniejszą próbą.
+- Kontrola systemowa Django na odtworzonej bazie nie wykazała błędów.
+- Nie stwierdzono niewykonanych migracji.
+- ORM odczytał 3 użytkowników, 2 zwierzęta i 5 wizyt.
+
+Sprawdzenie wykonano przez osobne połączenie w jednym procesie,
+bez zmiany `.env` i domyślnej bazy aplikacji.
+Nie obejmowało ono logowania ani testu interfejsu na odtworzonej bazie.
+
 ### Wykonanie kopii
 
 W Neon → Connect wybierz branch i bazę używane przez `vetcrm-api`.
