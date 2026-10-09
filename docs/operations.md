@@ -119,9 +119,84 @@ create_initial_admin nie resetuje hasła istniejącego konta. Użyj changepasswo
 
 Nie przesyłaj haseł, pełnych connection stringów, tokenów ani adresów callback zawierających code. Usunięcie lokalnych tokenów i sesji Django nie oznacza unieważnienia wcześniej wydanych tokenów OAuth na serwerze.
 
+## Kopia bazy Neon i lokalna próba odtworzenia
+
+Polecenia korzystają z `pg_dump` i `pg_restore` dostępnych w PATH.
+Użyj narzędzi zgodnych z wersją serwera źródłowego i odtwarzaj do zgodnej
+wersji PostgreSQL. Zweryfikowana ręcznie konfiguracja: Neon 18.6,
+lokalny serwer 18.6 oraz narzędzia 18.6.
+
+### Wykonanie kopii
+
+W Neon → Connect wybierz branch i bazę używane przez `vetcrm-api`.
+Wyłącz Connection pooling. Host ma kończyć się `.neon.tech` i nie zawierać
+`-pooler`. Przygotuj nazwę użytkownika i odsłoń hasło w panelu.
+
+W terminalu VS Code, w katalogu projektu z aktywnym `.venv`, uruchom
+(po zastąpieniu przykładowego hosta prawdziwym):
+
+```powershell
+python manage.py backup_neon --host ep-przyklad.us-west-2.aws.neon.tech --user neondb_owner --database neondb
+```
+
+Hasło podaj dopiero przy `Neon password (hidden):`. Nie będzie widoczne.
+Polecenie nie zmienia `.env` ani `DATABASE_URL`. Hasło przekazuje wyłącznie
+do środowiska procesu `pg_dump`, bez zapisu w pliku i argumentach polecenia.
+
+Domyślny katalog to `VetCRM-backups` w katalogu domowym użytkownika.
+Można wskazać inny katalog poza projektem:
+
+```powershell
+python manage.py backup_neon --host ep-przyklad.us-west-2.aws.neon.tech --user neondb_owner --output-dir "D:\VetCRM-backups"
+```
+
+Zapis odbywa się najpierw do pliku `.partial`. Dopiero udany eksport
+publikuje plik `.dump`; nieudany eksport usuwa plik częściowy.
+Wynik zawiera pełną ścieżkę i rozmiar kopii.
+Plik zawiera dane bazy, w tym konta i tokeny. Przechowuj go poza repozytorium
+w miejscu dostępnym tylko dla uprawnionych osób; utrzymuj dodatkową kopię
+na oddzielnym nośniku lub w chronionym magazynie plików.
+
+### Odtworzenie w nowej lokalnej bazie
+
+Lokalna konfiguracja Django musi wskazywać PostgreSQL na `localhost`,
+`127.0.0.1` lub `::1`. Użytkownik z tej konfiguracji musi mieć prawo CREATEDB.
+Polecenie wykorzystuje hasło już wczytane przez Django.
+
+Podaj istniejący plik kopii oraz **nową** nazwę zaczynającą się od
+`vetcrm_restore_`:
+
+```powershell
+python manage.py backup_test "C:\Users\Asus\VetCRM-backups\NAZWA_PLIKU.dump" --database vetcrm_restore_check_20261009
+```
+
+Polecenie sprawdza czytelność archiwum, tworzy pustą bazę z `template0`,
+odtwarza kopię w jednej transakcji i odczytuje liczby rekordów we wszystkich
+tabelach schematu `public`. Pomija właścicieli i uprawnienia z Neon,
+więc obiekty należą do lokalnego użytkownika wykonującego odtworzenie.
+
+Polecenie odmawia działania przy zdalnym hoście, nazwie aktywnej bazy Django
+lub istniejącej bazie docelowej. Nie usuwa baz i nie zmienia `.env`.
+Po błędzie odtworzenia nowa baza pozostaje; odtworzenie w jednej transakcji
+wycofuje wprowadzone przez `pg_restore` zmiany. Przy ponownej próbie użyj
+nowej nazwy bazy. W razie braku uprawnień do tworzenia bazy zgłoś komunikat
+administratorowi lokalnego PostgreSQL.
+
+### Co potwierdza sprawdzenie
+
+Sukces oznacza zakończony eksport, odtworzenie schematu i danych oraz
+odczyt tabel. Nie zastępuje testu aplikacji na odtworzonej bazie ani kopii
+plików przechowywanych poza PostgreSQL. Jest to kopia jednej bazy;
+role serwera i ich hasła nie są kopiowane przez `pg_dump`.
+
+Ręczna próba z 2026-10-09: archiwum `CUSTOM`, 96 644 bajty, 216 wpisów
+TOC, eksport i odtworzenie z kodem 0. W `vetcrm_restore_test` odczytano
+23 tabele, w tym 3 użytkowników, 2 właścicieli, 2 zwierzęta i 5 wizyt.
+Próba została wykonana przed dodaniem powyższych poleceń.
+
 ## Odtwarzanie danych i cofanie wdrożenia
 
-Przed migracjami zmieniającymi dane ustal aktualny sposób kopii i odtwarzania w Neon dla używanego planu. Nie zakładaj, że samo posiadanie repozytorium zapewnia kopię danych.
+Przed migracjami zmieniającymi dane wykonaj aktualną kopię i sprawdź jej odtworzenie według procedury powyżej. Nie zakładaj, że samo posiadanie repozytorium zapewnia kopię danych.
 
 Cofnięcie kodu do wcześniejszego deploya nie cofa wykonanych migracji ani nie odtwarza danych. Najpierw sprawdź zgodność starego kodu z aktualnym schematem. Procedura kopii i odtwarzania wymaga osobnego sprawdzenia na bazie testowej.
 
@@ -140,3 +215,6 @@ Cofnięcie kodu do wcześniejszego deploya nie cofa wykonanych migracji ani nie 
 - [Zmienne środowiskowe Render](https://render.com/docs/configure-environment-variables)
 - [Ograniczenia Render Free](https://render.com/docs/free)
 - [Vite 8](https://v8.vite.dev/blog/announcing-vite8)
+
+- [PostgreSQL: pg_dump](https://www.postgresql.org/docs/18/app-pgdump.html)
+- [PostgreSQL: pg_restore](https://www.postgresql.org/docs/18/app-pgrestore.html)
