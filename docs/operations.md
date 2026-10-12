@@ -138,7 +138,24 @@ lokalny serwer 18.6 oraz narzędzia 18.6.
 
 Sprawdzenie wykonano przez osobne połączenie w jednym procesie,
 bez zmiany `.env` i domyślnej bazy aplikacji.
-Nie obejmowało ono logowania ani testu interfejsu na odtworzonej bazie.
+Sprawdzenie z 2026-10-09 nie obejmowało logowania ani interfejsu.
+Test ten wykonano osobno 2026-10-12 i opisano poniżej.
+
+### Test interfejsu na odtworzonej bazie — 2026-10-12
+
+Backend uruchomiono na `vetcrm_restore_check_20261009`.
+Aplikację OAuth w tej kopii dopasowano do lokalnego frontendu.
+
+Potwierdzono:
+
+- logowanie administratora i wyświetlanie dashboardu,
+- odczyt 2 właścicieli, 2 zwierząt i 5 wizyt,
+- dodanie właściciela testowego i zachowanie wpisu po odświeżeniu,
+- wylogowanie, ponowne wyświetlenie formularza logowania
+  i dostęp do zapisanego wpisu po ponownym zalogowaniu.
+
+Po próbie zatrzymano backend testowy i uruchomiono go ponownie
+na zwykłej lokalnej bazie `vetcrm_db`.
 
 ### Wykonanie kopii
 
