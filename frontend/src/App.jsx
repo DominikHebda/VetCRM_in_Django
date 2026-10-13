@@ -11,6 +11,7 @@ import VisitsPage from './pages/VisitsPage.jsx'
 import MedicalRecordsPage from './pages/MedicalRecordsPage.jsx'
 import VaccinationsPage from './pages/VaccinationsPage.jsx'
 import PrescriptionsPage from './pages/PrescriptionsPage.jsx'
+import AnalyticsPage from './pages/AnalyticsPage.jsx'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/medical" element={<MedicalRecordsPage />} />
             <Route path="/vaccinations" element={<VaccinationsPage />} />
             <Route path="/prescriptions" element={<PrescriptionsPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
         </Route>
 

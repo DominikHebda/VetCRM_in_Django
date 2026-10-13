@@ -1,7 +1,9 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
+from django.utils import timezone
 
+from analytics.serializers import AnalyticsOverviewSerializer
 from analytics.services import AnalyticsService
 from tests.factories.animals import AnimalFactory
 from tests.factories.prescriptions import PrescriptionFactory
@@ -80,3 +82,24 @@ def test_overview_groups_visits_by_veterinarian(veterinarian_user,):
     )
 
     assert veterinarian_result["count"] == 3
+
+def test_overview_serializes_months_as_dates_in_current_timezone():
+    VisitFactory(
+        visit_date=datetime(2026, 9, 15, 12, tzinfo=UTC),
+    )
+    VisitFactory(
+        visit_date=datetime(2026, 9, 30, 22, 30, tzinfo=UTC),
+    )
+
+    with timezone.override("Europe/Warsaw"):
+        data = AnalyticsService.overview()
+        serialized = AnalyticsOverviewSerializer(data).data
+
+    assert all(
+        type(row["month"]) is date
+        for row in data["visits_by_month"]
+    )
+    assert serialized["visits_by_month"] == [
+        {"month": "2026-09-01", "count": 1},
+        {"month": "2026-10-01", "count": 1},
+    ]
