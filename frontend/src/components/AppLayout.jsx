@@ -2,6 +2,8 @@ import { NavLink, Outlet } from 'react-router-dom'
 
 import { useAuth } from '../auth/useAuth.js'
 
+import { canViewAnalytics } from '../auth/permissions.js'
+
 function AppLayout() {
   const { user, logout } = useAuth()
 
@@ -20,6 +22,7 @@ function AppLayout() {
           <NavLink to="/medical">Dokumentacja medyczna</NavLink>
           <NavLink to="/vaccinations">Szczepienia</NavLink>
           <NavLink to="/prescriptions">Recepty</NavLink>
+          {canViewAnalytics(user) && <NavLink to="/analytics">Analityka</NavLink>}
         </nav>
       </aside>
 

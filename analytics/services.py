@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, DateField
 from django.db.models.functions import TruncMonth
 
 from animals.models import Animal
@@ -12,7 +12,10 @@ class AnalyticsService:
     def overview():
         visits_by_month = list(
             Visit.objects.annotate(
-                month=TruncMonth("visit_date"),
+                month=TruncMonth(
+                    "visit_date",
+                    output_field=DateField(),
+                ),
             )
             .values("month")
             .annotate(count=Count("id"))
