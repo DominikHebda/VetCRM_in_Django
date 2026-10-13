@@ -116,7 +116,9 @@ git diff --check
 
 Jeżeli używasz bazy z Compose, konfiguracja lokalnych testów musi wskazywać `localhost:5433`, a nie kontenerowy host `db`. Nie uruchamiaj testów na bazie wdrożenia.
 
-Obecny workflow .github/workflows/ci.yml sprawdza backend. Lint i build frontendu wykonuj także lokalnie.
+Workflow `.github/workflows/ci.yml` sprawdza backend oraz frontend.
+Job `frontend` wykonuje `npm ci`, lint i build na Node.js 24.
+Te same sprawdzenia można uruchomić lokalnie przed wysłaniem zmian.
 
 ## Wdrożenie i dalsza praca
 

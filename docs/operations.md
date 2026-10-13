@@ -54,7 +54,7 @@ Client ID jest identyfikatorem publicznym. Client secret nie trafia do frontendu
 ## Wdrożenie zmiany
 
 1. Branch → kontrola zmiany → testy → commit → push → PR.
-2. Poczekaj na zielone CI. Obecne CI sprawdza backend; lint i build frontendu uruchom osobno.
+2. Poczekaj na zielone CI. Job `test` sprawdza backend, a job `frontend` wykonuje `npm ci`, lint i build na Node.js 24.
 3. Merge do main. Przy włączonym Auto Sync Blueprint synchronizuje konfigurację; w przeciwnym razie wykonaj Manual Sync.
 4. Sprawdź commit i wynik deploya dla obu usług. Nazwy i adresy istniejących usług mają zostać zachowane.
 5. Sprawdź health check, logowanie, dashboard, zapis danych oraz wylogowanie.
