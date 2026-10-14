@@ -23,6 +23,7 @@ function AppLayout() {
           <NavLink to="/vaccinations">Szczepienia</NavLink>
           <NavLink to="/prescriptions">Recepty</NavLink>
           {canViewAnalytics(user) && <NavLink to="/analytics">Analityka</NavLink>}
+          <NavLink to="/notifications">Powiadomienia</NavLink>
         </nav>
       </aside>
 
