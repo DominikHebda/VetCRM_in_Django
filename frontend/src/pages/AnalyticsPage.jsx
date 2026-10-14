@@ -116,7 +116,11 @@ function AnalyticsContent() {
     return (
       <div>
         <p role="alert">Nie udało się pobrać statystyk.</p>
-        <button type="button" onClick={reloadAnalytics}>
+        <button
+          className="primary-button"
+          type="button"
+          onClick={reloadAnalytics}
+        >
           Spróbuj ponownie
         </button>
       </div>
@@ -135,7 +139,11 @@ function AnalyticsContent() {
           <p>Zestawienia wszystkich danych zapisanych w klinice.</p>
         </div>
 
-        <button type="button" onClick={reloadAnalytics}>
+        <button
+          className="primary-button"
+          type="button"
+          onClick={reloadAnalytics}
+        >
           Odśwież dane
         </button>
       </div>
