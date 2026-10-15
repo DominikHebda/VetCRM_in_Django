@@ -4,15 +4,49 @@ CRM do zarządzania przychodnią weterynaryjną: Django REST Framework, React i 
 
 ## Funkcje i role
 
-Dostępne są dashboard, właściciele, zwierzęta, wizyty, dokumentacja medyczna, szczepienia i recepty, wraz z wyszukiwaniem i paginacją.
+Dostępne są dashboard, właściciele, zwierzęta, wizyty,
+dokumentacja medyczna, szczepienia, recepty, Analityka i Powiadomienia.
+Listy właścicieli, zwierząt, wizyt oraz wpisów klinicznych obsługują
+wyszukiwanie i paginację.
 
-| Obszar                              | ADMIN       | VET         | RECEPTIONIST |
-| ----------------------------------- | ----------- | ----------- | ------------ |
-| Właściciele i zwierzęta             | Zarządzanie | Odczyt      | Zarządzanie  |
-| Wizyty                              | Zarządzanie | Zarządzanie | Zarządzanie  |
-| Dokumentacja, szczepienia i recepty | Zarządzanie | Zarządzanie | Odczyt       |
+| Obszar                              | ADMIN                    | VET                   | RECEPTIONIST             |
+| ----------------------------------- | ------------------------ | --------------------- | ------------------------ |
+| Właściciele i zwierzęta             | Zarządzanie              | Odczyt                | Zarządzanie              |
+| Wizyty                              | Zarządzanie              | Zarządzanie           | Zarządzanie              |
+| Dokumentacja, szczepienia i recepty | Zarządzanie              | Zarządzanie           | Odczyt                   |
+| Analityka                           | Odczyt                   | Odczyt                | Brak dostępu             |
+| Powiadomienia                       | Wszystkie pasujące wpisy | Własne pasujące wpisy | Wszystkie pasujące wpisy |
 
-Role ustawia się w UserProfile w Django Admin. Konta personelu powinny być aktywne; do korzystania z frontendu nie wymagają flag staff ani superuser. API Analytics i Notifications istnieją; ich osobne widoki frontendowe pozostają do wykonania.
+Role ustawia się w UserProfile w Django Admin.
+Konta personelu powinny być aktywne; do korzystania z frontendu
+nie wymagają flag staff ani superuser.
+
+### Analityka
+
+Ekran `/analytics` przedstawia:
+
+- wizyty według miesiąca, niezależnie od statusu,
+- zwierzęta według gatunku,
+- do pięciu najczęstszych szczepionek i przepisywanych leków,
+- wizyty według lekarza.
+
+Zestawienia obejmują wszystkie zapisane dane, bez filtra okresu.
+Dostępne są ręczne odświeżanie oraz obsługa ładowania, błędów
+i pustych zestawień.
+
+### Powiadomienia
+
+Ekran `/notifications` przedstawia:
+
+- szczepienia z kolejnym terminem od dziś do 30 dni,
+- recepty ważne do daty przypadającej od dziś do 7 dni,
+- zaplanowane wizyty na dziś.
+
+Weterynarz widzi wpisy przypisane do jego konta.
+Powiadomienia zawierają terminy i linki do odpowiednich modułów.
+Lista jest pobierana przy otwarciu ekranu i odświeżana ręcznie;
+nie ma oznaczania wpisów jako przeczytane ani wysyłki e-mail.
+Treść komunikatów z API jest obecnie w języku angielskim.
 
 ## Wymagania
 
@@ -129,4 +163,6 @@ Te same sprawdzenia można uruchomić lokalnie przed wysłaniem zmian.
 
 Wdrożenie frontendu: https://vetcrm-web.onrender.com. Backend: https://vetcrm-api.onrender.com.
 
-Dalsze zadania obejmują widoki Analytics i Notifications, testy E2E oraz dopracowanie UX. Utworzenie taga i wydania v1.0.0 następuje po zatwierdzeniu dokumentacji i sprawdzeniu CI, nie przez samą zmianę tego pliku.
+Dalsze zadania obejmują testy E2E, dopracowanie UX oraz polskie
+komunikaty powiadomień. Wydanie `v1.0.0` zostało opublikowane;
+późniejsze zmiany są rozwijane na `main` i wejdą do kolejnego wydania.
