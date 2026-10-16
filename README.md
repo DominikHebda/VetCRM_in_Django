@@ -174,11 +174,13 @@ Playwright uruchamia backend na porcie 8002 i frontend na 5174.
 Korzysta z `config.settings_e2e`, osobnej bazy SQLite w `.e2e/`
 oraz dedykowanego konta i aplikacji OAuth.
 
-Pierwszy test sprawdza logowanie administratora przez OAuth,
-otwarcie dashboardu i zachowanie logowania po odświeżeniu.
-Nie zastępuje testów backendu na PostgreSQL.
+Testy sprawdzają logowanie administratora przez OAuth,
+otwarcie dashboardu, zachowanie logowania po odświeżeniu
+oraz wylogowanie wymagające ponownego podania danych logowania.
 
-Job `e2e` uruchamia ten test także w GitHub Actions.
+Nie zastępują one testów backendu na PostgreSQL.
+
+Job `e2e` uruchamia te testy także w GitHub Actions.
 
 ## Wdrożenie i dalsza praca
 
