@@ -172,11 +172,15 @@ Pop-Location
 
 Playwright uruchamia backend na porcie 8002 i frontend na 5174.
 Korzysta z `config.settings_e2e`, osobnej bazy SQLite w `.e2e/`
-oraz dedykowanego konta i aplikacji OAuth.
+oraz dedykowanych kont ADMIN, VET i RECEPTIONIST oraz aplikacji OAuth.
 
 Testy sprawdzają logowanie administratora przez OAuth,
 otwarcie dashboardu, zachowanie logowania po odświeżeniu
 oraz wylogowanie wymagające ponownego podania danych logowania.
+
+Testy sprawdzają również dostęp ADMIN i VET do Analityki
+oraz ukrycie linku i przekierowanie RECEPTIONIST przy wejściu
+na `/analytics`.
 
 Nie zastępują one testów backendu na PostgreSQL.
 
