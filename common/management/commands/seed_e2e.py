@@ -30,26 +30,34 @@ class Command(BaseCommand):
         Application = get_application_model()
 
         with transaction.atomic():
-            user, _ = get_user_model().objects.update_or_create(
-                username="e2e_admin",
-                defaults={
-                    "email": "e2e@example.invalid",
-                    "is_active": True,
-                    "is_staff": True,
-                    "is_superuser": True,
-                },
-            )
-            user.set_password("E2e-Login-Only-42!")
-            user.save(update_fields=["password"])
+            users = {}
 
-            UserProfile.objects.update_or_create(
-                user=user,
-                defaults={"role": UserProfile.Role.ADMIN},
-            )
+            for username, role in (
+                ("e2e_admin", UserProfile.Role.ADMIN),
+                ("e2e_vet", UserProfile.Role.VET),
+                ("e2e_receptionist", UserProfile.Role.RECEPTIONIST),
+            ):
+                user, _ = get_user_model().objects.update_or_create(
+                    username=username,
+                    defaults={
+                        "email": f"{username}@example.invalid",
+                        "is_active": True,
+                        "is_staff": role == UserProfile.Role.ADMIN,
+                        "is_superuser": role == UserProfile.Role.ADMIN,
+                    },
+                )
+                user.set_password("E2e-Login-Only-42!")
+                user.save(update_fields=["password"])
+
+                UserProfile.objects.update_or_create(
+                    user=user,
+                    defaults={"role": role},
+                )
+                users[username] = user
 
             application_defaults = {
                 "name": "VetCRM browser tests",
-                "user": user,
+                "user": users["e2e_admin"],
                 "client_type": Application.CLIENT_PUBLIC,
                 "authorization_grant_type": Application.GRANT_AUTHORIZATION_CODE,
                 "redirect_uris": "http://127.0.0.1:5174/auth/callback",
