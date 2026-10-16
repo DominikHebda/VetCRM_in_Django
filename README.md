@@ -154,6 +154,32 @@ Workflow `.github/workflows/ci.yml` sprawdza backend oraz frontend.
 Job `frontend` wykonuje `npm ci`, lint i build na Node.js 24.
 Te same sprawdzenia można uruchomić lokalnie przed wysłaniem zmian.
 
+## Testy przeglądarkowe E2E
+
+Przy aktywnym `.venv` i zainstalowanych zależnościach frontendu:
+
+```powershell
+npm --prefix frontend run test:e2e
+```
+
+Przy pierwszym uruchomieniu zainstaluj Chromium:
+
+```powershell
+Push-Location frontend
+npx playwright install chromium
+Pop-Location
+```
+
+Playwright uruchamia backend na porcie 8002 i frontend na 5174.
+Korzysta z `config.settings_e2e`, osobnej bazy SQLite w `.e2e/`
+oraz dedykowanego konta i aplikacji OAuth.
+
+Pierwszy test sprawdza logowanie administratora przez OAuth,
+otwarcie dashboardu i zachowanie logowania po odświeżeniu.
+Nie zastępuje testów backendu na PostgreSQL.
+
+Job `e2e` uruchamia ten test także w GitHub Actions.
+
 ## Wdrożenie i dalsza praca
 
 - [Instrukcja operacyjna Render i Neon](docs/operations.md).
@@ -163,6 +189,6 @@ Te same sprawdzenia można uruchomić lokalnie przed wysłaniem zmian.
 
 Wdrożenie frontendu: https://vetcrm-web.onrender.com. Backend: https://vetcrm-api.onrender.com.
 
-Dalsze zadania obejmują testy E2E oraz dopracowanie UX.
+Dalsze zadania obejmują rozbudowę testów E2E oraz dopracowanie UX.
 Wydanie `v1.0.0` zostało opublikowane;
 późniejsze zmiany są rozwijane na `main` i wejdą do kolejnego wydania.
