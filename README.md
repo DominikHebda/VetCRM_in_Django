@@ -182,6 +182,9 @@ Testy sprawdzają również dostęp ADMIN i VET do Analityki
 oraz ukrycie linku i przekierowanie RECEPTIONIST przy wejściu
 na `/analytics`.
 
+Sprawdzane jest także dodawanie właścicieli przez ADMIN
+i RECEPTIONIST oraz zachowanie zapisanych danych po odświeżeniu strony.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
