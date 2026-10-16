@@ -31,6 +31,10 @@ def test_returns_vaccination_due_within_30_days():
     assert notification["due_date"] == vaccination.next_due_date.isoformat()
     assert notification["animal_id"] == vaccination.animal_id
     assert notification["vaccination_id"] == vaccination.id
+    assert notification["message"] == (
+        f"Zbliża się termin szczepienia: {vaccination.vaccine_name}. "
+        f"Pacjent: {vaccination.animal.name}."
+    )
 
 
 def test_does_not_return_vaccination_due_after_30_days():
@@ -101,6 +105,10 @@ def test_returns_prescription_expiring_within_7_days():
     assert notification["due_date"] == prescription.valid_until.isoformat()
     assert notification["animal_id"] == prescription.animal_id
     assert notification["prescription_id"] == prescription.id
+    assert notification["message"] == (
+        f"Wkrótce wygasa recepta nr {prescription.prescription_number}. "
+        f"Pacjent: {prescription.animal.name}."
+    )
 
 
 def test_does_not_return_prescription_expiring_after_7_days():
@@ -169,6 +177,9 @@ def test_returns_scheduled_visit_for_today():
     assert notification["visit_id"] == visit.id
     assert notification["animal_id"] == visit.animal_id
     assert notification["due_date"] == visit.visit_date.isoformat()
+    assert notification["message"] == (
+        f"Wizyta zaplanowana na dziś. Pacjent: {visit.animal.name}."
+    )
 
 
 def test_does_not_return_completed_or_cancelled_visits():

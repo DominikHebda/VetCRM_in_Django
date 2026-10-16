@@ -44,8 +44,8 @@ class NotificationService:
                 "type": "vaccination_due",
                 "severity": "warning",
                 "message": (
-                    f"{vaccination.vaccine_name} vaccination for "
-                    f"{vaccination.animal.name} is due soon"
+                    f"Zbliża się termin szczepienia: {vaccination.vaccine_name}. "
+                    f"Pacjent: {vaccination.animal.name}."
                 ),
                 "due_date": vaccination.next_due_date.isoformat(),
                 "animal_id": vaccination.animal_id,
@@ -87,8 +87,8 @@ class NotificationService:
                 "type": "prescription_expiring",
                 "severity": "warning",
                 "message": (
-                    f"Prescription {prescription.prescription_number} for "
-                    f"{prescription.animal.name} expires soon"
+                    f"Wkrótce wygasa recepta nr {prescription.prescription_number}. "
+                    f"Pacjent: {prescription.animal.name}."
                 ),
                 "due_date": prescription.valid_until.isoformat(),
                 "animal_id": prescription.animal_id,
@@ -127,7 +127,7 @@ class NotificationService:
                 "type": "visit_today",
                 "severity": "info",
                 "message": (
-                    f"Visit for {visit.animal.name} is scheduled for today"
+                    f"Wizyta zaplanowana na dziś. Pacjent: {visit.animal.name}."
                 ),
                 "due_date": visit.visit_date.isoformat(),
                 "animal_id": visit.animal_id,
