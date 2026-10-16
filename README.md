@@ -46,7 +46,7 @@ Weterynarz widzi wpisy przypisane do jego konta.
 Powiadomienia zawierają terminy i linki do odpowiednich modułów.
 Lista jest pobierana przy otwarciu ekranu i odświeżana ręcznie;
 nie ma oznaczania wpisów jako przeczytane ani wysyłki e-mail.
-Treść komunikatów z API jest obecnie w języku angielskim.
+Treść komunikatów z API jest obecnie w języku polskim.
 
 ## Wymagania
 
@@ -163,6 +163,6 @@ Te same sprawdzenia można uruchomić lokalnie przed wysłaniem zmian.
 
 Wdrożenie frontendu: https://vetcrm-web.onrender.com. Backend: https://vetcrm-api.onrender.com.
 
-Dalsze zadania obejmują testy E2E, dopracowanie UX oraz polskie
-komunikaty powiadomień. Wydanie `v1.0.0` zostało opublikowane;
+Dalsze zadania obejmują testy E2E oraz dopracowanie UX.
+Wydanie `v1.0.0` zostało opublikowane;
 późniejsze zmiany są rozwijane na `main` i wejdą do kolejnego wydania.
