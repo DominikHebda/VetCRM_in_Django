@@ -7,6 +7,7 @@ from django.db import transaction
 from oauth2_provider.models import get_application_model
 
 from accounts.models import UserProfile
+from owners.models import Owner
 
 
 class Command(BaseCommand):
@@ -54,6 +55,16 @@ class Command(BaseCommand):
                     defaults={"role": role},
                 )
                 users[username] = user
+
+            Owner.objects.update_or_create(
+                email="e2e-readonly@example.invalid",
+                defaults={
+                    "first_name": "E2E",
+                    "last_name": "Odczyt",
+                    "phone": "500600701",
+                    "address": "ul. Odczytowa 1, Testowo",
+                },
+            )
 
             application_defaults = {
                 "name": "VetCRM browser tests",

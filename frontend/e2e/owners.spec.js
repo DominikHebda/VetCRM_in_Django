@@ -168,3 +168,81 @@ for (const [role, username] of [
     await expect(editedRow).toHaveCount(0)
   })
 }
+
+test('veterinarian can read owners without management actions', async ({
+  page,
+}) => {
+  const email = 'e2e-readonly@example.invalid'
+
+  await loginAsUser(page, 'e2e_vet')
+
+  await page.getByRole('link', {
+    name: 'Właściciele',
+    exact: true,
+  }).click()
+
+  await expect(page.getByRole('heading', {
+    name: 'Właściciele',
+    exact: true,
+  })).toBeVisible()
+
+  const filteredResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+
+    return (
+      response.request().method() === 'GET' &&
+      url.pathname === '/api/owners/' &&
+      url.searchParams.get('search') === email
+    )
+  })
+
+  await page.getByRole('searchbox', {
+    name: 'Szukaj właścicieli',
+    exact: true,
+  }).fill(email)
+
+  expect((await filteredResponse).status()).toBe(200)
+
+  const ownerRow = page.getByRole('row').filter({
+    has: page.getByRole('cell', {
+      name: email,
+      exact: true,
+    }),
+  })
+
+  await expect(ownerRow).toHaveCount(1)
+
+  await expect(ownerRow.getByText('E2E Odczyt', {
+    exact: true,
+  })).toBeVisible()
+
+  await expect(ownerRow.getByRole('cell', {
+    name: '500600701',
+    exact: true,
+  })).toBeVisible()
+
+  await expect(ownerRow.getByRole('cell', {
+    name: 'ul. Odczytowa 1, Testowo',
+    exact: true,
+  })).toBeVisible()
+
+  await expect(page.getByRole('button', {
+    name: 'Dodaj właściciela',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(ownerRow.getByRole('button', {
+    name: 'Edytuj',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(ownerRow.getByRole('button', {
+    name: 'Usuń',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(page.getByRole('columnheader', {
+    name: 'Akcje',
+    exact: true,
+  })).toHaveCount(0)
+})
