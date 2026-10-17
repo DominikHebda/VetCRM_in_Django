@@ -182,8 +182,9 @@ Testy sprawdzają również dostęp ADMIN i VET do Analityki
 oraz ukrycie linku i przekierowanie RECEPTIONIST przy wejściu
 na `/analytics`.
 
-Sprawdzane jest także dodawanie właścicieli przez ADMIN
-i RECEPTIONIST oraz zachowanie zapisanych danych po odświeżeniu strony.
+Sprawdzane są także dodawanie, edycja i usuwanie właścicieli
+przez ADMIN i RECEPTIONIST, wraz z weryfikacją zapisanych zmian
+i trwałości usunięcia po odświeżeniu strony.
 
 Nie zastępują one testów backendu na PostgreSQL.
 

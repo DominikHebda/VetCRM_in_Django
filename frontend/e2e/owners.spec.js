@@ -8,7 +8,7 @@ for (const [role, username] of [
   ['administrator', 'e2e_admin'],
   ['receptionist', 'e2e_receptionist'],
 ]) {
-  test(`${role} creates an owner and sees the saved data after reload`, async ({
+    test(`${role} creates, updates and deletes an owner`, async ({
     page,
   }) => {
     const email = `e2e-${randomUUID()}@example.com`
@@ -43,7 +43,7 @@ for (const [role, username] of [
     await page.getByLabel('Nazwisko', { exact: true }).fill('Testowy')
     await page.getByLabel('E-mail', { exact: true }).fill(email)
     await page.getByLabel('Telefon', { exact: true }).fill(phone)
-    await page.getByLabel('Adres', { exact: true }).fill(address)
+    await page.locator('textarea[name="address"]').fill(address)
 
     await page.getByRole('button', {
       name: 'Zapisz właściciela',
@@ -84,5 +84,87 @@ for (const [role, username] of [
       name: address,
       exact: true,
     })).toBeVisible()
+
+    const ownerIdText = await ownerRow.getByText(/^ID: \d+$/).innerText()
+    const updatedEmail = `e2e-updated-${randomUUID()}@example.com`
+    const updatedPhone = '600700800'
+    const updatedAddress = 'ul. Zmieniona 2, 00-002 Testowo'
+
+    await ownerRow.getByRole('button', {
+      name: 'Edytuj',
+      exact: true,
+    }).click()
+
+    const editHeading = page.getByRole('heading', {
+      name: 'Edytuj właściciela',
+      exact: true,
+    })
+
+    await expect(editHeading).toBeVisible()
+
+    await page.getByLabel('Imię', { exact: true }).fill('Edycja')
+    await page.getByLabel('Nazwisko', { exact: true }).fill('Zmieniony')
+    await page.getByLabel('E-mail', { exact: true }).fill(updatedEmail)
+    await page.getByLabel('Telefon', { exact: true }).fill(updatedPhone)
+    await expect(page.locator('textarea[name="address"]')).toHaveValue(address)
+    await page.locator('textarea[name="address"]').fill(updatedAddress)
+
+    await page.getByRole('button', {
+      name: 'Zapisz właściciela',
+      exact: true,
+    }).click()
+
+    await expect(editHeading).toHaveCount(0)
+    await search.fill(updatedEmail)
+
+    const editedRow = page.getByRole('row').filter({
+      has: page.getByRole('cell', {
+        name: updatedEmail,
+        exact: true,
+      }),
+    })
+
+    await expect(editedRow).toHaveCount(1)
+
+    await page.reload()
+    await search.fill(updatedEmail)
+
+    await expect(editedRow).toHaveCount(1)
+    await expect(editedRow.getByText(ownerIdText, {
+      exact: true,
+    })).toBeVisible()
+    await expect(editedRow.getByText('Edycja Zmieniony', {
+      exact: true,
+    })).toBeVisible()
+    await expect(editedRow.getByRole('cell', {
+      name: updatedPhone,
+      exact: true,
+    })).toBeVisible()
+    await expect(editedRow.getByRole('cell', {
+      name: updatedAddress,
+      exact: true,
+    })).toBeVisible()
+
+    page.once('dialog', (dialog) => dialog.accept())
+
+    await editedRow.getByRole('button', {
+      name: 'Usuń',
+      exact: true,
+    }).click()
+
+    await expect(editedRow).toHaveCount(0)
+    await expect(page.getByRole('heading', {
+      name: 'Brak właścicieli',
+      exact: true,
+    })).toBeVisible()
+
+    await page.reload()
+    await search.fill(updatedEmail)
+
+    await expect(page.getByRole('heading', {
+      name: 'Brak właścicieli',
+      exact: true,
+    })).toBeVisible()
+    await expect(editedRow).toHaveCount(0)
   })
 }

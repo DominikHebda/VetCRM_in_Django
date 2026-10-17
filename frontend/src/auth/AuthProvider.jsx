@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 
 import { getCurrentUser } from '../services/authService.js'
 import { AuthContext } from './authContext.js'
-import { clearOAuthTokens } from './oauth.js'
+import {
+  clearOAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+} from './oauth.js'
 import { LOGOUT_URL } from './oauthConfig.js'
 
 /**
@@ -22,32 +26,48 @@ function AuthProvider({ children }) {
   )
 
   const [status, setStatus] = useState(
-    /** @type {'loading' | 'authenticated' | 'unauthenticated'} */ (
-      'loading'
-    ),
-  )
+  /** @returns {'loading' | 'authenticated' | 'unauthenticated'} */
+  () =>
+    getAccessToken() || getRefreshToken()
+      ? 'loading'
+      : 'unauthenticated',
+)
 
   useEffect(() => {
+    if (!getAccessToken() && !getRefreshToken()) {
+      return
+    }
+
+    let isActive = true
+
     async function loadCurrentUser() {
       try {
         const currentUser = await getCurrentUser()
 
-        setUser(currentUser)
-        setStatus('authenticated')
+        if (isActive) {
+          setUser(currentUser)
+          setStatus('authenticated')
+        }
       } catch {
-        setUser(null)
-        setStatus('unauthenticated')
+        if (isActive) {
+          setUser(null)
+          setStatus('unauthenticated')
+        }
       }
     }
 
     loadCurrentUser()
+
+    return () => {
+      isActive = false
+    }
   }, [])
 
   function logout() {
-  clearOAuthTokens()
-  setUser(null)
-  setStatus('unauthenticated')
-  window.location.assign(LOGOUT_URL)
+    clearOAuthTokens()
+    setUser(null)
+    setStatus('unauthenticated')
+    window.location.assign(LOGOUT_URL)
   }
 
   const value = {
