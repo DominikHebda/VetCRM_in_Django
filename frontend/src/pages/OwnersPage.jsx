@@ -45,6 +45,7 @@ function OwnersPage() {
   const [totalCount, setTotalCount] = useState(0)
   const [hasNextPage, setHasNextPage] = useState(false)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
+  const [listRevision, setListRevision] = useState(0)
 
   /**
  * @param {{
@@ -61,15 +62,7 @@ async function handleCreateOwner(owner) {
   try {
     await createOwner(owner)
 
-    const data = await getOwners({
-      search: debouncedSearch,
-      page,
-    })
-
-    setOwners(data.results)
-    setTotalCount(data.count)
-    setHasNextPage(Boolean(data.next))
-    setHasPreviousPage(Boolean(data.previous))
+    setListRevision((current) => current + 1)
     setFormStatus('idle')
     setIsCreateFormOpen(false)
   } catch {
@@ -96,15 +89,7 @@ async function handleUpdateOwner(owner) {
   try {
     await updateOwner(editingOwner.id, owner)
 
-    const data = await getOwners({
-      search: debouncedSearch,
-      page,
-    })
-
-    setOwners(data.results)
-    setTotalCount(data.count)
-    setHasNextPage(Boolean(data.next))
-    setHasPreviousPage(Boolean(data.previous))
+    setListRevision((current) => current + 1)
     setFormStatus('idle')
     setEditingOwner(null)
   } catch {
@@ -131,18 +116,9 @@ async function handleDeleteOwner(owner) {
 
     if (owners.length === 1 && page > 1) {
       setPage((currentPage) => currentPage - 1)
-      return
     }
 
-    const data = await getOwners({
-      search: debouncedSearch,
-      page,
-    })
-
-    setOwners(data.results)
-    setTotalCount(data.count)
-    setHasNextPage(Boolean(data.next))
-    setHasPreviousPage(Boolean(data.previous))
+    setListRevision((current) => current + 1)
   } catch {
     window.alert('Nie udało się usunąć właściciela.')
   } finally {
@@ -190,7 +166,7 @@ async function handleDeleteOwner(owner) {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, page])
+  }, [debouncedSearch, page, listRevision])
 
   if (status === 'loading') {
     return <p>Ładowanie właścicieli...</p>
