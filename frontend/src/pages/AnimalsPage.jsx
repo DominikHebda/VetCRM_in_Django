@@ -53,6 +53,7 @@ function AnimalsPage() {
   const [page, setPage] = useState(1)
   const [hasNextPage, setHasNextPage] = useState(false)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
+  const [listRevision, setListRevision] = useState(0)
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -81,15 +82,7 @@ function AnimalsPage() {
     try {
       await createAnimal(animal)
 
-      const data = await getAnimals({
-        search: debouncedSearch,
-        page,
-      })
-
-      setAnimals(data.results)
-      setTotalCount(data.count)
-      setHasNextPage(Boolean(data.next))
-      setHasPreviousPage(Boolean(data.previous))
+      setListRevision((current) => current + 1)
       setFormStatus('idle')
       setIsCreateFormOpen(false)
     } catch {
@@ -108,31 +101,23 @@ function AnimalsPage() {
  *   notes: string,
  * }} animal
  */
-async function handleUpdateAnimal(animal) {
-  if (!editingAnimal) {
-    return
+  async function handleUpdateAnimal(animal) {
+    if (!editingAnimal) {
+      return
+    }
+
+    setFormStatus('saving')
+
+    try {
+      await updateAnimal(editingAnimal.id, animal)
+
+      setListRevision((current) => current + 1)
+      setFormStatus('idle')
+      setEditingAnimal(null)
+    } catch {
+      setFormStatus('error')
+    }
   }
-
-  setFormStatus('saving')
-
-  try {
-    await updateAnimal(editingAnimal.id, animal)
-
-    const data = await getAnimals({
-      search: debouncedSearch,
-      page,
-    })
-
-    setAnimals(data.results)
-    setTotalCount(data.count)
-    setHasNextPage(Boolean(data.next))
-    setHasPreviousPage(Boolean(data.previous))
-    setFormStatus('idle')
-    setEditingAnimal(null)
-  } catch {
-    setFormStatus('error')
-  }
-}
 
 /**
  * @param {Animal} animal
@@ -151,18 +136,9 @@ async function handleDeleteAnimal(animal) {
 
     if (animals.length === 1 && page > 1) {
       setPage((currentPage) => currentPage - 1)
-      return
     }
 
-    const data = await getAnimals({
-      search: debouncedSearch,
-      page,
-    })
-
-    setAnimals(data.results)
-    setTotalCount(data.count)
-    setHasNextPage(Boolean(data.next))
-    setHasPreviousPage(Boolean(data.previous))
+    setListRevision((current) => current + 1)
   } catch {
     window.alert('Nie udało się usunąć zwierzęcia.')
   }
@@ -209,7 +185,7 @@ async function handleDeleteAnimal(animal) {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, page])
+  }, [debouncedSearch, page, listRevision])
 
   if (status === 'loading') {
     return <p>Ładowanie zwierząt...</p>
