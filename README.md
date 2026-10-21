@@ -189,6 +189,10 @@ i trwałości usunięcia po odświeżeniu strony.
 Dla VET sprawdzany jest odczyt danych właściciela oraz brak
 przycisków dodawania, edycji i usuwania.
 
+Dla ADMIN i RECEPTIONIST sprawdzane jest również dodawanie
+zwierzęcia, przypisanie właściciela oraz zachowanie danych
+i notatki po odświeżeniu strony.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
