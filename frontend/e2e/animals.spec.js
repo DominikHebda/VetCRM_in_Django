@@ -8,7 +8,7 @@ for (const [role, username] of [
   ['administrator', 'e2e_admin'],
   ['receptionist', 'e2e_receptionist'],
 ]) {
-  test(`${role} creates an animal and sees saved data after reload`, async ({
+  test(`${role} creates, updates and deletes an animal`, async ({
     page,
   }) => {
     const name = `E2E-${randomUUID()}`
@@ -74,18 +74,18 @@ for (const [role, username] of [
       exact: true,
     })
 
-    async function searchForAnimal() {
+    async function searchForAnimal(query = name) {
       const responsePromise = page.waitForResponse((response) => {
         const url = new URL(response.url())
 
         return (
           response.request().method() === 'GET' &&
           url.pathname === '/api/animals/' &&
-          url.searchParams.get('search') === name
+          url.searchParams.get('search') === query
         )
       })
 
-      await search.fill(name)
+      await search.fill(query)
 
       expect((await responsePromise).status()).toBe(200)
     }
@@ -134,9 +134,120 @@ for (const [role, username] of [
       page.locator('textarea[name="notes"]'),
     ).toHaveValue(notes)
 
+    const updatedName = `Edycja-${randomUUID()}`
+    const updatedBreed = 'Rasa po zmianie'
+    const updatedBirthDate = '2021-06-20'
+    const updatedNotes = 'Notatka zmieniona przez test E2E.'
+
+    await page.getByLabel('Imię', {
+      exact: true,
+    }).fill(updatedName)
+
+    await page.getByRole('combobox', {
+      name: 'Gatunek',
+      exact: true,
+    }).selectOption('cat')
+
+    await page.getByLabel('Rasa', {
+      exact: true,
+    }).fill(updatedBreed)
+
+    await page.getByLabel('Data urodzenia', {
+      exact: true,
+    }).fill(updatedBirthDate)
+
+    await page.locator('textarea[name="notes"]').fill(updatedNotes)
+
+    await page.getByRole('button', {
+      name: 'Zapisz zwierzę',
+      exact: true,
+    }).click()
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj zwierzę',
+      exact: true,
+    })).toHaveCount(0)
+
+    await searchForAnimal(updatedName)
+
+    const editedRow = page.getByRole('row').filter({
+      has: page.getByRole('cell', {
+        name: updatedName,
+        exact: true,
+      }),
+    })
+
+    await expect(editedRow).toHaveCount(1)
+
+    await page.reload()
+    await searchForAnimal(updatedName)
+
+    await expect(editedRow).toHaveCount(1)
+
+    for (const value of [
+      updatedName,
+      'Kot',
+      updatedBreed,
+      updatedBirthDate,
+      chipNumber,
+      'E2E Odczyt',
+    ]) {
+      await expect(editedRow.getByRole('cell', {
+        name: value,
+        exact: true,
+      })).toBeVisible()
+    }
+
+    await editedRow.getByRole('button', {
+      name: 'Edytuj',
+      exact: true,
+    }).click()
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj zwierzę',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(
+      page.locator('textarea[name="notes"]'),
+    ).toHaveValue(updatedNotes)
+
     await page.getByRole('button', {
       name: 'Anuluj',
       exact: true,
     }).click()
+
+    const deleteResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'DELETE' &&
+        /^\/api\/animals\/\d+\/$/.test(url.pathname)
+      )
+    })
+
+    page.once('dialog', (dialog) => dialog.accept())
+
+    await editedRow.getByRole('button', {
+      name: 'Usuń',
+      exact: true,
+    }).click()
+
+    expect((await deleteResponse).status()).toBe(204)
+
+    await expect(editedRow).toHaveCount(0)
+    await expect(page.getByRole('heading', {
+      name: 'Brak zwierząt',
+      exact: true,
+    })).toBeVisible()
+
+    await page.reload()
+    await searchForAnimal(updatedName)
+
+    await expect(editedRow).toHaveCount(0)
+    await expect(page.getByRole('heading', {
+      name: 'Brak zwierząt',
+      exact: true,
+    })).toBeVisible()
   })
 }
