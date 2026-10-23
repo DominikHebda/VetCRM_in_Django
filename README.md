@@ -200,6 +200,11 @@ i usuwanie wizyt. Testy potwierdzają zachowanie pacjenta,
 weterynarza, terminu, statusu, powodu i notatki po odświeżeniu
 oraz trwałość usunięcia wizyty.
 
+Dla ADMIN i VET sprawdzane jest tworzenie dokumentacji medycznej
+oraz zachowanie przypisanej wizyty, diagnozy, leczenia, zaleceń,
+wagi i temperatury po odświeżeniu. Test obejmuje również
+ponowne otwarcie formularza edycji z datą wizyty.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.

@@ -4,6 +4,7 @@ import { apiRequest } from './apiClient.js'
  * @typedef {Object} MedicalRecord
  * @property {number} id
  * @property {number} visit
+ * @property {string} visit_date
  * @property {string} animal_name
  * @property {'dog' | 'cat' | 'other'} animal_species
  * @property {string} animal_owner_name

@@ -17,6 +17,11 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    visit_date = serializers.DateTimeField(
+        source="visit.visit_date",
+        read_only=True,
+    )
+    
     class Meta:
         model = MedicalRecord
         fields = "__all__"
