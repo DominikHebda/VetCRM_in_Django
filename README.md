@@ -195,6 +195,10 @@ i usuwanie zwierząt, przypisanie właściciela oraz zachowanie
 danych i notatki po odświeżeniu strony. Sprawdzana jest również
 trwałość usunięcia po odświeżeniu.
 
+Dla ADMIN, VET i RECEPTIONIST sprawdzane jest dodawanie wizyt
+oraz zachowanie pacjenta, weterynarza, terminu, statusu,
+powodu i notatki po odświeżeniu strony.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.

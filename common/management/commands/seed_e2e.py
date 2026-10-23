@@ -44,6 +44,8 @@ class Command(BaseCommand):
                     username=username,
                     defaults={
                         "email": f"{username}@example.invalid",
+                        "first_name": "E2E",
+                        "last_name": role,
                         "is_active": True,
                         "is_staff": role == UserProfile.Role.ADMIN,
                         "is_superuser": role == UserProfile.Role.ADMIN,
