@@ -251,3 +251,81 @@ for (const [role, username] of [
     })).toBeVisible()
   })
 }
+
+test('veterinarian can read animals without management actions', async ({
+  page,
+}) => {
+  const name = 'E2E Pacjent Odczyt'
+
+  await loginAsUser(page, 'e2e_vet')
+
+  await page.getByRole('link', {
+    name: 'Zwierzęta',
+    exact: true,
+  }).click()
+
+  await expect(page.getByRole('heading', {
+    name: 'Zwierzęta',
+    exact: true,
+  })).toBeVisible()
+
+  const filteredResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+
+    return (
+      response.request().method() === 'GET' &&
+      url.pathname === '/api/animals/' &&
+      url.searchParams.get('search') === name
+    )
+  })
+
+  await page.getByRole('searchbox', {
+    name: 'Szukaj zwierząt',
+    exact: true,
+  }).fill(name)
+
+  expect((await filteredResponse).status()).toBe(200)
+
+  const animalRow = page.getByRole('row').filter({
+    has: page.getByRole('cell', {
+      name,
+      exact: true,
+    }),
+  })
+
+  await expect(animalRow).toHaveCount(1)
+
+  for (const value of [
+    name,
+    'Pies',
+    'Rasa testowa',
+    '2020-05-15',
+    '900000000000001',
+    'E2E Odczyt',
+  ]) {
+    await expect(animalRow.getByRole('cell', {
+      name: value,
+      exact: true,
+    })).toBeVisible()
+  }
+
+  await expect(page.getByRole('button', {
+    name: 'Dodaj zwierzę',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(animalRow.getByRole('button', {
+    name: 'Edytuj',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(animalRow.getByRole('button', {
+    name: 'Usuń',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(page.getByRole('columnheader', {
+    name: 'Akcje',
+    exact: true,
+  })).toHaveCount(0)
+})
