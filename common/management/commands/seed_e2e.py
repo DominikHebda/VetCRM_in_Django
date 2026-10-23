@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 from django.conf import settings
@@ -7,6 +8,7 @@ from django.db import transaction
 from oauth2_provider.models import get_application_model
 
 from accounts.models import UserProfile
+from animals.models import Animal
 from owners.models import Owner
 
 
@@ -56,13 +58,25 @@ class Command(BaseCommand):
                 )
                 users[username] = user
 
-            Owner.objects.update_or_create(
+            owner, _ = Owner.objects.update_or_create(
                 email="e2e-readonly@example.invalid",
                 defaults={
                     "first_name": "E2E",
                     "last_name": "Odczyt",
                     "phone": "500600701",
                     "address": "ul. Odczytowa 1, Testowo",
+                },
+            )
+
+            Animal.objects.update_or_create(
+                owner=owner,
+                name="E2E Pacjent Odczyt",
+                defaults={
+                    "species": "dog",
+                    "breed": "Rasa testowa",
+                    "birth_date": date(2020, 5, 15),
+                    "chip_number": "900000000000001",
+                    "notes": "Pacjent do testu odczytu przez VET.",
                 },
             )
 
