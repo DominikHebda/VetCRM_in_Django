@@ -89,6 +89,7 @@ function VisitsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [listRevision, setListRevision] = useState(0)
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -116,19 +117,9 @@ async function handleCreateVisit(visit) {
   try {
     await createVisit(visit)
 
-    const data = await getVisits({
-      search: debouncedSearch,
-      status: statusFilter,
-      animal: animalFilter,
-      page,
-    })
-
-    setVisits(data.results)
-    setTotalCount(data.count)
-    setHasPreviousPage(Boolean(data.previous))
-    setHasNextPage(Boolean(data.next))
     setFormStatus('idle')
     setIsCreateFormOpen(false)
+    setListRevision((current) => current + 1)
   } catch {
     setFormStatus('error')
   }
@@ -154,19 +145,9 @@ async function handleUpdateVisit(visit) {
   try {
     await updateVisit(editingVisit.id, visit)
 
-    const data = await getVisits({
-      search: debouncedSearch,
-      status: statusFilter,
-      animal: animalFilter,
-      page,
-    })
-
-    setVisits(data.results)
-    setTotalCount(data.count)
-    setHasPreviousPage(Boolean(data.previous))
-    setHasNextPage(Boolean(data.next))
     setFormStatus('idle')
     setEditingVisit(null)
+    setListRevision((current) => current + 1)
   } catch {
     setFormStatus('error')
   }
@@ -187,17 +168,11 @@ async function handleDeleteVisit(visit) {
   try {
     await deleteVisit(visit.id)
 
-    const data = await getVisits({
-      search: debouncedSearch,
-      status: statusFilter,
-      animal: animalFilter,
-      page,
-    })
+    if (visits.length === 1 && page > 1) {
+      setPage((currentPage) => currentPage - 1)
+    }
 
-    setVisits(data.results)
-    setTotalCount(data.count)
-    setHasPreviousPage(Boolean(data.previous))
-    setHasNextPage(Boolean(data.next))
+    setListRevision((current) => current + 1)
   } catch {
     window.alert('Nie udało się usunąć wizyty.')
   }
@@ -280,7 +255,7 @@ async function handleDeleteVisit(visit) {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, statusFilter, page, animalFilter])
+  }, [debouncedSearch, statusFilter, page, animalFilter, listRevision])
 
   if (status === 'loading') {
     return <p>Ładowanie wizyt...</p>

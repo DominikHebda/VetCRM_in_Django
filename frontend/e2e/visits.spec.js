@@ -11,7 +11,7 @@ for (const [role, username] of [
   ['veterinarian', 'e2e_vet'],
   ['receptionist', 'e2e_receptionist'],
 ]) {
-  test(`${role} creates a visit and sees saved data after reload`, async ({
+  test(`${role} creates, updates and deletes a visit`, async ({
     page,
   }) => {
     const reason = `Kontrola E2E ${randomUUID()}`
@@ -101,18 +101,18 @@ for (const [role, username] of [
       exact: true,
     })
 
-    async function searchForVisit() {
+    async function searchForVisit(query = reason) {
       const responsePromise = page.waitForResponse((response) => {
         const url = new URL(response.url())
 
         return (
           response.request().method() === 'GET' &&
           url.pathname === '/api/visits/' &&
-          url.searchParams.get('search') === reason
+          url.searchParams.get('search') === query
         )
       })
 
-      await search.fill(reason)
+      await search.fill(query)
 
       expect((await responsePromise).status()).toBe(200)
     }
@@ -181,9 +181,144 @@ for (const [role, username] of [
       page.locator('textarea[name="notes"]'),
     ).toHaveValue(notes)
 
+        const updatedReason = `Zmiana E2E ${randomUUID()}`
+    const updatedDate = '2027-01-16T12:45'
+    const updatedNotes = 'Zmieniona notatka wizyty E2E.'
+
+    await page.getByLabel('Data i godzina', {
+      exact: true,
+    }).fill(updatedDate)
+
+    await page.getByRole('combobox', {
+      name: 'Status',
+      exact: true,
+    }).selectOption('CANCELLED')
+
+    await page.getByLabel('Powód wizyty', {
+      exact: true,
+    }).fill(updatedReason)
+
+    await page.locator('textarea[name="notes"]').fill(updatedNotes)
+
+    const updateResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'PATCH' &&
+        /^\/api\/visits\/\d+\/$/.test(url.pathname)
+      )
+    })
+
+    await page.getByRole('button', {
+      name: 'Zapisz zmiany',
+      exact: true,
+    }).click()
+
+    const savedResponse = await updateResponse
+    expect(savedResponse.status()).toBe(200)
+    const updatedVisit = await savedResponse.json()
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj wizytę',
+      exact: true,
+    })).toHaveCount(0)
+
+    await searchForVisit(updatedReason)
+
+    const editedRow = page.getByRole('row').filter({
+      has: page.getByRole('cell', {
+        name: updatedReason,
+        exact: true,
+      }),
+    })
+
+    await expect(editedRow).toHaveCount(1)
+
+    await page.reload()
+    await searchForVisit(updatedReason)
+
+    await expect(editedRow).toHaveCount(1)
+
+    await expect(editedRow.getByText('E2E Pacjent Odczyt', {
+      exact: true,
+    })).toBeVisible()
+
+    await expect(editedRow.getByRole('cell', {
+      name: 'E2E VET',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(editedRow.getByRole('cell', {
+      name: 'Anulowana',
+      exact: true,
+    })).toBeVisible()
+
+    await editedRow.getByRole('button', {
+      name: 'Edytuj',
+      exact: true,
+    }).click()
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj wizytę',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(animalSelect).toHaveValue(animalId)
+    await expect(veterinarianSelect).toHaveValue(veterinarianId)
+
+    await expect(page.getByLabel('Data i godzina', {
+      exact: true,
+    })).toHaveValue(updatedDate)
+
+    await expect(page.getByRole('combobox', {
+      name: 'Status',
+      exact: true,
+    })).toHaveValue('CANCELLED')
+
+    await expect(page.getByLabel('Powód wizyty', {
+      exact: true,
+    })).toHaveValue(updatedReason)
+
+    await expect(
+      page.locator('textarea[name="notes"]'),
+    ).toHaveValue(updatedNotes)
+
     await page.getByRole('button', {
       name: 'Anuluj',
       exact: true,
     }).click()
+
+    const deleteResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'DELETE' &&
+        url.pathname === `/api/visits/${updatedVisit.id}/`
+      )
+    })
+
+    page.once('dialog', (dialog) => dialog.accept())
+
+    await editedRow.getByRole('button', {
+      name: 'Usuń',
+      exact: true,
+    }).click()
+
+    expect((await deleteResponse).status()).toBe(204)
+
+    await expect(editedRow).toHaveCount(0)
+    await expect(page.getByRole('heading', {
+      name: 'Brak wizyt',
+      exact: true,
+    })).toBeVisible()
+
+    await page.reload()
+    await searchForVisit(updatedReason)
+
+    await expect(editedRow).toHaveCount(0)
+    await expect(page.getByRole('heading', {
+      name: 'Brak wizyt',
+      exact: true,
+    })).toBeVisible()
   })
 }
