@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 
 import { loginAsUser } from './helpers/auth.js'
 
-test.use({ timezoneId: 'UTC' })
+test.use({ timezoneId: 'Europe/Warsaw' })
 
 for (const [role, username] of [
   ['administrator', 'e2e_admin'],
@@ -15,7 +15,7 @@ for (const [role, username] of [
     page,
   }) => {
     const reason = `Kontrola E2E ${randomUUID()}`
-    const visitDate = '2027-01-15T10:30'
+    const visitDate = '2027-07-15T07:00'
     const notes = 'Notatka wizyty zapisana przez test E2E.'
 
     await loginAsUser(page, username)
@@ -117,6 +117,66 @@ for (const [role, username] of [
       expect((await responsePromise).status()).toBe(200)
     }
 
+    /**
+     * @param {string} query
+     * @param {string} expectedDate
+     */
+
+    async function checkUnchangedSaves(query, expectedDate) {
+      const dateInput = page.getByLabel('Data i godzina', {
+        exact: true,
+      })
+
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        await expect(dateInput).toHaveValue(expectedDate)
+
+        const responsePromise = page.waitForResponse((response) => {
+          const url = new URL(response.url())
+
+          return (
+            response.request().method() === 'PATCH' &&
+            /^\/api\/visits\/\d+\/$/.test(url.pathname)
+          )
+        })
+
+        await page.getByRole('button', {
+          name: 'Zapisz zmiany',
+          exact: true,
+        }).click()
+
+        expect((await responsePromise).status()).toBe(200)
+
+        await expect(page.getByRole('heading', {
+          name: 'Edytuj wizytę',
+          exact: true,
+        })).toHaveCount(0)
+
+        await page.reload()
+        await searchForVisit(query)
+
+        const row = page.getByRole('row').filter({
+          has: page.getByRole('cell', {
+            name: query,
+            exact: true,
+          }),
+        })
+
+        await expect(row).toHaveCount(1)
+
+        await row.getByRole('button', {
+          name: 'Edytuj',
+          exact: true,
+        }).click()
+
+        await expect(page.getByRole('heading', {
+          name: 'Edytuj wizytę',
+          exact: true,
+        })).toBeVisible()
+
+        await expect(dateInput).toHaveValue(expectedDate)
+      }
+    }
+
     await searchForVisit()
 
     const visitRow = page.getByRole('row').filter({
@@ -181,8 +241,10 @@ for (const [role, username] of [
       page.locator('textarea[name="notes"]'),
     ).toHaveValue(notes)
 
-        const updatedReason = `Zmiana E2E ${randomUUID()}`
-    const updatedDate = '2027-01-16T12:45'
+    await checkUnchangedSaves(reason, visitDate)
+
+    const updatedReason = `Zmiana E2E ${randomUUID()}`
+    const updatedDate = '2027-01-16T13:00'
     const updatedNotes = 'Zmieniona notatka wizyty E2E.'
 
     await page.getByLabel('Data i godzina', {
@@ -282,6 +344,8 @@ for (const [role, username] of [
     await expect(
       page.locator('textarea[name="notes"]'),
     ).toHaveValue(updatedNotes)
+
+    await checkUnchangedSaves(updatedReason, updatedDate)
 
     await page.getByRole('button', {
       name: 'Anuluj',

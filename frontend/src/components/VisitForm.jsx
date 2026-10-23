@@ -83,7 +83,9 @@ function VisitForm(props) {
     await onSubmit({
       animal: Number(formData.get('animal')),
       veterinarian: Number(formData.get('veterinarian')),
-      visit_date: String(formData.get('visit_date') ?? ''),
+      visit_date: new Date(
+        String(formData.get('visit_date') ?? ''),
+      ).toISOString(),      
       reason: String(formData.get('reason') ?? '').trim(),
       notes: String(formData.get('notes') ?? '').trim(),
       status: /** @type {'SCHEDULED' | 'COMPLETED' | 'CANCELLED'} */ (
