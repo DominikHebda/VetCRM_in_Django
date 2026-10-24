@@ -10,7 +10,7 @@ for (const [role, username] of [
   ['administrator', 'e2e_admin'],
   ['veterinarian', 'e2e_vet'],
 ]) {
-  test(`${role} creates a medical record and sees saved data after reload`, async ({
+  test(`${role} creates, updates and deletes a medical record`, async ({
     page,
   }) => {
     const reason = `Dokumentacja E2E ${randomUUID()}`
@@ -143,22 +143,29 @@ for (const [role, username] of [
 
     await page.reload()
 
-    const filteredResponse = page.waitForResponse((response) => {
-      const url = new URL(response.url())
+    /**
+     * @param {string} query
+     */
+    async function searchForRecord(query) {
+      const responsePromise = page.waitForResponse((response) => {
+        const url = new URL(response.url())
 
-      return (
-        response.request().method() === 'GET' &&
-        url.pathname === '/api/medical-records/' &&
-        url.searchParams.get('search') === diagnosis
-      )
-    })
+        return (
+          response.request().method() === 'GET' &&
+          url.pathname === '/api/medical-records/' &&
+          url.searchParams.get('search') === query
+        )
+      })
 
-    await page.getByRole('searchbox', {
-      name: 'Szukaj dokumentacji medycznej',
-      exact: true,
-    }).fill(diagnosis)
+      await page.getByRole('searchbox', {
+        name: 'Szukaj dokumentacji medycznej',
+        exact: true,
+      }).fill(query)
 
-    expect((await filteredResponse).status()).toBe(200)
+      expect((await responsePromise).status()).toBe(200)
+    }
+
+    await searchForRecord(diagnosis)
 
     const recordRow = page.getByRole('row').filter({
       has: page.getByRole('cell', {
@@ -212,6 +219,159 @@ for (const [role, username] of [
     await expect(page.getByLabel('Temperatura (°C)', {
       exact: true,
     })).toHaveValue('38.5')
+
+    const updatedDiagnosis = `Zmiana diagnozy E2E ${randomUUID()}`
+    const updatedTreatment = 'Zmienione leczenie E2E.'
+    const updatedRecommendations = 'Kontrola za dwa tygodnie.'
+
+    await page.locator('textarea[name="diagnosis"]').fill(
+      updatedDiagnosis,
+    )
+    await page.locator('textarea[name="treatment"]').fill(
+      updatedTreatment,
+    )
+    await page.locator('textarea[name="recommendations"]').fill(
+      updatedRecommendations,
+    )
+
+    await page.getByLabel('Waga (kg)', {
+      exact: true,
+    }).fill('13.25')
+
+    await page.getByLabel('Temperatura (°C)', {
+      exact: true,
+    }).fill('38.7')
+
+    const recordPath = `/api/medical-records/${savedRecord.id}/`
+
+    const updateResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'PUT' &&
+        url.pathname === recordPath
+      )
+    })
+
+    await page.getByRole('button', {
+      name: 'Zapisz dokumentację',
+      exact: true,
+    }).click()
+
+    const updatedResponse = await updateResponse
+    expect(updatedResponse.status()).toBe(200)
+
+    const updatedRecord = await updatedResponse.json()
+    expect(updatedRecord.id).toBe(savedRecord.id)
+    expect(updatedRecord.visit).toBe(createdVisit.id)
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj dokumentację medyczną',
+      exact: true,
+    })).toHaveCount(0)
+
+    await searchForRecord(updatedDiagnosis)
+
+    const editedRow = page.getByRole('row').filter({
+      has: page.getByRole('cell', {
+        name: updatedDiagnosis,
+        exact: true,
+      }),
+    })
+
+    await expect(editedRow).toHaveCount(1)
+
+    await page.reload()
+    await searchForRecord(updatedDiagnosis)
+
+    await expect(editedRow).toHaveCount(1)
+
+    await expect(editedRow.getByRole('cell', {
+      name: updatedTreatment,
+      exact: true,
+    })).toBeVisible()
+
+    await editedRow.getByRole('button', {
+      name: 'Edytuj',
+      exact: true,
+    }).click()
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj dokumentację medyczną',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(visitSelect).toHaveValue(String(createdVisit.id))
+
+    await expect(
+      page.locator('textarea[name="diagnosis"]'),
+    ).toHaveValue(updatedDiagnosis)
+
+    await expect(
+      page.locator('textarea[name="treatment"]'),
+    ).toHaveValue(updatedTreatment)
+
+    await expect(
+      page.locator('textarea[name="recommendations"]'),
+    ).toHaveValue(updatedRecommendations)
+
+    await expect(page.getByLabel('Waga (kg)', {
+      exact: true,
+    })).toHaveValue('13.25')
+
+    await expect(page.getByLabel('Temperatura (°C)', {
+      exact: true,
+    })).toHaveValue('38.7')
+
+    await page.getByRole('button', {
+      name: 'Anuluj',
+      exact: true,
+    }).click()
+
+    const deleteResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'DELETE' &&
+        url.pathname === recordPath
+      )
+    })
+
+    page.once('dialog', (dialog) => dialog.accept())
+
+    await editedRow.getByRole('button', {
+      name: 'Usuń',
+      exact: true,
+    }).click()
+
+    expect((await deleteResponse).status()).toBe(204)
+
+    await expect(page.getByRole('heading', {
+      name: 'Brak dokumentacji medycznej',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(editedRow).toHaveCount(0)
+
+    await page.reload()
+    await searchForRecord(updatedDiagnosis)
+
+    await expect(page.getByRole('heading', {
+      name: 'Brak dokumentacji medycznej',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(editedRow).toHaveCount(0)
+
+    await page.getByRole('button', {
+      name: 'Dodaj dokumentację',
+      exact: true,
+    }).click()
+
+    await expect(formHeading).toBeVisible()
+
+    await visitSelect.selectOption(String(createdVisit.id))
+    await expect(visitSelect).toHaveValue(String(createdVisit.id))
 
     await page.getByRole('button', {
       name: 'Anuluj',
