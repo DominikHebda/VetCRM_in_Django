@@ -208,9 +208,10 @@ oraz ponowną dostępność wizyty do utworzenia dokumentacji.
 Dla RECEPTIONIST sprawdzany jest odczyt dokumentacji medycznej
 oraz brak przycisków dodawania, edycji i usuwania.
 
-Dla ADMIN i VET sprawdzane jest dodawanie szczepień oraz
-zachowanie pacjenta, weterynarza, szczepionki, producenta,
-numeru serii, dat i uwag po odświeżeniu strony.
+Dla ADMIN i VET sprawdzane są dodawanie, edycja i usuwanie
+szczepień. Testy potwierdzają zachowanie pacjenta, weterynarza,
+danych szczepionki, dat i uwag po odświeżeniu oraz trwałość
+usunięcia szczepienia.
 
 Nie zastępują one testów backendu na PostgreSQL.
 

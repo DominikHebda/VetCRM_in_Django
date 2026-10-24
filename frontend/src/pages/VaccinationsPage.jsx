@@ -31,6 +31,7 @@ function VaccinationsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [listRevision, setListRevision] = useState(0)
   const [veterinarians, setVeterinarians] = useState(
     /** @type {Awaited<ReturnType<typeof getVeterinarians>>} */ ([]),
   )
@@ -60,20 +61,10 @@ function VaccinationsPage() {
     try {
       await createVaccination(values)
 
+      setPage(1)
+      setListRevision((current) => current + 1)
       setIsCreateFormOpen(false)
       setFormStatus('idle')
-      setPage(1)
-
-      const data = await getVaccinations({
-        search: debouncedSearch,
-        animal: animalFilter || undefined,
-        page: 1,
-      })
-
-      setVaccinations(data.results)
-      setTotalCount(data.count)
-      setHasPreviousPage(Boolean(data.previous))
-      setHasNextPage(Boolean(data.next))
     } catch {
       setFormStatus('error')
     }
@@ -91,63 +82,48 @@ function VaccinationsPage() {
  *   notes: string,
  * }} values
  */
-    async function handleUpdateVaccination(values) {
-      if (!editingVaccination) {
-        return
-      }
+  async function handleUpdateVaccination(values) {
+    if (!editingVaccination) {
+      return
+    }
 
-      setFormStatus('saving')
+    setFormStatus('saving')
 
-      try {
-        await updateVaccination(editingVaccination.id, values)
+    try {
+      await updateVaccination(editingVaccination.id, values)
 
-        const data = await getVaccinations({
-        search: debouncedSearch,
-        animal: animalFilter || undefined,
-        page,
-      })
-
-      setVaccinations(data.results)
-      setTotalCount(data.count)
-      setHasPreviousPage(Boolean(data.previous))
-      setHasNextPage(Boolean(data.next))
-
+      setListRevision((current) => current + 1)
       setFormStatus('idle')
       setEditingVaccination(null)
     } catch {
-        setFormStatus('error')
+      setFormStatus('error')
     }
   }
 
-    /**
-     * @param {import('../services/vaccinationsService.js').Vaccination} vaccination
-     */
-    async function handleDeleteVaccination(vaccination) {
-      const confirmed = window.confirm(
-        `Czy na pewno chcesz usunąć szczepienie ${vaccination.vaccine_name} pacjenta ${vaccination.animal_name}?`,
-      )
+  /**
+  * @param {import('../services/vaccinationsService.js').Vaccination} vaccination
+  */
+  async function handleDeleteVaccination(vaccination) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunąć szczepienie ${vaccination.vaccine_name} pacjenta ${vaccination.animal_name}?`,
+    )
 
-      if (!confirmed) {
-        return
-      }
-
-      try {
-        await deleteVaccination(vaccination.id)
-
-        const data = await getVaccinations({
-          search: debouncedSearch,
-          animal: animalFilter || undefined,
-          page,
-        })
-
-        setVaccinations(data.results)
-        setTotalCount(data.count)
-        setHasPreviousPage(Boolean(data.previous))
-        setHasNextPage(Boolean(data.next))
-      } catch {
-        setStatus('error')
-      }
+    if (!confirmed) {
+      return
     }
+
+    try {
+      await deleteVaccination(vaccination.id)
+
+      if (vaccinations.length === 1 && page > 1) {
+        setPage((currentPage) => currentPage - 1)
+      }
+
+      setListRevision((current) => current + 1)
+    } catch {
+      setStatus('error')
+    }
+  }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -246,7 +222,7 @@ function VaccinationsPage() {
     return () => {
       isActive = false
     }
-  }, [debouncedSearch, animalFilter, page])
+  }, [debouncedSearch, animalFilter, page, listRevision])
 
   return (
     <div className="visits-page">
