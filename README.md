@@ -208,6 +208,10 @@ oraz ponowną dostępność wizyty do utworzenia dokumentacji.
 Dla RECEPTIONIST sprawdzany jest odczyt dokumentacji medycznej
 oraz brak przycisków dodawania, edycji i usuwania.
 
+Dla ADMIN i VET sprawdzane jest dodawanie szczepień oraz
+zachowanie pacjenta, weterynarza, szczepionki, producenta,
+numeru serii, dat i uwag po odświeżeniu strony.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
