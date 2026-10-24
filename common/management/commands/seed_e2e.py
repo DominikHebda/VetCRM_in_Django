@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -9,7 +9,9 @@ from oauth2_provider.models import get_application_model
 
 from accounts.models import UserProfile
 from animals.models import Animal
+from medical.models import MedicalRecord
 from owners.models import Owner
+from visits.models import Visit
 
 
 class Command(BaseCommand):
@@ -70,7 +72,7 @@ class Command(BaseCommand):
                 },
             )
 
-            Animal.objects.update_or_create(
+            animal, _ = Animal.objects.update_or_create(
                 owner=owner,
                 name="E2E Pacjent Odczyt",
                 defaults={
@@ -79,6 +81,30 @@ class Command(BaseCommand):
                     "birth_date": date(2020, 5, 15),
                     "chip_number": "900000000000001",
                     "notes": "Pacjent do testu odczytu przez VET.",
+                },
+            )
+
+            visit, _ = Visit.objects.update_or_create(
+                animal=animal,
+                reason="E2E wizyta do odczytu dokumentacji",
+                defaults={
+                    "veterinarian": users["e2e_vet"],
+                    "visit_date": datetime(
+                        2026, 9, 15, 8, 30, tzinfo=UTC,
+                    ),
+                    "status": "COMPLETED",
+                    "notes": "Wizyta do testu uprawnień recepcji.",
+                },
+            )
+
+            MedicalRecord.objects.update_or_create(
+                visit=visit,
+                defaults={
+                    "diagnosis": "E2E Diagnoza Odczyt",
+                    "treatment": "E2E Leczenie Odczyt",
+                    "recommendations": "Kontrola zgodnie z zaleceniami.",
+                    "weight": "12.50",
+                    "temperature": "38.5",
                 },
             )
 

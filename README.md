@@ -205,6 +205,9 @@ dokumentacji medycznej. Testy potwierdzają zachowanie przypisanej
 wizyty i danych klinicznych po odświeżeniu, trwałość usunięcia
 oraz ponowną dostępność wizyty do utworzenia dokumentacji.
 
+Dla RECEPTIONIST sprawdzany jest odczyt dokumentacji medycznej
+oraz brak przycisków dodawania, edycji i usuwania.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
