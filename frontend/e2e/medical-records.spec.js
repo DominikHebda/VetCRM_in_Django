@@ -379,3 +379,86 @@ for (const [role, username] of [
     }).click()
   })
 }
+
+test('receptionist can read medical records without management actions', async ({
+  page,
+}) => {
+  const diagnosis = 'E2E Diagnoza Odczyt'
+
+  await loginAsUser(page, 'e2e_receptionist')
+
+  await page.getByRole('link', {
+    name: 'Dokumentacja medyczna',
+    exact: true,
+  }).click()
+
+  await expect(page.getByRole('heading', {
+    name: 'Dokumentacja medyczna',
+    exact: true,
+  })).toBeVisible()
+
+  const filteredResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+
+    return (
+      response.request().method() === 'GET' &&
+      url.pathname === '/api/medical-records/' &&
+      url.searchParams.get('search') === diagnosis
+    )
+  })
+
+  await page.getByRole('searchbox', {
+    name: 'Szukaj dokumentacji medycznej',
+    exact: true,
+  }).fill(diagnosis)
+
+  expect((await filteredResponse).status()).toBe(200)
+
+  const recordRow = page.getByRole('row').filter({
+    has: page.getByRole('cell', {
+      name: diagnosis,
+      exact: true,
+    }),
+  })
+
+  await expect(recordRow).toHaveCount(1)
+
+  await expect(recordRow.getByText('E2E Pacjent Odczyt', {
+    exact: true,
+  })).toBeVisible()
+
+  await expect(recordRow.getByText('pies · E2E Odczyt', {
+    exact: true,
+  })).toBeVisible()
+
+  for (const value of [
+    'E2E Leczenie Odczyt',
+    '12.50 kg',
+    '38.5 °C',
+  ]) {
+    await expect(recordRow.getByRole('cell', {
+      name: value,
+      exact: true,
+    })).toBeVisible()
+  }
+
+  await expect(page.getByRole('button', {
+    name: 'Dodaj dokumentację',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(recordRow.getByRole('button', {
+    name: 'Edytuj',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(recordRow.getByRole('button', {
+    name: 'Usuń',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(page.getByRole('columnheader', {
+    name: 'Akcje',
+    exact: true,
+  })).toHaveCount(0)
+})
