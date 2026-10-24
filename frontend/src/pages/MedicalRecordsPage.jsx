@@ -73,6 +73,7 @@ function MedicalRecordsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [listRevision, setListRevision] = useState(0)
   const [animals, setAnimals] = useState(
   /** @type {Animal[]} */ ([]),
   )
@@ -96,23 +97,7 @@ function MedicalRecordsPage() {
     try {
       await createMedicalRecord(medicalRecord)
 
-      const data = await getMedicalRecords({
-        search: debouncedSearch,
-        animal: animalFilter,
-        page,
-      })
-
-      setMedicalRecords(data.results)
-      setTotalCount(data.count)
-      setHasPreviousPage(Boolean(data.previous))
-      setHasNextPage(Boolean(data.next))
-
-      setVisits((currentVisits) =>
-        currentVisits.filter(
-          (visit) => visit.id !== medicalRecord.visit,
-        ),
-      )
-
+      setListRevision((current) => current + 1)
       setFormStatus('idle')
       setIsCreateFormOpen(false)
     } catch {
@@ -143,17 +128,7 @@ function MedicalRecordsPage() {
         medicalRecord,
       )
 
-      const data = await getMedicalRecords({
-        search: debouncedSearch,
-        animal: animalFilter,
-        page,
-      })
-
-      setMedicalRecords(data.results)
-      setTotalCount(data.count)
-      setHasPreviousPage(Boolean(data.previous))
-      setHasNextPage(Boolean(data.next))
-
+      setListRevision((current) => current + 1)
       setFormStatus('idle')
       setEditingMedicalRecord(null)
     } catch {
@@ -176,24 +151,11 @@ function MedicalRecordsPage() {
     try {
       await deleteMedicalRecord(record.id)
 
-      const data = await getMedicalRecords({
-        search: debouncedSearch,
-        animal: animalFilter,
-        page,
-      })
+      if (medicalRecords.length === 1 && page > 1) {
+        setPage((currentPage) => currentPage - 1)
+      }
 
-      setMedicalRecords(data.results)
-      setTotalCount(data.count)
-      setHasPreviousPage(Boolean(data.previous))
-      setHasNextPage(Boolean(data.next))
-
-      const visitsData = await getVisits({ pageSize: 100 })
-
-      setVisits(
-        visitsData.results.filter(
-          (visit) => !visit.has_medical_record,
-        ),
-      )
+      setListRevision((current) => current + 1)
     } catch {
       window.alert('Nie udało się usunąć dokumentacji medycznej.')
     }
@@ -264,7 +226,7 @@ function MedicalRecordsPage() {
     return () => {
       isMounted = false
     }
-  }, [canManageMedicalRecords])
+  }, [canManageMedicalRecords, listRevision])
 
   useEffect(() => {
     let isMounted = true
@@ -300,7 +262,7 @@ function MedicalRecordsPage() {
     return () => {
       isMounted = false
     }
-  }, [debouncedSearch, animalFilter, page])
+  }, [debouncedSearch, animalFilter, page, listRevision])
 
   const editVisitOptions = editingMedicalRecord
     ? [

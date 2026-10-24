@@ -200,10 +200,10 @@ i usuwanie wizyt. Testy potwierdzają zachowanie pacjenta,
 weterynarza, terminu, statusu, powodu i notatki po odświeżeniu
 oraz trwałość usunięcia wizyty.
 
-Dla ADMIN i VET sprawdzane jest tworzenie dokumentacji medycznej
-oraz zachowanie przypisanej wizyty, diagnozy, leczenia, zaleceń,
-wagi i temperatury po odświeżeniu. Test obejmuje również
-ponowne otwarcie formularza edycji z datą wizyty.
+Dla ADMIN i VET sprawdzane są tworzenie, edycja i usuwanie
+dokumentacji medycznej. Testy potwierdzają zachowanie przypisanej
+wizyty i danych klinicznych po odświeżeniu, trwałość usunięcia
+oraz ponowną dostępność wizyty do utworzenia dokumentacji.
 
 Nie zastępują one testów backendu na PostgreSQL.
 
