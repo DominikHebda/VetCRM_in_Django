@@ -8,7 +8,7 @@ for (const [role, username] of [
   ['administrator', 'e2e_admin'],
   ['veterinarian', 'e2e_vet'],
 ]) {
-  test(`${role} creates a vaccination and sees saved data after reload`, async ({
+  test(`${role} creates, updates and deletes a vaccination`, async ({
     page,
   }) => {
     const vaccineName = `Szczepionka E2E ${randomUUID()}`
@@ -100,27 +100,36 @@ for (const [role, username] of [
       exact: true,
     }).click()
 
-    expect((await createResponse).status()).toBe(201)
+    const createdResponse = await createResponse
+    expect(createdResponse.status()).toBe(201)
+    const createdVaccination = await createdResponse.json()
     await expect(formHeading).toHaveCount(0)
 
     await page.reload()
 
-    const filteredResponse = page.waitForResponse((response) => {
-      const url = new URL(response.url())
+    /**
+     * @param {string} query
+     */
+    async function searchForVaccination(query) {
+      const responsePromise = page.waitForResponse((response) => {
+        const url = new URL(response.url())
 
-      return (
-        response.request().method() === 'GET' &&
-        url.pathname === '/api/vaccinations/' &&
-        url.searchParams.get('search') === vaccineName
-      )
-    })
+        return (
+          response.request().method() === 'GET' &&
+          url.pathname === '/api/vaccinations/' &&
+          url.searchParams.get('search') === query
+        )
+      })
 
-    await page.getByRole('searchbox', {
-      name: 'Szukaj szczepień',
-      exact: true,
-    }).fill(vaccineName)
+      await page.getByRole('searchbox', {
+        name: 'Szukaj szczepień',
+        exact: true,
+      }).fill(query)
 
-    expect((await filteredResponse).status()).toBe(200)
+      expect((await responsePromise).status()).toBe(200)
+    }
+
+    await searchForVaccination(vaccineName)
 
     const vaccinationRow = page.getByRole('row').filter({
       has: page.getByText(vaccineName, {
@@ -189,9 +198,168 @@ for (const [role, username] of [
       page.locator('textarea[name="notes"]'),
     ).toHaveValue(notes)
 
+    const updatedName = `Zmiana szczepionki E2E ${randomUUID()}`
+    const updatedManufacturer = 'Zmieniony producent E2E'
+    const updatedBatch = `ZMIANA-${randomUUID()}`
+    const updatedDate = '2026-09-16'
+    const updatedDueDate = '2027-09-16'
+    const updatedNotes = 'Zmienione uwagi szczepienia E2E.'
+
+    await page.getByLabel('Nazwa szczepionki', {
+      exact: true,
+    }).fill(updatedName)
+
+    await page.getByLabel('Producent', {
+      exact: true,
+    }).fill(updatedManufacturer)
+
+    await page.getByLabel('Numer serii', {
+      exact: true,
+    }).fill(updatedBatch)
+
+    await page.getByLabel('Data szczepienia', {
+      exact: true,
+    }).fill(updatedDate)
+
+    await page.getByLabel('Termin kolejnej dawki', {
+      exact: true,
+    }).fill(updatedDueDate)
+
+    await page.locator('textarea[name="notes"]').fill(updatedNotes)
+
+    const vaccinationPath =
+      `/api/vaccinations/${createdVaccination.id}/`
+
+    const updateResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'PATCH' &&
+        url.pathname === vaccinationPath
+      )
+    })
+
+    await page.getByRole('button', {
+      name: 'Zapisz zmiany',
+      exact: true,
+    }).click()
+
+    const updatedResponse = await updateResponse
+    expect(updatedResponse.status()).toBe(200)
+
+    const updatedVaccination = await updatedResponse.json()
+    expect(updatedVaccination.id).toBe(createdVaccination.id)
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj szczepienie',
+      exact: true,
+    })).toHaveCount(0)
+
+    await searchForVaccination(updatedName)
+
+    const editedRow = page.getByRole('row').filter({
+      has: page.getByText(updatedName, {
+        exact: true,
+      }),
+    })
+
+    await expect(editedRow).toHaveCount(1)
+
+    await page.reload()
+    await searchForVaccination(updatedName)
+
+    await expect(editedRow).toHaveCount(1)
+
+    await expect(editedRow.getByText(updatedManufacturer, {
+      exact: true,
+    })).toBeVisible()
+
+    for (const value of [
+      updatedDate,
+      updatedDueDate,
+      'E2E VET',
+    ]) {
+      await expect(editedRow.getByRole('cell', {
+        name: value,
+        exact: true,
+      })).toBeVisible()
+    }
+
+    await editedRow.getByRole('button', {
+      name: 'Edytuj',
+      exact: true,
+    }).click()
+
+    await expect(page.getByRole('heading', {
+      name: 'Edytuj szczepienie',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(animalSelect).toHaveValue(animalId)
+    await expect(veterinarianSelect).toHaveValue(veterinarianId)
+
+    await expect(page.getByLabel('Nazwa szczepionki', {
+      exact: true,
+    })).toHaveValue(updatedName)
+
+    await expect(page.getByLabel('Producent', {
+      exact: true,
+    })).toHaveValue(updatedManufacturer)
+
+    await expect(page.getByLabel('Numer serii', {
+      exact: true,
+    })).toHaveValue(updatedBatch)
+
+    await expect(page.getByLabel('Data szczepienia', {
+      exact: true,
+    })).toHaveValue(updatedDate)
+
+    await expect(page.getByLabel('Termin kolejnej dawki', {
+      exact: true,
+    })).toHaveValue(updatedDueDate)
+
+    await expect(
+      page.locator('textarea[name="notes"]'),
+    ).toHaveValue(updatedNotes)
+
     await page.getByRole('button', {
       name: 'Anuluj',
       exact: true,
     }).click()
+
+    const deleteResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        response.request().method() === 'DELETE' &&
+        url.pathname === vaccinationPath
+      )
+    })
+
+    page.once('dialog', (dialog) => dialog.accept())
+
+    await editedRow.getByRole('button', {
+      name: 'Usuń',
+      exact: true,
+    }).click()
+
+    expect((await deleteResponse).status()).toBe(204)
+
+    await expect(page.getByRole('heading', {
+      name: 'Brak zapisanych szczepień',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(editedRow).toHaveCount(0)
+
+    await page.reload()
+    await searchForVaccination(updatedName)
+
+    await expect(page.getByRole('heading', {
+      name: 'Brak zapisanych szczepień',
+      exact: true,
+    })).toBeVisible()
+
+    await expect(editedRow).toHaveCount(0)
   })
 }
