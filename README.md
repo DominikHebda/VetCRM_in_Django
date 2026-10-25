@@ -232,6 +232,10 @@ Dla ADMIN i VET wartości w pięciu tabelach Analityki są porównywane
 z odpowiedzią API przy otwarciu, po ręcznym odświeżeniu
 i po ponownym załadowaniu strony.
 
+Dla Analityki i Powiadomień sprawdzane są komunikaty po błędzie
+API 500 oraz skuteczne ponowienie pobierania przyciskiem
+„Spróbuj ponownie”.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
