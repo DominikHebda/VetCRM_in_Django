@@ -221,6 +221,9 @@ Testy potwierdzają zachowanie danych po odświeżeniu, niezmienność
 numeru recepty, wystawiającego, pacjenta i wizyty podczas edycji
 oraz trwałość usunięcia.
 
+Dla RECEPTIONIST sprawdzany jest odczyt recept oraz brak
+przycisków dodawania, edycji i usuwania.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.

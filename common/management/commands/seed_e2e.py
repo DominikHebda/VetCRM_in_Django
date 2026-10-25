@@ -11,6 +11,7 @@ from accounts.models import UserProfile
 from animals.models import Animal
 from medical.models import MedicalRecord
 from owners.models import Owner
+from prescriptions.models import Prescription
 from vaccinations.models import Vaccination
 from visits.models import Visit
 
@@ -119,6 +120,24 @@ class Command(BaseCommand):
                     "vaccination_date": date(2026, 9, 15),
                     "next_due_date": date(2027, 9, 15),
                     "notes": "Szczepienie do testu uprawnień recepcji.",
+                },
+            )
+
+            Prescription.objects.update_or_create(
+                prescription_number="E2E-READONLY-001",
+                defaults={
+                    "animal": animal,
+                    "visit": visit,
+                    "veterinarian": users["e2e_vet"],
+                    "medication_name": "E2E Lek Odczyt",
+                    "active_substance": "E2E Substancja Odczyt",
+                    "dosage": "1 tabletka",
+                    "frequency": "Raz dziennie",
+                    "duration": "7 dni",
+                    "quantity": 7,
+                    "issue_date": date(2026, 9, 15),
+                    "valid_until": date(2026, 10, 15),
+                    "instructions": "Recepta do testu uprawnień recepcji.",
                 },
             )
 
