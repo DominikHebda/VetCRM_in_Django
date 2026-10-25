@@ -213,6 +213,9 @@ szczepień. Testy potwierdzają zachowanie pacjenta, weterynarza,
 danych szczepionki, dat i uwag po odświeżeniu oraz trwałość
 usunięcia szczepienia.
 
+Dla RECEPTIONIST sprawdzany jest odczyt szczepień oraz brak
+przycisków dodawania, edycji i usuwania.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
