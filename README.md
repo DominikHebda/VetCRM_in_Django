@@ -228,6 +228,10 @@ Testy powiadomień sprawdzają trzy rodzaje przypomnień i ręczne
 odświeżanie. ADMIN i RECEPTIONIST widzą wpisy obu weterynarzy,
 a każde z dwóch kont VET wyłącznie własne wpisy.
 
+Dla ADMIN i VET wartości w pięciu tabelach Analityki są porównywane
+z odpowiedzią API przy otwarciu, po ręcznym odświeżeniu
+i po ponownym załadowaniu strony.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.

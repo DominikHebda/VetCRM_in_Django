@@ -4,47 +4,157 @@ import { loginAsUser } from './helpers/auth.js'
 
 const analyticsApiUrl = 'http://127.0.0.1:8002/api/analytics/overview/'
 
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {import('../src/services/analyticsService.js').AnalyticsOverview} data
+ */
+async function checkAnalyticsTables(page, data) {
+  const monthFormatter = new Intl.DateTimeFormat('pl-PL', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+
+  const panels = [
+    {
+      title: 'Wizyty według miesiąca',
+      rows: data.visits_by_month.map((row) => ({
+        label: monthFormatter.format(
+          new Date(`${row.month.slice(0, 7)}-01T00:00:00Z`),
+        ),
+        count: row.count,
+      })),
+    },
+    {
+      title: 'Zwierzęta według gatunku',
+      rows: data.animals_by_species.map((row) => ({
+        label: row.species || 'Nie podano gatunku',
+        count: row.count,
+      })),
+    },
+    {
+      title: 'Najczęstsze szczepienia',
+      rows: data.top_vaccines.map((row) => ({
+        label: row.vaccine_name || 'Nie podano nazwy',
+        count: row.count,
+      })),
+    },
+    {
+      title: 'Najczęściej przepisywane leki',
+      rows: data.top_medications.map((row) => ({
+        label: row.medication_name || 'Nie podano nazwy',
+        count: row.count,
+      })),
+    },
+    {
+      title: 'Wizyty według lekarza',
+      rows: data.visits_by_veterinarian.map((row) => ({
+        label:
+          [
+            row.veterinarian__first_name,
+            row.veterinarian__last_name,
+          ].filter(Boolean).join(' ') || `Lekarz #${row.veterinarian_id}`,
+        count: row.count,
+      })),
+    },
+  ]
+
+  await expect(page.getByRole('heading', {
+    name: 'Statystyki',
+    exact: true,
+  })).toBeVisible()
+
+  for (const panel of panels) {
+    // Seed przygotowuje dane do każdego z pięciu zestawień.
+    expect(panel.rows.length).toBeGreaterThan(0)
+
+    const region = page.getByRole('region', {
+      name: panel.title,
+      exact: true,
+    })
+
+    await expect(region).toBeVisible()
+
+    const table = region.getByRole('table')
+
+    // Jeden wiersz nagłówka i wiersze danych.
+    await expect(table.getByRole('row')).toHaveCount(
+      panel.rows.length + 1,
+    )
+
+    for (const expectedRow of panel.rows) {
+      const row = table.getByRole('row').filter({
+        has: page.getByRole('rowheader', {
+          name: expectedRow.label,
+          exact: true,
+        }),
+      })
+
+      await expect(row).toHaveCount(1)
+
+      await expect(row.getByRole('cell')).toHaveText(
+        String(expectedRow.count),
+      )
+    }
+  }
+}
+
 for (const [role, username] of [
   ['administrator', 'e2e_admin'],
   ['veterinarian', 'e2e_vet'],
 ]) {
-  test(`${role} can open analytics`, async ({ page }) => {
+  test(`${role} sees analytics data after refresh and reload`, async ({
+    page,
+  }) => {
     await loginAsUser(page, username)
 
-    const responsePromise = page.waitForResponse(
-      (response) =>
-        response.url() === analyticsApiUrl &&
-        response.request().method() === 'GET',
-    )
+    /**
+     * @returns {Promise<import('@playwright/test').Response>}
+     */
+    function waitForAnalytics() {
+      return page.waitForResponse(
+        (response) =>
+          response.url() === analyticsApiUrl &&
+          response.request().method() === 'GET',
+      )
+    }
+
+    const initialResponsePromise = waitForAnalytics()
 
     await page.getByRole('link', {
       name: 'Analityka',
       exact: true,
     }).click()
 
-    expect((await responsePromise).status()).toBe(200)
-    await expect(page).toHaveURL('http://127.0.0.1:5174/analytics')
+    const initialResponse = await initialResponsePromise
+    expect(initialResponse.status()).toBe(200)
 
-    for (const title of [
-      'Statystyki',
-      'Wizyty według miesiąca',
-      'Zwierzęta według gatunku',
-      'Najczęstsze szczepienia',
-      'Najczęściej przepisywane leki',
-      'Wizyty według lekarza',
-    ]) {
-      await expect(page.getByRole('heading', {
-        name: title,
-        exact: true,
-      })).toBeVisible()
-    }
+    await expect(page).toHaveURL(
+      'http://127.0.0.1:5174/analytics',
+    )
+
+    await checkAnalyticsTables(page, await initialResponse.json())
+
+    const refreshResponsePromise = waitForAnalytics()
+
+    await page.getByRole('button', {
+      name: 'Odśwież dane',
+      exact: true,
+    }).click()
+
+    const refreshResponse = await refreshResponsePromise
+    expect(refreshResponse.status()).toBe(200)
+
+    await checkAnalyticsTables(page, await refreshResponse.json())
+
+    const reloadResponsePromise = waitForAnalytics()
 
     await page.reload()
 
-    await expect(page.getByRole('heading', {
-      name: 'Statystyki',
-      exact: true,
-    })).toBeVisible()
+    const reloadResponse = await reloadResponsePromise
+    expect(reloadResponse.status()).toBe(200)
+
+    await checkAnalyticsTables(page, await reloadResponse.json())
   })
 }
 
