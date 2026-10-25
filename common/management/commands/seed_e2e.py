@@ -11,6 +11,7 @@ from accounts.models import UserProfile
 from animals.models import Animal
 from medical.models import MedicalRecord
 from owners.models import Owner
+from vaccinations.models import Vaccination
 from visits.models import Visit
 
 
@@ -105,6 +106,19 @@ class Command(BaseCommand):
                     "recommendations": "Kontrola zgodnie z zaleceniami.",
                     "weight": "12.50",
                     "temperature": "38.5",
+                },
+            )
+
+            Vaccination.objects.update_or_create(
+                animal=animal,
+                vaccine_name="E2E Szczepionka Odczyt",
+                defaults={
+                    "veterinarian": users["e2e_vet"],
+                    "manufacturer": "E2E Producent Odczyt",
+                    "batch_number": "E2E-ODCZYT-001",
+                    "vaccination_date": date(2026, 9, 15),
+                    "next_due_date": date(2027, 9, 15),
+                    "notes": "Szczepienie do testu uprawnień recepcji.",
                 },
             )
 

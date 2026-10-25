@@ -363,3 +363,88 @@ for (const [role, username] of [
     await expect(editedRow).toHaveCount(0)
   })
 }
+
+test('receptionist can read vaccinations without management actions', async ({
+  page,
+}) => {
+  const vaccineName = 'E2E Szczepionka Odczyt'
+
+  await loginAsUser(page, 'e2e_receptionist')
+
+  await page.getByRole('link', {
+    name: 'Szczepienia',
+    exact: true,
+  }).click()
+
+  await expect(page.getByRole('heading', {
+    name: 'Szczepienia',
+    exact: true,
+  })).toBeVisible()
+
+  const filteredResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+
+    return (
+      response.request().method() === 'GET' &&
+      url.pathname === '/api/vaccinations/' &&
+      url.searchParams.get('search') === vaccineName
+    )
+  })
+
+  await page.getByRole('searchbox', {
+    name: 'Szukaj szczepień',
+    exact: true,
+  }).fill(vaccineName)
+
+  expect((await filteredResponse).status()).toBe(200)
+
+  const vaccinationRow = page.getByRole('row').filter({
+    has: page.getByText(vaccineName, {
+      exact: true,
+    }),
+  })
+
+  await expect(vaccinationRow).toHaveCount(1)
+
+  for (const value of [
+    'E2E Pacjent Odczyt',
+    'E2E Odczyt',
+    vaccineName,
+    'E2E Producent Odczyt',
+  ]) {
+    await expect(vaccinationRow.getByText(value, {
+      exact: true,
+    })).toBeVisible()
+  }
+
+  for (const value of [
+    '2026-09-15',
+    '2027-09-15',
+    'E2E VET',
+  ]) {
+    await expect(vaccinationRow.getByRole('cell', {
+      name: value,
+      exact: true,
+    })).toBeVisible()
+  }
+
+  await expect(page.getByRole('button', {
+    name: 'Dodaj szczepienie',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(vaccinationRow.getByRole('button', {
+    name: 'Edytuj',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(vaccinationRow.getByRole('button', {
+    name: 'Usuń',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(page.getByRole('columnheader', {
+    name: 'Akcje',
+    exact: true,
+  })).toHaveCount(0)
+})
