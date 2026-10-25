@@ -362,3 +362,91 @@ for (const [role, username, issuerName] of [
     await expect(editedRow).toHaveCount(0)
   })
 }
+
+test('receptionist can read prescriptions without management actions', async ({
+  page,
+}) => {
+  const medicationName = 'E2E Lek Odczyt'
+
+  await loginAsUser(page, 'e2e_receptionist')
+
+  await page.getByRole('link', {
+    name: 'Recepty',
+    exact: true,
+  }).click()
+
+  await expect(page.getByRole('heading', {
+    name: 'Recepty',
+    exact: true,
+  })).toBeVisible()
+
+  const filteredResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+
+    return (
+      response.request().method() === 'GET' &&
+      url.pathname === '/api/prescriptions/' &&
+      url.searchParams.get('search') === medicationName
+    )
+  })
+
+  await page.getByRole('searchbox', {
+    name: 'Szukaj recept',
+    exact: true,
+  }).fill(medicationName)
+
+  expect((await filteredResponse).status()).toBe(200)
+
+  const prescriptionRow = page.getByRole('row').filter({
+    has: page.getByText(medicationName, {
+      exact: true,
+    }),
+  })
+
+  await expect(prescriptionRow).toHaveCount(1)
+
+  for (const value of [
+    'E2E Pacjent Odczyt',
+    'E2E Odczyt',
+    medicationName,
+    'E2E Substancja Odczyt',
+    '1 tabletka',
+    'Raz dziennie',
+  ]) {
+    await expect(prescriptionRow.getByText(value, {
+      exact: true,
+    })).toBeVisible()
+  }
+
+  for (const value of [
+    'E2E-READONLY-001',
+    '2026-09-15',
+    '2026-10-15',
+    'E2E VET',
+  ]) {
+    await expect(prescriptionRow.getByRole('cell', {
+      name: value,
+      exact: true,
+    })).toBeVisible()
+  }
+
+  await expect(page.getByRole('button', {
+    name: 'Dodaj receptę',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(prescriptionRow.getByRole('button', {
+    name: 'Edytuj',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(prescriptionRow.getByRole('button', {
+    name: 'Usuń',
+    exact: true,
+  })).toHaveCount(0)
+
+  await expect(page.getByRole('columnheader', {
+    name: 'Akcje',
+    exact: true,
+  })).toHaveCount(0)
+})
