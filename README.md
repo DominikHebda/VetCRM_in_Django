@@ -224,6 +224,10 @@ oraz trwałość usunięcia.
 Dla RECEPTIONIST sprawdzany jest odczyt recept oraz brak
 przycisków dodawania, edycji i usuwania.
 
+Testy powiadomień sprawdzają trzy rodzaje przypomnień i ręczne
+odświeżanie. ADMIN i RECEPTIONIST widzą wpisy obu weterynarzy,
+a każde z dwóch kont VET wyłącznie własne wpisy.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
