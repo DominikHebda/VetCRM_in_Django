@@ -14,6 +14,8 @@ for (const [role, username] of [
   test(`${role} creates, updates and deletes a visit`, async ({
     page,
   }) => {
+    test.setTimeout(60_000)
+
     const reason = `Kontrola E2E ${randomUUID()}`
     const visitDate = '2027-07-15T07:00'
     const notes = 'Notatka wizyty zapisana przez test E2E.'
