@@ -216,9 +216,10 @@ usunięcia szczepienia.
 Dla RECEPTIONIST sprawdzany jest odczyt szczepień oraz brak
 przycisków dodawania, edycji i usuwania.
 
-Dla ADMIN i VET sprawdzane jest tworzenie recept oraz zachowanie
-pacjenta, wizyty, wystawiającego, numeru recepty, danych leku,
-dawkowania, dat i zaleceń po odświeżeniu strony.
+Dla ADMIN i VET sprawdzane są tworzenie, edycja i usuwanie recept.
+Testy potwierdzają zachowanie danych po odświeżeniu, niezmienność
+numeru recepty, wystawiającego, pacjenta i wizyty podczas edycji
+oraz trwałość usunięcia.
 
 Nie zastępują one testów backendu na PostgreSQL.
 

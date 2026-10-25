@@ -32,6 +32,7 @@ function PrescriptionsPage() {
   const [page, setPage] = useState(1)
   const [hasPreviousPage, setHasPreviousPage] = useState(false)
   const [hasNextPage, setHasNextPage] = useState(false)
+  const [listRevision, setListRevision] = useState(0)
   const [visits, setVisits] = useState(
     /** @type {Awaited<ReturnType<typeof getVisits>>['results']} */ ([]),
   )
@@ -64,20 +65,10 @@ function PrescriptionsPage() {
     try {
       await createPrescription(values)
 
+      setPage(1)
+      setListRevision((current) => current + 1)
       setIsCreateFormOpen(false)
       setFormStatus('idle')
-      setPage(1)
-
-      const data = await getPrescriptions({
-        search: debouncedSearch,
-        animal: animalFilter || undefined,
-        page: 1,
-      })
-
-    setPrescriptions(data.results)
-    setTotalCount(data.count)
-    setHasPreviousPage(Boolean(data.previous))
-    setHasNextPage(Boolean(data.next))
     } catch {
       setFormStatus('error')
     }
@@ -98,63 +89,48 @@ function PrescriptionsPage() {
  *   instructions: string,
  * }} values
  */
-async function handleUpdatePrescription(values) {
-  if (!editingPrescription) {
-    return
+  async function handleUpdatePrescription(values) {
+    if (!editingPrescription) {
+      return
+    }
+
+    setFormStatus('saving')
+
+    try {
+      await updatePrescription(editingPrescription.id, values)
+
+      setListRevision((current) => current + 1)
+      setFormStatus('idle')
+      setEditingPrescription(null)
+    } catch {
+      setFormStatus('error')
+    }
   }
-
-  setFormStatus('saving')
-
-  try {
-    await updatePrescription(editingPrescription.id, values)
-
-    const data = await getPrescriptions({
-      search: debouncedSearch,
-      animal: animalFilter || undefined,
-      page,
-    })
-
-    setPrescriptions(data.results)
-    setTotalCount(data.count)
-    setHasPreviousPage(Boolean(data.previous))
-    setHasNextPage(Boolean(data.next))
-
-    setFormStatus('idle')
-    setEditingPrescription(null)
-  } catch {
-    setFormStatus('error')
-  }
-}
 
 /**
  * @param {import('../services/prescriptionsService.js').Prescription} prescription
  */
-async function handleDeletePrescription(prescription) {
-  const confirmed = window.confirm(
-    `Czy na pewno chcesz usunąć receptę ${prescription.prescription_number} dla pacjenta ${prescription.animal_name}?`,
-  )
+  async function handleDeletePrescription(prescription) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunąć receptę ${prescription.prescription_number} dla pacjenta ${prescription.animal_name}?`,
+    )
 
-  if (!confirmed) {
-    return
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      await deletePrescription(prescription.id)
+
+      if (prescriptions.length === 1 && page > 1) {
+        setPage((currentPage) => currentPage - 1)
+      }
+
+      setListRevision((current) => current + 1)
+    } catch {
+      setStatus('error')
+    }
   }
-
-  try {
-    await deletePrescription(prescription.id)
-
-    const data = await getPrescriptions({
-      search: debouncedSearch,
-      animal: animalFilter || undefined,
-      page,
-    })
-
-    setPrescriptions(data.results)
-    setTotalCount(data.count)
-    setHasPreviousPage(Boolean(data.previous))
-    setHasNextPage(Boolean(data.next))
-  } catch {
-    setStatus('error')
-  }
-}
 
   useEffect(() => {
     if (!canManagePrescriptions) {
@@ -253,7 +229,7 @@ async function handleDeletePrescription(prescription) {
     return () => {
       isActive = false
     }
-  }, [debouncedSearch, animalFilter, page])
+  }, [debouncedSearch, animalFilter, page, listRevision])
 
   return (
     <div className="visits-page">
