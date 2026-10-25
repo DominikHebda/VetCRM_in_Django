@@ -1,10 +1,11 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 from oauth2_provider.models import get_application_model
 
 from accounts.models import UserProfile
@@ -43,13 +44,18 @@ class Command(BaseCommand):
                 ("e2e_admin", UserProfile.Role.ADMIN),
                 ("e2e_vet", UserProfile.Role.VET),
                 ("e2e_receptionist", UserProfile.Role.RECEPTIONIST),
+                ("e2e_vet_other", UserProfile.Role.VET),
             ):
                 user, _ = get_user_model().objects.update_or_create(
                     username=username,
                     defaults={
                         "email": f"{username}@example.invalid",
                         "first_name": "E2E",
-                        "last_name": role,
+                        "last_name": (
+                            "VET Drugi"
+                            if username == "e2e_vet_other"
+                            else role
+                        ),
                         "is_active": True,
                         "is_staff": role == UserProfile.Role.ADMIN,
                         "is_superuser": role == UserProfile.Role.ADMIN,
@@ -140,6 +146,58 @@ class Command(BaseCommand):
                     "instructions": "Recepta do testu uprawnień recepcji.",
                 },
             )
+
+            today = timezone.localdate()
+            visit_time = timezone.make_aware(
+                datetime.combine(today, time(12, 0)),
+                timezone.get_current_timezone(),
+            )
+
+            for username, suffix in (
+                ("e2e_vet", "A"),
+                ("e2e_vet_other", "B"),
+            ):
+                notification_animal, _ = Animal.objects.update_or_create(
+                    owner=owner,
+                    name=f"E2E Powiadomienia {suffix}",
+                    defaults={"species": "dog"},
+                )
+
+                notification_visit, _ = Visit.objects.update_or_create(
+                    animal=notification_animal,
+                    reason=f"E2E powiadomienia {suffix}",
+                    defaults={
+                        "veterinarian": users[username],
+                        "visit_date": visit_time,
+                        "status": "SCHEDULED",
+                    },
+                )
+
+                Vaccination.objects.update_or_create(
+                    animal=notification_animal,
+                    vaccine_name=f"E2E szczepienie powiadomienia {suffix}",
+                    defaults={
+                        "veterinarian": users[username],
+                        "vaccination_date": today - timedelta(days=30),
+                        "next_due_date": today + timedelta(days=10),
+                    },
+                )
+
+                Prescription.objects.update_or_create(
+                    prescription_number=f"E2E-NOTIFY-{suffix}",
+                    defaults={
+                        "animal": notification_animal,
+                        "visit": notification_visit,
+                        "veterinarian": users[username],
+                        "medication_name": f"E2E lek powiadomienia {suffix}",
+                        "dosage": "Dawka testowa",
+                        "frequency": "Raz dziennie",
+                        "duration": "3 dni",
+                        "quantity": 3,
+                        "issue_date": today - timedelta(days=1),
+                        "valid_until": today + timedelta(days=3),
+                    },
+                )
 
             application_defaults = {
                 "name": "VetCRM browser tests",
