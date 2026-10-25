@@ -216,6 +216,10 @@ usunięcia szczepienia.
 Dla RECEPTIONIST sprawdzany jest odczyt szczepień oraz brak
 przycisków dodawania, edycji i usuwania.
 
+Dla ADMIN i VET sprawdzane jest tworzenie recept oraz zachowanie
+pacjenta, wizyty, wystawiającego, numeru recepty, danych leku,
+dawkowania, dat i zaleceń po odświeżeniu strony.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
