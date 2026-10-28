@@ -186,6 +186,10 @@ Sprawdzane są także dodawanie, edycja i usuwanie właścicieli
 przez ADMIN i RECEPTIONIST, wraz z weryfikacją zapisanych zmian
 i trwałości usunięcia po odświeżeniu strony.
 
+Dla ADMIN i RECEPTIONIST sprawdzane jest również odrzucenie imienia
+złożonego ze spacji przez API, wyświetlenie błędu bez utraty danych
+formularza oraz zapis po poprawieniu imienia i odczyt po odświeżeniu.
+
 Dla VET sprawdzany jest odczyt danych właścicieli i zwierząt,
 w tym przypisania zwierzęcia do właściciela, oraz brak przycisków
 dodawania, edycji i usuwania w obu modułach.
