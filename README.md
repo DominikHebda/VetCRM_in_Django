@@ -190,6 +190,10 @@ Dla ADMIN i RECEPTIONIST sprawdzane jest również odrzucenie imienia
 złożonego ze spacji przez API, wyświetlenie błędu bez utraty danych
 formularza oraz zapis po poprawieniu imienia i odczyt po odświeżeniu.
 
+Dla ADMIN, RECEPTIONIST i VET sprawdzana jest paginacja właścicieli:
+zawartość obu stron, przyciski nawigacji oraz powrót na pierwszą
+stronę i aktualizacja liczby wyników po zmianie wyszukiwania.
+
 Dla VET sprawdzany jest odczyt danych właścicieli i zwierząt,
 w tym przypisania zwierzęcia do właściciela, oraz brak przycisków
 dodawania, edycji i usuwania w obu modułach.
