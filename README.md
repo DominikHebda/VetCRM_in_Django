@@ -236,6 +236,9 @@ Dla Analityki i Powiadomień sprawdzane są komunikaty po błędzie
 API 500 oraz skuteczne ponowienie pobierania przyciskiem
 „Spróbuj ponownie”.
 
+Dla Analityki i Powiadomień sprawdzane są również puste odpowiedzi
+API, komunikaty o braku danych oraz ręczne odświeżanie pustych zestawień.
+
 Nie zastępują one testów backendu na PostgreSQL.
 
 Job `e2e` uruchamia te testy także w GitHub Actions.
