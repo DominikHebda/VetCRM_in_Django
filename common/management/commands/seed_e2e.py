@@ -80,6 +80,17 @@ class Command(BaseCommand):
                 },
             )
 
+            for index in range(1, 13):
+                Owner.objects.update_or_create(
+                    email=f"e2e-pagination-{index:02d}@example.invalid",
+                    defaults={
+                        "first_name": "E2E",
+                        "last_name": f"ZZZ Paginacja {index:02d}",
+                        "phone": "500600703",
+                        "address": "ul. Paginacyjna 4, Testowo",
+                    },
+                )
+
             animal, _ = Animal.objects.update_or_create(
                 owner=owner,
                 name="E2E Pacjent Odczyt",
