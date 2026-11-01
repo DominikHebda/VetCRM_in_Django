@@ -199,6 +199,10 @@ powrót na pierwszą stronę po usunięciu jedynego właściciela
 na drugiej stronie, wraz z zachowaniem pozostałych wyników
 i potwierdzeniem usunięcia po odświeżeniu.
 
+Dla ADMIN i RECEPTIONIST sprawdzane jest anulowanie usuwania
+właściciela: odrzucenie potwierdzenia nie wysyła żądania DELETE,
+a dane właściciela pozostają dostępne po odświeżeniu strony.
+
 Dla VET sprawdzany jest odczyt danych właścicieli i zwierząt,
 w tym przypisania zwierzęcia do właściciela, oraz brak przycisków
 dodawania, edycji i usuwania w obu modułach.
