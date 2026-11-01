@@ -1,5 +1,6 @@
 asgiref==3.11.1
 attrs==26.1.0
+certifi==2026.10.23
 colorama==0.4.6
 coverage==7.15.1
 Django==6.0.6
