@@ -194,6 +194,11 @@ Dla ADMIN, RECEPTIONIST i VET sprawdzana jest paginacja właścicieli:
 zawartość obu stron, przyciski nawigacji oraz powrót na pierwszą
 stronę i aktualizacja liczby wyników po zmianie wyszukiwania.
 
+Dla ADMIN i RECEPTIONIST sprawdzany jest również automatyczny
+powrót na pierwszą stronę po usunięciu jedynego właściciela
+na drugiej stronie, wraz z zachowaniem pozostałych wyników
+i potwierdzeniem usunięcia po odświeżeniu.
+
 Dla VET sprawdzany jest odczyt danych właścicieli i zwierząt,
 w tym przypisania zwierzęcia do właściciela, oraz brak przycisków
 dodawania, edycji i usuwania w obu modułach.
