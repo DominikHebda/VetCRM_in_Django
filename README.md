@@ -178,6 +178,10 @@ Testy sprawdzają logowanie administratora przez OAuth,
 otwarcie dashboardu, zachowanie logowania po odświeżeniu
 oraz wylogowanie wymagające ponownego podania danych logowania.
 
+Sprawdzane jest również odrzucenie błędnego hasła z komunikatem
+bez wymiany kodu OAuth na token oraz udane logowanie po poprawieniu
+hasła w tym samym formularzu.
+
 Sprawdzane jest również odzyskanie dostępu po odrzuceniu access
 tokenu odpowiedzią 401: odświeżenie tokenu przez endpoint OAuth,
 ponowienie żądania API oraz zachowanie zalogowania i nowego tokenu
