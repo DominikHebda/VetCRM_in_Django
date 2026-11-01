@@ -183,6 +183,10 @@ tokenu odpowiedzią 401: odświeżenie tokenu przez endpoint OAuth,
 ponowienie żądania API oraz zachowanie zalogowania i nowego tokenu
 po ponownym załadowaniu strony.
 
+Sprawdzane jest również odrzucenie nieprawidłowego refresh tokenu:
+aplikacja usuwa oba tokeny i przekierowuje na ekran logowania,
+który pozostaje widoczny po ponownym załadowaniu strony.
+
 Testy sprawdzają również dostęp ADMIN i VET do Analityki
 oraz ukrycie linku i przekierowanie RECEPTIONIST przy wejściu
 na `/analytics`.
