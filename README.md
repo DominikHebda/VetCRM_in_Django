@@ -222,6 +222,10 @@ Dla ADMIN i RECEPTIONIST sprawdzane jest anulowanie usuwania
 właściciela: odrzucenie potwierdzenia nie wysyła żądania DELETE,
 a dane właściciela pozostają dostępne po odświeżeniu strony.
 
+Właściciele utworzeni przez testy walidacji są usuwani przez API
+po zakończeniu testu, także gdy późniejsza asercja się nie powiedzie.
+Test odczytu po odświeżeniu strony odbywa się przed sprzątaniem.
+
 Dla VET sprawdzany jest odczyt danych właścicieli i zwierząt,
 w tym przypisania zwierzęcia do właściciela, oraz brak przycisków
 dodawania, edycji i usuwania w obu modułach.

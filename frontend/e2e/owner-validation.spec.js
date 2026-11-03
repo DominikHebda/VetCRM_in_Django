@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 
 import { loginAsUser } from './helpers/auth.js'
+import { registerResourceCleanup } from './helpers/resourceCleanup.js'
+
+const trackCreatedResource = registerResourceCleanup(test)
 
 for (const [role, username] of [
   ['administrator', 'e2e_admin'],
@@ -105,6 +108,8 @@ for (const [role, username] of [
     expect(savedResponse.status()).toBe(201)
 
     const savedOwner = await savedResponse.json()
+
+    trackCreatedResource(page, savedResponse, savedOwner.id)
 
     expect(savedOwner).toMatchObject({
       first_name: 'E2E',
