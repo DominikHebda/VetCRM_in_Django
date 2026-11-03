@@ -241,6 +241,11 @@ dokumentacji medycznej. Testy potwierdzają zachowanie przypisanej
 wizyty i danych klinicznych po odświeżeniu, trwałość usunięcia
 oraz ponowną dostępność wizyty do utworzenia dokumentacji.
 
+Pomocnicze wizyty tworzone przez testy dokumentacji medycznej
+są usuwane przez API w `afterEach`, również po błędzie testu.
+Sprzątanie potwierdza brak wizyty odpowiedzią 404 i obejmuje
+powiązaną dokumentację dzięki relacji CASCADE.
+
 Dla RECEPTIONIST sprawdzany jest odczyt dokumentacji medycznej
 oraz brak przycisków dodawania, edycji i usuwania.
 

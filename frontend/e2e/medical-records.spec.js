@@ -6,6 +6,40 @@ import { loginAsUser } from './helpers/auth.js'
 
 test.use({ timezoneId: 'Europe/Warsaw' })
 
+/**
+ * @type {Map<
+ *   import('@playwright/test').Page,
+ *   { url: string, authorization: string }
+ * >}
+ */
+const visitsToClean = new Map()
+
+test.afterEach(async ({ page, request }) => {
+  const visit = visitsToClean.get(page)
+
+  if (!visit) {
+    return
+  }
+
+  visitsToClean.delete(page)
+
+  const headers = {
+    Authorization: visit.authorization,
+  }
+
+  const deleteResponse = await request.delete(visit.url, {
+    headers,
+  })
+
+  expect(deleteResponse.status()).toBe(204)
+
+  const verificationResponse = await request.get(visit.url, {
+    headers,
+  })
+
+  expect(verificationResponse.status()).toBe(404)
+})
+
 for (const [role, username] of [
   ['administrator', 'e2e_admin'],
   ['veterinarian', 'e2e_vet'],
@@ -72,6 +106,21 @@ for (const [role, username] of [
     const createdVisitResponse = await visitResponse
     expect(createdVisitResponse.status()).toBe(201)
     const createdVisit = await createdVisitResponse.json()
+
+    const authorization =
+      createdVisitResponse.request().headers().authorization
+
+    if (!authorization) {
+      throw new Error('Brak nagłówka autoryzacji utworzonej wizyty.')
+    }
+
+    visitsToClean.set(page, {
+      url: new URL(
+        `/api/visits/${createdVisit.id}/`,
+        createdVisitResponse.url(),
+      ).href,
+      authorization,
+    })
 
     await expect(page.getByRole('heading', {
       name: 'Dodaj wizytę',
