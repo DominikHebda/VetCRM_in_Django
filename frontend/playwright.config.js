@@ -7,7 +7,7 @@ const frontendDirectory = fileURLToPath(new URL('.', import.meta.url))
 
 const backendCommand = [
   'python ../manage.py migrate --settings=config.settings_e2e --noinput',
-  'python ../manage.py seed_e2e --settings=config.settings_e2e',
+  'python ../manage.py seed_e2e --settings=config.settings_e2e --reset',
   'python ../manage.py runserver 127.0.0.1:8002 --settings=config.settings_e2e --noreload',
 ].join(' && ')
 
