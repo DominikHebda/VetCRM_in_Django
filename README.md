@@ -174,6 +174,12 @@ Playwright uruchamia backend na porcie 8002 i frontend na 5174.
 Korzysta z `config.settings_e2e`, osobnej bazy SQLite w `.e2e/`
 oraz dedykowanych kont ADMIN, VET i RECEPTIONIST oraz aplikacji OAuth.
 
+Przed każdym uruchomieniem zestawu Playwright czyści dane dedykowanej
+bazy przez `seed_e2e --reset` i odtwarza stałe dane testowe.
+Reset jest dozwolony wyłącznie w trybie E2E, dla SQLite pod ścieżką
+`.e2e/db.sqlite3`. Po zakończeniu testów baza pozostaje dostępna
+do diagnostyki.
+
 Testy sprawdzają logowanie administratora przez OAuth,
 otwarcie dashboardu, zachowanie logowania po odświeżeniu
 oraz wylogowanie wymagające ponownego podania danych logowania.

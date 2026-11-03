@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
@@ -21,6 +22,13 @@ class Command(BaseCommand):
     help = "Prepare the isolated browser test account and OAuth application."
     requires_system_checks = []
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--reset",
+            action="store_true",
+            help="Clear the dedicated E2E database before seeding.",
+        )
+
     def handle(self, *args, **options):
         db = settings.DATABASES["default"]
         expected_path = settings.BASE_DIR / ".e2e" / "db.sqlite3"
@@ -33,6 +41,14 @@ class Command(BaseCommand):
             raise CommandError(
                 "This command requires config.settings_e2e "
                 "and the dedicated .e2e/db.sqlite3 database."
+            )
+
+        if options["reset"]:
+            call_command(
+                "flush",
+                database="default",
+                interactive=False,
+                verbosity=0,
             )
 
         Application = get_application_model()
